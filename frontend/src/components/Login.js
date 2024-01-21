@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Container, 
-  Paper, 
+  Container,  
   ThemeProvider, 
   Box, 
   Typography, 
@@ -10,18 +10,62 @@ import {
   CssBaseline, 
   Avatar,
   Grid,
-  Link
+  Link,
+  InputAdornment,
+  IconButton 
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import theme from './reusable/Theme'; 
+import axios from './reusable/axios'; 
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); 
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    console.log(username, password);
+  
+    try {
+      console.log({ username, password });
+      const response = await axios.post('/api/users/login', {
+        username,
+        password,
+      });
+      console.log('Login successful:', response.data);
+      // Check role and navigate
+      switch(response.data.role) {
+        case 'admin':
+          navigate('/adminfaq');
+          break;
+        case 'patient':
+          navigate('/patient');
+          break;
+        case 'healthcare':
+          navigate('/healthcare');
+          break;
+        default:
+      }
+    } catch (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Login failed:', error.response.data);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response:', error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error:', error.message);
+      }
+    }
+  };
+
+  const handlePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -62,11 +106,23 @@ export default function Login() {
               fullWidth
               name="password"
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'} // Toggle input type based on visibility
               id="password"
               autoComplete="current-password"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handlePasswordVisibility}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"
@@ -84,7 +140,7 @@ export default function Login() {
               </Grid>
               <Grid item>
                 <Link href="/register" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                  {"Don't have an account? Register"}
                 </Link>
               </Grid>
             </Grid>

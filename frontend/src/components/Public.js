@@ -1,112 +1,331 @@
-import React from "react";
-import NavBar from "./reusable/NavBar";
-import theme from "./reusable/Theme";
-import { ThemeProvider } from "@mui/material/styles"; 
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
-  Container,
+  ThemeProvider,
   Typography,
-  Button,
   Box,
+  Container,
+  Button,
+  Dialog,
+  DialogTitle,
+  List,
+  ListItemButton,
+  ListItemText,
+  AppBar,
+  Toolbar,
+  TextField,
+  Grid,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  IconButton,
+  Checkbox,
+  FormControlLabel,
   useMediaQuery,
 } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import theme from "./reusable/Theme";
 import BgImage from "./image/cover.jpeg";
+import logo from "./image/logo.png";
 
 export default function Public() {
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-  const backgroundOverlayStyle = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    opacity: 0.5,
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [userRole, setUserRole] = useState("");
+  const [openRoleSelect, setOpenRoleSelect] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Navigate to TB information page
+  const handleMoreInfo = () => {
+    navigate("/tb-info");
   };
-  const handleFAQClick = () => {
-    navigate('/faq');
+
+  // Handle login form submission
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Insert authentication logic here
+  };
+
+  // Handle registration button click
+  const handleRegister = () => {
+    toggleRoleSelectDialog();
+  };
+
+  // Handle role selection
+  const handleRoleChange = (event) => {
+    setUserRole(event.target.value);
+  };
+
+  // Toggle role selection dialog
+  const toggleRoleSelectDialog = () => {
+    setOpenRoleSelect(!openRoleSelect);
+  };
+
+  // Navigate to registration with the selected role
+  const navigateToRegister = (role) => {
+    navigate(`/register/${role}`);
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+  const handleRememberMeChange = (event) => {
+    setRememberMe(event.target.checked);
+  };
+
+  // Custom style for the Dialog Title
+  const dialogTitleStyle = {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    textAlign: "center",
+    padding: theme.spacing(2),
+  };
+
+  // Custom style for List Items
+  const listItemStyle = {
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+    cursor: "pointer",
+    padding: theme.spacing(2),
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <NavBar />
+      <AppBar position="static" color="transparent" elevation={0}>
+        <Toolbar>
+          <img
+            src={logo}
+            alt="Logo"
+            style={{ height: "50px", marginRight: theme.spacing(2) }}
+          />
+          <Typography variant="h5" color="inherit">
+            <span style={{ color: "#0046c0", fontWeight: "bold" }}>My</span>
+            <span style={{ color: "#4cbcea", fontWeight: "bold" }}>TB</span>
+            <span style={{ color: "#0046c0", fontWeight: "bold" }}>
+              Companion
+            </span>
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Banner */}
       <Box
         sx={{
-          minHeight: "35vh",
-          backgroundColor: theme.palette.background.default,
+          minHeight: "45vh",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          position: "relative",
+          alignItems: "center",
+          textAlign: "center",
           p: theme.spacing(4),
+          backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
-        <Box
-          component="img"
-          src={BgImage}
-          alt="Doctor"
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            opacity: 0.5,
-          }}
-        />
-        <Box sx={backgroundOverlayStyle} />
-        <Container
-          maxWidth="md"
-          sx={{
-            zIndex: 1,
-            padding: theme.spacing(4),
-            alignSelf: "flex-start",
-            marginLeft: 0,
-            paddingLeft: 0,
-          }}
+        <Typography
+          variant="h2"
+          component="h1"
+          gutterBottom
+          sx={{ color: "black", fontWeight: "bold" }}
         >
+          Tuberculosis (TB)
+        </Typography>
+        <Typography variant="h5" sx={{ color: "black", mb: 2 }}>
+          A bacterial infection that affects your lungs
+        </Typography>
+        <Box sx={{ mt: 4 }}>
           <Typography
-            variant={isSmallScreen ? "h4" : "h3"}
-            component="h1"
-            gutterBottom
-            sx={{
-              color: theme.palette.text.primary,
-              fontWeight: "bold",
-              textAlign: "left",
-            }}
+            variant="body1"
+            component="span"
+            sx={{ color: "black", mr: 2 }}
           >
-            Tuberculosis (TB)
+            Would you like to know more about TB?
           </Typography>
-          <Typography
-            variant={isSmallScreen ? "body2" : "subtitle1"}
+          <Button
+            variant="outlined" // Change to outlined
+            color="primary" // Set the color to primary
+            onClick={handleMoreInfo}
             sx={{
-              color: theme.palette.text.primary,
-              mb: 4,
-              textAlign: "left",
+              borderRadius: 25,
+              padding: theme.spacing(1, 4),
+              borderColor: "primary",
+              borderWidth: 2,
+              color: "primary",
+              backgroundColor: "#fff",
+              "&:hover": {
+                color: "#fff",
+                backgroundColor: "#0046c0",
+              },
             }}
           >
-            A bacterial infection that affects your lungs
-          </Typography>
-          <Box
+            Yes
+          </Button>
+        </Box>
+
+        {/* Ensuring that the login form does not block the text */}
+        <Box sx={{ position: "absolute", top: "50%", width: "100%", p: 4 }}>
+          <Container
+            maxWidth="sm"
             sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              flexWrap: "nowrap",
+              backgroundColor: "background.paper",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+              borderRadius: 4,
+              p: 4,
             }}
           >
-            <Button variant="contained" color="primary" sx={{ mr: 2 }}>
-              Learn More
-            </Button>
-            <Button variant="contained" color="primary" onClick={handleFAQClick}>
-              FAQ
-            </Button>
-          </Box>
-        </Container>
+            <Typography
+              variant="h6"
+              color="textPrimary"
+              gutterBottom
+              sx={{ fontWeight: "bold" }}
+            >
+              Login
+            </Typography>
+            <form onSubmit={handleLogin}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="user-role-label">User Role</InputLabel>
+                    <Select
+                      labelId="user-role-label"
+                      id="user-role"
+                      value={userRole}
+                      label="User Role"
+                      onChange={handleRoleChange}
+                      sx={{ textAlign: "left" }}
+                    >
+                      <MenuItem value="patient">Patient</MenuItem>
+                      <MenuItem value="doctor">Doctor</MenuItem>
+                      <MenuItem value="nurse">Nurse</MenuItem>
+                      <MenuItem value="medical-assistant">
+                        Medical Assistant
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    fullWidth
+                    variant="filled"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    fullWidth
+                    variant="filled"
+                    InputProps={{
+                      endAdornment: (
+                        <IconButton
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid
+                  container
+                  item
+                  xs={12}
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Grid item xs={6} style={{ textAlign: "left" }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={rememberMe}
+                          onChange={handleRememberMeChange}
+                        />
+                      }
+                      label="Remember me"
+                    />
+                  </Grid>
+                  <Grid item xs={6} style={{ textAlign: "right" }}>
+                    <Link
+                      to="/forgot-password"
+                      style={{
+                        textDecoration: "none",
+                        color: theme.palette.primary.main,
+                      }}
+                    >
+                      Forgot password?
+                    </Link>
+                  </Grid>
+                </Grid>
+
+                {/* Login Button */}
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                  >
+                    Login
+                  </Button>
+                </Grid>
+                {/* Register Link */}
+                <Grid item xs={12} style={{ textAlign: "center" }}>
+                  <Typography variant="body1" sx={{ color: "black", mt: 2 }}>
+                    Not a user yet?{" "}
+                    <Link
+                      to="#"
+                      style={{
+                        textDecoration: "none",
+                        color: theme.palette.primary.main,
+                      }}
+                      onClick={handleRegister}
+                    >
+                      Register
+                    </Link>
+                  </Typography>
+                </Grid>
+              </Grid>
+            </form>
+          </Container>
+        </Box>
       </Box>
+      {/* Role Selection Dialog */}
+      <Dialog open={openRoleSelect} onClose={toggleRoleSelectDialog}>
+        <DialogTitle style={dialogTitleStyle}>Select Your Role</DialogTitle>
+        <List>
+          <ListItemButton
+            style={listItemStyle}
+            onClick={() => navigateToRegister("patient")}
+          >
+            <ListItemText primary="Patient" />
+          </ListItemButton>
+          <ListItemButton
+            style={listItemStyle}
+            onClick={() => navigateToRegister("healthcare")}
+          >
+            <ListItemText primary="Healthcare Professional" />
+          </ListItemButton>
+        </List>
+      </Dialog>
     </ThemeProvider>
   );
 }
