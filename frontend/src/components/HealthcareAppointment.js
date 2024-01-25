@@ -70,13 +70,6 @@ export default function HealthcareAppointment() {
     );
   };
 
-  const handleIgnore = (appointmentId) => {
-    // Filter out the ignored appointment
-    setAppointments((prevAppointments) =>
-      prevAppointments.filter((appointment) => appointment.id !== appointmentId)
-    );
-  };
-
   function parseAppointmentDate(dateTimeStr) {
     // Convert "YYYY-MM-DD hh:mm AM/PM" to a Date object
     const [datePart, timePart] = dateTimeStr.split(" ");
@@ -247,9 +240,8 @@ const calendarAppointments = yourAppointments.map(appointment => ({
                       <Button
                         variant="outlined"
                         color="secondary"
-                        onClick={() => handleIgnore(appointment.id)}
                       >
-                        Ignore
+                        Reschedule
                       </Button>
                     </CardActions>
                   </Card>
@@ -267,7 +259,7 @@ const calendarAppointments = yourAppointments.map(appointment => ({
               variant="h5"
               sx={{ fontWeight: "bold", mb: 2, color: "#333" }}
             >
-              Your Appointments
+             Appointments
             </Typography>
             <Box>
               <Calendar

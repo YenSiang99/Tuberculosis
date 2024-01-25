@@ -14,6 +14,7 @@ import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem'; 
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'; 
 import SettingsIcon from '@mui/icons-material/Settings'; 
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'; 
 
 export default function HealthcareSidebar() {
@@ -29,7 +30,8 @@ export default function HealthcareSidebar() {
   const isReviewVideo = location.pathname === '/healthcarevideo';
   const isReviewSideEffect = location.pathname === '/healthcaresideeffect';
   const isAppointment = location.pathname === '/healthcareappointment';
-  const isSetting = location.pathname === '/healthcaresetting';
+  const isProfile = location.pathname === '/healthcareprofile';
+  const isPasswordReset = location.pathname === '/healthcarepassword';
 
   return (
     <Drawer
@@ -74,10 +76,16 @@ export default function HealthcareSidebar() {
           <ListItemText primary="Appointment" />
         </ListItemButton>
 
-        {/* Settings */}
-        <ListItemButton key="Settings" onClick={() => navigateTo('/healthcaresetting')} selected={isSetting}>
+        {/* Profile */}
+        <ListItemButton key="Profile" onClick={() => navigateTo('/healthcareprofile')} selected={isProfile}>
           <ListItemIcon><SettingsIcon /></ListItemIcon>
-          <ListItemText primary="Settings" />
+          <ListItemText primary="Profile" />
+        </ListItemButton>
+
+        {/* Password Reset */}
+        <ListItemButton key="PasswordReset" onClick={() => navigateTo('/healthcarepassword')} selected={isPasswordReset}>
+          <ListItemIcon><VpnKeyIcon /></ListItemIcon>
+          <ListItemText primary="Password Reset" />
         </ListItemButton>
 
         {/* Logout */}

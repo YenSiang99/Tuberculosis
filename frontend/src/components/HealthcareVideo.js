@@ -78,6 +78,12 @@ export default function HealthcarePatient() {
     closeVideoDialog();
   };
 
+  const getTodaysDateFormatted = () => {
+    const today = new Date();
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return today.toLocaleDateString(undefined, options);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       {matchesSM && (
@@ -115,7 +121,10 @@ export default function HealthcarePatient() {
         }}
       >
         <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 , backgroundColor: "#f7f7f7"}}>
+          <Paper
+            elevation={3}
+            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+          >
             <Box sx={{ p: 3 }}>
               <Typography
                 variant="h5"
@@ -124,6 +133,15 @@ export default function HealthcarePatient() {
                 sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
               >
                 Review Video
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                color="textSecondary"
+                gutterBottom
+                component="div"
+                sx={{ fontWeight: "normal", fontSize: "1rem", mt: 2 }}
+              >
+                Videos for {getTodaysDateFormatted()}
               </Typography>
 
               <List>

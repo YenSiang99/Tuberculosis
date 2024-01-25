@@ -32,20 +32,16 @@ import FaceIcon from "@mui/icons-material/Face";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import HealthcareSidebar from "./reusable/HealthcareBar";
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
   accepted: {
-    backgroundColor: '#c8e6c9',
-    color: 'black',
-  },
-  pending: {
-    backgroundColor: '#FDF5A0',
-    color: 'black',
+    backgroundColor: "#c8e6c9",
+    color: "black",
   },
   rejected: {
-    backgroundColor: '#ffcdd2',
-    color: 'black',
+    backgroundColor: "#ffcdd2",
+    color: "black",
   },
 });
 
@@ -56,55 +52,47 @@ export default function HealthcareSideEffect() {
   const [patients, setPatients] = useState([
     {
       id: 1,
-      name: "John Doe",
-      sideEffects: "Cough, Fever, Weight Loss",
-      reportDateTime: "2024-01-02 10:30 AM",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      sideEffects: "Fatigue, Night Sweats",
-      reportDateTime: "2024-01-01 04:15 PM",
-    },
-  ]);
-  const [patientInfo, setPatientInfo] = useState([
-    {
-      id: 1,
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       icNumber: "012345010123",
       age: 30,
-      nationality: "Malaysian",
+      country: "Malaysia",
       gender: "Male",
+      phoneNumber: "0123456789",
       diagnosis: "x",
       treatment: "y",
+      numberOfTablets: 2,
       treatmentStartMonth: "January 2024",
       notes: "Regular check-ups needed",
       sideEffectsHistory: [
-        { date: "2024-01-01", detail: "Nausea" },
-        { date: "2024-02-01", detail: "Headache" },
+        { date: "2024-02-01", detail: "Headache", grade: 2 },
+        // ... more side effects with grades ...
       ],
     },
     {
       id: 2,
-      name: "John Doe",
-      icNumber: "012345010123",
-      age: 30,
-      nationality: "Malaysian",
-      gender: "Male",
+      firstName: "Jane",
+      lastName: "Doe",
+      passportNumber: "A12345678",
+      age: 35,
+      country: "Singapore",
+      gender: "Female",
+      phoneNumber: "0123456789",
       diagnosis: "x",
       treatment: "y",
+      numberOfTablets: 3,
       treatmentStartMonth: "January 2024",
       notes: "Regular check-ups needed",
       sideEffectsHistory: [
-        { date: "2024-01-01", detail: "Nausea" },
-        { date: "2024-02-01", detail: "Headache" },
+        { date: "2024-02-01", detail: "Nausea", grade: 1 },
+        // ... more side effects with grades ...
       ],
     },
+    // ... other patients ...
   ]);
   const videoStatus = {
-    '2024-01-01': 'accepted',
-    '2024-01-02': 'rejected',
-    '2024-01-03': 'pending',
+    "2024-01-01": "accepted",
+    "2024-01-02": "rejected",
     // ... other dates
   };
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -115,7 +103,7 @@ export default function HealthcareSideEffect() {
   };
 
   const openPatientProfile = (patientId) => {
-    const patientInfoToShow = patientInfo.find((p) => p.id === patientId);
+    const patientInfoToShow = patients.find((p) => p.id === patientId);
     setSelectedPatient(patientInfoToShow);
   };
 
@@ -130,28 +118,30 @@ export default function HealthcareSideEffect() {
   };
 
   const tileClassName = ({ date, view }) => {
-    if (view === 'month') {
-      const dateString = date.toISOString().split('T')[0]; // format date to YYYY-MM-DD
-      return classes[videoStatus[dateString]] || '';
+    if (view === "month") {
+      const dateString = date.toISOString().split("T")[0]; // format date to YYYY-MM-DD
+      return classes[videoStatus[dateString]] || "";
     }
   };
-  
+
   const CalendarLegend = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
       <Box display="flex" alignItems="center" mr={2}>
-        <Box sx={{ width: 16, height: 16, bgcolor: '#c8e6c9', mr: 1 }} />
+        <Box sx={{ width: 16, height: 16, bgcolor: "#c8e6c9", mr: 1 }} />
         <Typography variant="body2">Accepted Video</Typography>
       </Box>
-      <Box display="flex" alignItems="center" mr={2}>
-        <Box sx={{ width: 16, height: 16, bgcolor: '#FDF5A0', mr: 1 }} />
-        <Typography variant="body2">Pending Video</Typography>
-      </Box>
       <Box display="flex" alignItems="center">
-        <Box sx={{ width: 16, height: 16, bgcolor: '#ffcdd2', mr: 1 }} />
+        <Box sx={{ width: 16, height: 16, bgcolor: "#ffcdd2", mr: 1 }} />
         <Typography variant="body2">Rejected Video</Typography>
       </Box>
     </Box>
   );
+
+  const gradeOptions = [
+    { value: 1, label: "Grade 1" },
+    { value: 2, label: "Grade 2" },
+    { value: 3, label: "Grade 3" },
+  ];
 
   return (
     <ThemeProvider theme={theme}>
@@ -190,7 +180,10 @@ export default function HealthcareSideEffect() {
         }}
       >
         <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 , backgroundColor: "#f7f7f7"}}>
+          <Paper
+            elevation={3}
+            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+          >
             <Box sx={{ p: 3 }}>
               <Typography
                 variant="h5"
@@ -200,7 +193,6 @@ export default function HealthcareSideEffect() {
               >
                 Review Side Effect
               </Typography>
-
               <List>
                 {patients.map((patient) => (
                   <Card
@@ -211,20 +203,26 @@ export default function HealthcareSideEffect() {
                       <ListItem>
                         <PersonIcon color="primary" sx={{ mr: 2 }} />
                         <ListItemText
-                          primary={patient.name}
+                          primary={`${patient.firstName} ${patient.lastName}`}
                           secondary={
                             <>
-                              <Typography
-                                component="span"
-                                variant="body2"
-                                color="error"
-                              >
-                                {`Side Effects: ${patient.sideEffects}`}
-                              </Typography>
-                              <br />
-                              <Typography component="span" variant="body2">
-                                {`Reported: ${patient.reportDateTime}`}
-                              </Typography>
+                              {patient.sideEffectsHistory.map(
+                                (effect, index) => (
+                                  <div key={index}>
+                                    <Typography
+                                      component="span"
+                                      variant="body2"
+                                      style={{
+                                        color:
+                                          effect.grade >= 2 ? "red" : "inherit",
+                                      }}
+                                    >
+                                      {`${effect.date}: ${effect.detail} (Grade: ${effect.grade})`}
+                                    </Typography>
+                                    <br />
+                                  </div>
+                                )
+                              )}
                             </>
                           }
                         />
@@ -264,7 +262,7 @@ export default function HealthcareSideEffect() {
           <IconButton
             aria-label="close"
             onClick={closePatientProfile}
-            sx={{ color: "white"  }}
+            sx={{ color: "white" }}
           >
             <CloseIcon />
           </IconButton>
@@ -277,25 +275,38 @@ export default function HealthcareSideEffect() {
                 <CardContent>
                   <Box sx={{ bgcolor: "#e1f5fe", p: 2 }}>
                     <Typography variant="h6" gutterBottom>
-                    <FaceIcon sx={{ verticalAlign: 'middle', mr: 1 }} /> Personal Details
+                      <FaceIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
+                      Personal Details
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
-                  {/* Display Personal Details */}
                   <Typography variant="body1">
-                    <b>Name:</b> {selectedPatient?.name}
+                    <b>First Name:</b> {selectedPatient?.firstName}
                   </Typography>
                   <Typography variant="body1">
-                    <b>IC Number:</b> {selectedPatient?.icNumber}
+                    <b>Last Name:</b> {selectedPatient?.lastName}
+                  </Typography>
+                  <Typography variant="body1">
+                    <b>Gender:</b> {selectedPatient?.gender}
+                  </Typography>
+                  <Typography variant="body1">
+                    <b>Country:</b> {selectedPatient?.country}
+                  </Typography>
+                  <Typography variant="body1">
+                    <b>
+                      {selectedPatient?.country === "Malaysia"
+                        ? "IC Number:"
+                        : "Passport Number:"}
+                    </b>{" "}
+                    {selectedPatient?.nationality === "Malaysian"
+                      ? selectedPatient?.icNumber
+                      : selectedPatient?.passportNumber}
                   </Typography>
                   <Typography variant="body1">
                     <b>Age:</b> {selectedPatient?.age}
                   </Typography>
                   <Typography variant="body1">
-                    <b>Nationality:</b> {selectedPatient?.nationality}
-                  </Typography>
-                  <Typography variant="body1">
-                    <b>Gender:</b> {selectedPatient?.gender}
+                    <b>Phone Number:</b> {selectedPatient?.phoneNumber}
                   </Typography>
                 </CardContent>
               </Card>
@@ -313,7 +324,10 @@ export default function HealthcareSideEffect() {
                     sx={{ p: 2 }}
                   >
                     <Typography variant="h6" gutterBottom>
-                      <LocalHospitalIcon sx={{ verticalAlign: 'middle', mr: 1 }} /> Treatment Information
+                      <LocalHospitalIcon
+                        sx={{ verticalAlign: "middle", mr: 1 }}
+                      />{" "}
+                      Treatment Information
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
@@ -323,6 +337,10 @@ export default function HealthcareSideEffect() {
                   <Typography variant="body1">
                     <b>Treatment:</b> {selectedPatient?.treatment}
                   </Typography>
+                  <Typography variant="body1">
+                        <b>Number Of Tablets:</b>{" "}
+                        {selectedPatient?.numberOfTablets}
+                      </Typography>
                   <Typography variant="body1">
                     <b>Treatment Start Month:</b>{" "}
                     {selectedPatient?.treatmentStartMonth}
@@ -334,7 +352,7 @@ export default function HealthcareSideEffect() {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                <Box
+                  <Box
                     display="flex"
                     justifyContent="space-between"
                     alignItems="center"
@@ -342,7 +360,8 @@ export default function HealthcareSideEffect() {
                     sx={{ p: 2 }}
                   >
                     <Typography variant="h6" gutterBottom>
-                      <CalendarIcon sx={{ verticalAlign: 'middle',mr: 1 }} /> Video Status Calendar
+                      <CalendarIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
+                      Video Status Calendar
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
@@ -351,7 +370,7 @@ export default function HealthcareSideEffect() {
                     value={dateState}
                     tileClassName={tileClassName}
                   />
-                   <CalendarLegend />
+                  <CalendarLegend />
                 </CardContent>
               </Card>
             </Grid>
@@ -368,7 +387,7 @@ export default function HealthcareSideEffect() {
                     sx={{ p: 2 }}
                   >
                     <Typography variant="h6" gutterBottom>
-                      <NoteIcon sx={{ verticalAlign: 'middle',mr: 1 }} /> Notes
+                      <NoteIcon sx={{ verticalAlign: "middle", mr: 1 }} /> Notes
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
@@ -385,7 +404,8 @@ export default function HealthcareSideEffect() {
                 <CardContent>
                   <Box sx={{ bgcolor: "#e1f5fe", p: 2 }}>
                     <Typography variant="h6" gutterBottom>
-                      <SideEffectIcon sx={{ verticalAlign: 'middle',mr: 1 }} /> Side Effect History
+                      <SideEffectIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
+                      Side Effect History
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
@@ -395,7 +415,10 @@ export default function HealthcareSideEffect() {
                         <ListItem key={index}>
                           <ListItemText
                             primary={effect.date}
-                            secondary={effect.detail}
+                            secondary={`${effect.detail}, ${
+                              gradeOptions.find((g) => g.value === effect.grade)
+                                ?.label
+                            }`}
                           />
                         </ListItem>
                       )

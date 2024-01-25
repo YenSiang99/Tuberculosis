@@ -40,20 +40,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#6386C3",
     },
   },
-  saveButton: {
-    color: "#fff",
-    backgroundColor: "#4CAF50",
-    "&:hover": {
-      backgroundColor: "#388E3C",
-    },
-  },
-  cancelButton: {
-    color: "#d32f2f",
-    borderColor: "#d32f2f",
-    "&:hover": {
-      backgroundColor: "#F9DDDD",
-    },
-  },
   actionButton: {
     flexGrow: 1, // This makes each button take equal space
   },
