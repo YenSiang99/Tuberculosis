@@ -2,9 +2,25 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
+  // Common fields
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true, enum: ['admin', 'patient', 'healthcare'] },
+  roles: [{ type: String, enum: ['admin', 'patient', 'healthcare'] }],
+  group: { type: String, required: true, enum: ['patient','doctor', 'nurse', 'medical assistant', ] },
+
+  // Patient-specific fields
+  firstName: String,
+  lastName: String,
+  gender: { type: String, enum: ['male', 'female'] },
+  phoneNumber: String,
+  country: String,
+  passportNumber: String,
+  nricNumber: String,
+  dateOfBirth: Date,
+  diagnosis: { type: String, enum: ['SPPTB', 'SNTB', 'EXPTB', 'LTBI'] },
+  currentTreatment: { type: String, enum: ['Akurit-4', 'Akurit', 'Pyridoxine10mg'] },
+  numberOfTablets: Number,
+  treatmentStartMonth: String, // Or Date type, depending on the format you choose
 });
 
 module.exports = mongoose.model('User', userSchema);
