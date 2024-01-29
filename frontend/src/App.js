@@ -3,9 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Public from "./components/Public";
 import PatientRegister from "./components/PatientRegister";
 import PatientRegister2 from "./components/PatientRegister2";
-import PatientRegister3 from "./components/PatientRegister3";
 import HealthcareRegister from "./components/HealthcareRegister";
-import HealthcareRegister2 from "./components/HealthcareRegister2";
 
 import PatientVideo from "./components/PatientVideo";
 import PatientSideEffect from "./components/PatientSideEffect";
@@ -31,9 +29,7 @@ function App() {
         <Route path="/" element={<Public />} />
         <Route path="/register/patient" element={<PatientRegister />} />
         <Route path="/register/patient_2" element={<PatientRegister2 />} />
-        <Route path="/register/patient_3" element={<PatientRegister3 />} />
         <Route path="/register/healthcare" element={<HealthcareRegister />} />
-        <Route path="/register/healthcare_2" element={<HealthcareRegister2 />} />
 
         <Route path="/patientvideo" element={<PatientVideo />} />
         <Route path="/patientsideeffect" element={<PatientSideEffect />} />

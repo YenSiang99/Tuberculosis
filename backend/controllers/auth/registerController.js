@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, group, mcpId } = req.body;
+    const { email, password, firstName, lastName, group, mcpId, profilePicture } = req.body;
 
     let roles;
     if (['doctor', 'nurse', 'medical assistant'].includes(group)) {
@@ -16,7 +16,7 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword, roles, firstName, lastName, group, mcpId });
+    const newUser = new User({ email, password: hashedPassword, roles, firstName, lastName, group, mcpId, profilePicture });
     await newUser.save();
 
     res.status(201).send('User registered successfully');
@@ -31,7 +31,7 @@ exports.registerPatient = async (req, res) => {
   try {
     const {
       email, password, firstName, lastName, gender, phoneNumber, country,
-      passportNumber, nricNumber, dateOfBirth, diagnosis, currentTreatment,
+      passportNumber, nricNumber, age, diagnosis, currentTreatment,
       numberOfTablets, treatmentStartMonth
     } = req.body;
 
@@ -45,7 +45,7 @@ exports.registerPatient = async (req, res) => {
       gender,
       phoneNumber, 
       country, 
-      dateOfBirth, 
+      age, 
       diagnosis,
       currentTreatment, 
       numberOfTablets, 

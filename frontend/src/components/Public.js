@@ -15,20 +15,16 @@ import {
   Toolbar,
   TextField,
   Grid,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   IconButton,
   Checkbox,
   FormControlLabel,
-  useMediaQuery,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import theme from "./reusable/Theme";
 import BgImage from "./image/cover.jpeg";
 import logo from "./image/logo.png";
+
 
 export default function Public() {
   const navigate = useNavigate();
@@ -194,7 +190,7 @@ export default function Public() {
             </Typography>
             <form onSubmit={handleLogin}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <FormControl fullWidth>
                     <InputLabel id="user-role-label">User Role</InputLabel>
                     <Select
@@ -213,7 +209,7 @@ export default function Public() {
                       </MenuItem>
                     </Select>
                   </FormControl>
-                </Grid>
+                </Grid> */}
 
                 <Grid item xs={12}>
                   <TextField

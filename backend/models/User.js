@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   // Common fields
+  profilePicture: { type: String, default: '' },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   roles: [{ type: String, enum: ['admin', 'patient', 'healthcare'] }],
@@ -16,7 +17,7 @@ const userSchema = new mongoose.Schema({
   country: String,
   passportNumber: String,
   nricNumber: String,
-  dateOfBirth: Date,
+  age: String,
   diagnosis: { type: String, enum: ['SPPTB', 'SNTB', 'EXPTB', 'LTBI'] },
   currentTreatment: { type: String, enum: ['Akurit-4', 'Akurit', 'Pyridoxine10mg'] },
   numberOfTablets: Number,

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ThemeProvider,
   Box,
@@ -8,41 +8,137 @@ import {
   Button,
   Avatar,
   Grid,
-  Link,
   MenuItem,
-  InputLabel,
+  InputAdornment,
   IconButton,
-} from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
-import theme from './reusable/Theme';
+  Alert,
+  Dialog,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import theme from "./reusable/Theme";
 import BgImage from "./image/cover.jpeg";
+import axios from "./axios";
 
 export default function HealthcareRegister() {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
-  const [role, setRole] = useState('');
-  const [mcpid, setMCPID] = useState('');
+  const [group, setGroup] = useState("");
+  const [mcpId, setMCPID] = useState("");
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleRegister = (event) => {
+  const handleRegister = async (event) => {
     event.preventDefault();
-    console.log("First Name:", firstName);
-    console.log("Last Name:", lastName);
-    console.log('Role:', role);
-    console.log('MCP ID:', mcpid);
-  };
 
-  const SubmitNext = () => navigate("/register/healthcare_2");
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Invalid email format.",
+      });
+      return;
+    }
 
-    // Function to handle profile picture change
-    const handleProfilePictureChange = (event) => {
-      if (event.target.files && event.target.files[0]) {
-        setProfilePicture(URL.createObjectURL(event.target.files[0]));
-      }
+    // Simple password validation
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum eight characters, at least one letter and one number
+    if (!passwordRegex.test(password)) {
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message:
+          "Password must be at least 8 characters long and contain at least one letter and one number.",
+      });
+      return;
+    }
+
+    // Construct the user data object
+    const userData = {
+      firstName,
+      lastName,
+      group,
+      mcpId,
+      email,
+      password,
+      // Include the profilePicture if it has been uploaded
+      profilePicture: profilePicture || "",
     };
 
+    try {
+      // Send a POST request to the backend registration endpoint
+      const response = await axios.post("/auth/register", userData);
+      console.log(response.data);
+      // Registration was successful
+      navigate("/healthcarepatient");
+    } catch (error) {
+      console.error(
+        "Registration Error:",
+        error.response?.data || error.message
+      );
+      // Handle registration errors
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message:
+          "Registration failed: " + (error.response?.data || error.message),
+      });
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setAlertInfo({ show: false, type: "", message: "" });
+  };
+
+  const CustomDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+      boxShadow: "none",
+      overflow: "visible",
+    },
+  }));
+  
+  const handleProfilePictureUpload = async (event) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
+  
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      try {
+        const response = await axios.post('/images/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+  
+        if (response && response.data) {
+          console.log('Uploaded file:', response.data);
+          const uploadedFilename = response.data.filename;
+          setProfilePicture(uploadedFilename); // Store the uploaded filename or URL
+        } else {
+          console.error('No response data received');
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+  };
+  
+  
+  
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -69,44 +165,85 @@ export default function HealthcareRegister() {
             width: "100vh",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
+          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Step 1: Personal Details
+            Registration
           </Typography>
-          <Box component="form" onSubmit={handleRegister} noValidate sx={{ mt: 1 }}>
+          <Box
+            component="form"
+            onSubmit={handleRegister}
+            sx={{ mt: 1 }}
+          >
             <Grid container spacing={2}>
-            <Grid item xs={12}>
-                <InputLabel htmlFor="icon-button-file">
-                  Upload Profile Picture
-                </InputLabel>
-                <input
-                  accept="image/*"
-                  id="icon-button-file"
-                  type="file"
-                  style={{ display: "none" }}
-                  onChange={handleProfilePictureChange}
-                />
-                <IconButton
-                  color="primary"
-                  aria-label="upload picture"
-                  component="span"
-                  htmlFor="icon-button-file"
-                  style={{
-                    marginTop: "8px",
-                    padding: "18.5px 14px",
-                    border: "1px solid #ced4da",
-                    borderRadius: "4px",
-                    backgroundColor: "#fff",
-                    fontSize: "1rem",
-                  }}
-                >
-                  <PhotoCamera />
-                </IconButton>
-
-                {profilePicture && (
-                  <Avatar src={profilePicture} sx={{ width: 56, height: 56 }} />
+              <Grid item sm={12}>
+                {/* Profile picture upload section */}
+                {profilePicture ? (
+                  <>
+                    {/* Profile picture display */}
+                    <Grid item>
+                      <Avatar
+                        src={profilePicture}
+                        sx={{ width: 90, height: 90 }}
+                      />
+                    </Grid>
+                    {/* Edit photo button */}
+                    <Grid item>
+                      <input
+                        accept="image/*"
+                        id="icon-button-file"
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={handleProfilePictureUpload}
+                      />
+                      <label htmlFor="icon-button-file">
+                        <Button
+                          variant="outlined"
+                          component="span"
+                          startIcon={<CloudUploadIcon />}
+                          style={{
+                            marginTop: "8px",
+                            padding: "10px 14px",
+                            border: "1px solid #ced4da",
+                            borderRadius: "4px",
+                            backgroundColor: "#fff",
+                            textTransform: "none", // Optional: prevents uppercase styling
+                          }}
+                        >
+                          Edit Photo
+                        </Button>
+                      </label>
+                    </Grid>
+                  </>
+                ) : (
+                  // Upload button only shown when no profile picture is uploaded
+                  <Grid item>
+                    <input
+                      accept="image/*"
+                      id="icon-button-file"
+                      type="file"
+                      style={{ display: "none" }}
+                      onChange={handleProfilePictureUpload}
+                    />
+                    <label htmlFor="icon-button-file">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        startIcon={<CloudUploadIcon />}
+                        style={{
+                          marginTop: "8px",
+                          padding: "10px 14px",
+                          border: "1px solid #ced4da",
+                          borderRadius: "4px",
+                          backgroundColor: "#fff",
+                          textTransform: "none", // Optional: prevents uppercase styling
+                        }}
+                      >
+                        Upload Profile Picture
+                      </Button>
+                    </label>
+                  </Grid>
                 )}
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -142,15 +279,17 @@ export default function HealthcareRegister() {
                   margin="normal"
                   required
                   fullWidth
-                  id="role"
-                  label="Role"
-                  name="role"
-                  value={role}
-                  onChange={e => setRole(e.target.value)}
+                  id="group"
+                  label="Group"
+                  name="group"
+                  value={group}
+                  onChange={(e) => setGroup(e.target.value)}
                 >
                   <MenuItem value="doctor">Doctor</MenuItem>
                   <MenuItem value="nurse">Nurse</MenuItem>
-                  <MenuItem value="medical-assistant">Medical Assistant</MenuItem>
+                  <MenuItem value="medical assistant">
+                    Medical Assistant
+                  </MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={12}>
@@ -158,12 +297,56 @@ export default function HealthcareRegister() {
                   margin="normal"
                   required
                   fullWidth
-                  id="mcpid"
+                  id="mcpId"
                   label="MCP ID"
-                  name="mcpid"
+                  name="mcpId"
                   autoFocus
-                  value={firstName}
+                  value={mcpId}
                   onChange={(e) => setMCPID(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email"
+                  name="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? (
+                            <VisibilityOffIcon />
+                          ) : (
+                            <VisibilityIcon />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
             </Grid>
@@ -172,13 +355,23 @@ export default function HealthcareRegister() {
               variant="contained"
               fullWidth
               sx={{ mt: 3, mb: 2 }}
-              onClick={SubmitNext}
             >
-              Next
+              Register
             </Button>
           </Box>
         </Box>
       </Box>
+
+      <CustomDialog
+        open={alertInfo.show}
+        onClose={handleCloseAlert}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
+          {alertInfo.message}
+        </Alert>
+      </CustomDialog>
     </ThemeProvider>
   );
 }
