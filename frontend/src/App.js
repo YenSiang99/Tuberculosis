@@ -2,8 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Public from "./components/Public";
 import PatientRegister from "./components/PatientRegister";
-import PatientRegister2 from "./components/PatientRegister2";
 import HealthcareRegister from "./components/HealthcareRegister";
+import SuccessfulRegister from "./components/SuccessfulRegister";
 
 import PatientVideo from "./components/PatientVideo";
 import PatientSideEffect from "./components/PatientSideEffect";
@@ -28,8 +28,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Public />} />
         <Route path="/register/patient" element={<PatientRegister />} />
-        <Route path="/register/patient_2" element={<PatientRegister2 />} />
         <Route path="/register/healthcare" element={<HealthcareRegister />} />
+        <Route path="/register/success" element={<SuccessfulRegister />} />
 
         <Route path="/patientvideo" element={<PatientVideo />} />
         <Route path="/patientsideeffect" element={<PatientSideEffect />} />

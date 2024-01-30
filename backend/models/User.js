@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   // Patient-specific fields
   firstName: String,
   lastName: String,
-  gender: { type: String, enum: ['male', 'female'] },
+  gender: { type: String, enum: ['male', 'female',''] },
   phoneNumber: String,
   country: String,
   passportNumber: String,

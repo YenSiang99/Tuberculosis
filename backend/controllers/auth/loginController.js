@@ -34,7 +34,9 @@ exports.login = async (req, res) => {
     );
 
     // Send the token to the client
-    res.json({ token });
+    console.log("User roles:", user.roles); // Debugging log
+    res.json({ token, roles: user.roles });
+    
   } catch (error) {
     res.status(500).send(`Error during login: ${error.message}`);
   }

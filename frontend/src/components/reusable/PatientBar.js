@@ -39,6 +39,14 @@ const navigateTo = (path) => {
   const isProfile = location.pathname === '/patientprofile';
   const isPasswordReset = location.pathname === '/patientpassword';
   
+  const handleLogout = () => {
+    // Clear both localStorage and sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redirect to the homepage
+    navigate('/'); 
+  };
 
   return (
     <Drawer
@@ -96,7 +104,7 @@ const navigateTo = (path) => {
         </ListItemButton>
 
         {/* Logout */}
-        <ListItemButton key="Logout" onClick={() => navigateTo('/')}>
+        <ListItemButton key="Logout" onClick={handleLogout}>
           <ListItemIcon><ExitToAppIcon /></ListItemIcon>
           <ListItemText primary="Logout" />
         </ListItemButton>

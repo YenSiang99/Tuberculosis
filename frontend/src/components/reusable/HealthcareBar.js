@@ -33,6 +33,15 @@ export default function HealthcareSidebar() {
   const isProfile = location.pathname === '/healthcareprofile';
   const isPasswordReset = location.pathname === '/healthcarepassword';
 
+  const handleLogout = () => {
+    // Clear both localStorage and sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redirect to the homepage
+    navigate('/'); 
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -89,7 +98,7 @@ export default function HealthcareSidebar() {
         </ListItemButton>
 
         {/* Logout */}
-        <ListItemButton key="Logout" onClick={() => navigateTo('/')}>
+        <ListItemButton key="Logout" onClick={handleLogout}>
           <ListItemIcon><ExitToAppIcon /></ListItemIcon>
           <ListItemText primary="Logout" />
         </ListItemButton>

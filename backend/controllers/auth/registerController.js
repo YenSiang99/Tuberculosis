@@ -20,36 +20,46 @@ exports.register = async (req, res) => {
     await newUser.save();
 
     res.status(201).send('User registered successfully');
+    
   } catch (error) {
-    console.error(error); // Log the full error to the console
-    res.status(500).send('Error registering user');
+    if (error.code === 11000) {
+      // This means there's a duplicate key error (i.e., the email is already in use)
+      return res.status(409).send('Email already registered');
+    } else {
+      console.error(error);
+      res.status(500).send('Error registering user');
+    }
   }
 };
 
-
 exports.registerPatient = async (req, res) => {
+  console.log(req.body); 
   try {
+    // req.body will contain text fields
     const {
       email, password, firstName, lastName, gender, phoneNumber, country,
       passportNumber, nricNumber, age, diagnosis, currentTreatment,
-      numberOfTablets, treatmentStartMonth
+      numberOfTablets, treatmentStartMonth, profilePicture
     } = req.body;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     let patientFields = {
-      email, 
-      password: await bcrypt.hash(password, 10), 
-      roles: ['patient'], 
-      group : 'patient',
-      firstName, 
-      lastName, 
+      email,
+      password: hashedPassword,
+      roles: ['patient'],
+      group: 'patient',
+      firstName,
+      lastName,
       gender,
-      phoneNumber, 
-      country, 
-      age, 
+      phoneNumber,
+      country,
+      age,
       diagnosis,
-      currentTreatment, 
-      numberOfTablets, 
-      treatmentStartMonth
+      currentTreatment,
+      numberOfTablets,
+      treatmentStartMonth,
+      profilePicture
     };
 
     // Add passportNumber or nricNumber based on the country
@@ -63,6 +73,11 @@ exports.registerPatient = async (req, res) => {
         return res.status(400).send('NRIC number is required for Malaysians');
       }
       patientFields.nricNumber = nricNumber;
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send('Email already registered');
     }
 
     const newUser = new User(patientFields);

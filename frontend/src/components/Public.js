@@ -18,13 +18,15 @@ import {
   IconButton,
   Checkbox,
   FormControlLabel,
+  InputAdornment,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import theme from "./reusable/Theme";
 import BgImage from "./image/cover.jpeg";
 import logo from "./image/logo.png";
-
+import axios from "./axios";
+import { jwtDecode } from "jwt-decode";
 
 export default function Public() {
   const navigate = useNavigate();
@@ -38,12 +40,6 @@ export default function Public() {
   // Navigate to TB information page
   const handleMoreInfo = () => {
     navigate("/tb-info");
-  };
-
-  // Handle login form submission
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Insert authentication logic here
   };
 
   // Handle registration button click
@@ -93,6 +89,51 @@ export default function Public() {
     },
     cursor: "pointer",
     padding: theme.spacing(2),
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/auth/login", { email, password });
+      const { token } = response.data;
+
+      localStorage.setItem("token", token); // Store token for authenticated requests
+
+      // Decode the token to get the roles
+      const decoded = jwtDecode(token);
+      console.log("Decoded JWT:", decoded);
+
+      // Store the token and user data based on the "Remember Me" selection
+      if (rememberMe) {
+        // Store in local storage if "Remember Me" is checked
+        localStorage.setItem("token", token);
+        localStorage.setItem("userData", JSON.stringify(decoded));
+      } else {
+        // Store in session storage if "Remember Me" is not checked
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("userData", JSON.stringify(decoded));
+      }
+
+      // Check if roles is defined and is an array
+      if (decoded.roles) {
+        if (decoded.roles.includes("patient")) {
+          navigate("/patientvideo");
+        } else if (decoded.roles.includes("healthcare")) {
+          navigate("/healthcarepatient");
+        } else {
+          console.log("User role not recognized or unauthorized");
+        }
+      } else {
+        console.log("Roles not defined or not an array");
+        // Handle case where roles is not defined or not in the expected format
+      }
+    } catch (error) {
+      console.error(
+        "Login error:",
+        error.response ? error.response.data : error
+      );
+      // Handle login errors here
+    }
   };
 
   return (
@@ -224,19 +265,23 @@ export default function Public() {
                 <Grid item xs={12}>
                   <TextField
                     label="Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     fullWidth
                     variant="filled"
                     InputProps={{
                       endAdornment: (
-                        <IconButton
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleClickShowPassword} // Toggle the visibility
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
                       ),
                     }}
                   />

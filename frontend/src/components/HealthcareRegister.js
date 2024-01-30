@@ -38,6 +38,7 @@ export default function HealthcareRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null); 
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -65,6 +66,8 @@ export default function HealthcareRegister() {
       return;
     }
 
+    const uploadedFilename = await uploadProfilePicture();
+
     // Construct the user data object
     const userData = {
       firstName,
@@ -74,7 +77,7 @@ export default function HealthcareRegister() {
       email,
       password,
       // Include the profilePicture if it has been uploaded
-      profilePicture: profilePicture || "",
+      profilePicture: uploadedFilename || "",
     };
 
     try {
@@ -82,20 +85,24 @@ export default function HealthcareRegister() {
       const response = await axios.post("/auth/register", userData);
       console.log(response.data);
       // Registration was successful
-      navigate("/healthcarepatient");
+      navigate("/register/success");
     } catch (error) {
-      console.error(
-        "Registration Error:",
-        error.response?.data || error.message
-      );
-      // Handle registration errors
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message:
-          "Registration failed: " + (error.response?.data || error.message),
-      });
+      if (error.response?.status === 409) {
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "Email already registered. Please login."
+        });
+      } else {
+        // Handle other types of errors
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "Registration failed: " + (error.response?.data || error.message),
+        });
+      }
     }
+    
   };
 
   const handleCloseAlert = () => {
@@ -113,31 +120,32 @@ export default function HealthcareRegister() {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
+      setSelectedFile(file); 
   
       const formData = new FormData();
       formData.append('file', file);
-  
-      try {
-        const response = await axios.post('/images/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-  
-        if (response && response.data) {
-          console.log('Uploaded file:', response.data);
-          const uploadedFilename = response.data.filename;
-          setProfilePicture(uploadedFilename); // Store the uploaded filename or URL
-        } else {
-          console.error('No response data received');
-        }
-      } catch (error) {
-        console.error('Error uploading image:', error);
-      }
     }
   };
-  
-  
+
+  const uploadProfilePicture = async () => {
+    if (!selectedFile) return null;
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await axios.post('/images/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      return response.data.filename; // Return the uploaded filename or URL
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
   
   return (
     <ThemeProvider theme={theme}>
@@ -169,7 +177,7 @@ export default function HealthcareRegister() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Registration
+            Healthcare Registration
           </Typography>
           <Box
             component="form"

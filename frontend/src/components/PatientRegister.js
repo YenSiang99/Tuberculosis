@@ -8,17 +8,16 @@ import {
   Button,
   Avatar,
   Grid,
-  InputLabel,
   IconButton,
   InputAdornment,
   Alert,
   Dialog,
   MenuItem,
+  Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PersonIcon from "@mui/icons-material/Person";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
-import VaccinesIcon from "@mui/icons-material/Vaccines";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PhoneInput from "react-phone-input-2";
@@ -26,9 +25,9 @@ import { CountryDropdown } from "react-country-region-selector";
 import "react-phone-input-2/lib/material.css";
 import theme from "./reusable/Theme";
 import BgImage from "./image/cover.jpeg";
+import axios from "./axios";
 
 export default function PatientRegister() {
-  const [currentStep, setCurrentStep] = useState(1);
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -51,40 +50,14 @@ export default function PatientRegister() {
   const [treatment, setTreatment] = useState("");
   const [treatmentStartMonth, setTreatmentStartMonth] = useState("");
   const [numberOfTablets, setNumberOfTablets] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null); 
 
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
   };
 
-  const handleFormSubmit = (event) => {
-    if (currentStep === 1) {
-      event.preventDefault();
-      handleRegisterNext();
-    } else if (currentStep === 2) {
-      event.preventDefault();
-      handleSubmit();
-    }
-  };
-
-  const handleRegisterNext = () => {
-    if (!phoneNumber || !country) {
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message: "Phone number and country are required.",
-      });
-      console.log("Phone number and country are required.");
-      return;
-    }
-
-    // if (nricNumber.length !== 12) {
-    //   setAlertInfo({
-    //     show: true,
-    //     type: "error",
-    //     message: "IC Number must have exactly 12 digits.",
-    //   });
-    //   return; // Prevent further processing if validation fails
-    // }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -108,12 +81,64 @@ export default function PatientRegister() {
       });
       return;
     }
-  };
 
-  // Function to handle profile picture change
-  const handleProfilePictureChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setProfilePicture(URL.createObjectURL(event.target.files[0]));
+    if (country === "Malaysia" && nricNumber.length !== 12) {
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "IC Number must have exactly 12 digits.",
+      });
+      return; // Prevent further processing if validation fails
+    }
+
+    const uploadedFilename = await uploadProfilePicture();
+
+    // Construct the user data object
+    const userData = {
+      firstName,
+      lastName,
+      gender,
+      email,
+      password,
+      phoneNumber,
+      country,
+      age,
+      email,
+      password,
+      diagnosis,
+      treatment,
+      treatmentStartMonth,
+      numberOfTablets,
+      profilePicture: uploadedFilename || "",
+    };
+
+    console.log(userData);
+
+    // Conditionally add NRIC or Passport Number based on the country
+    if (country === "Malaysia") {
+      userData.nricNumber = nricNumber;
+    } else {
+      userData.passportNumber = passportNumber;
+    }
+
+    try {
+      // Send a POST request to the backend registration endpoint
+      const response = await axios.post("/auth/registerPatient", userData);
+      console.log(response.data);
+      // Registration was successful
+      navigate("/register/success");
+    } catch (error) {
+      console.error(
+        "Registration Error:",
+        error.response?.data || error.message
+      );
+      // Handle registration errors
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message:
+          "Registration failed: " + (error.response?.data || error.message),
+      });
     }
   };
 
@@ -138,21 +163,34 @@ export default function PatientRegister() {
     },
   }));
 
-  const handleNext = () => {
-    if (currentStep === 1) {
-      // validate step 1 data
+  const handleProfilePictureUpload = async (event) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
+      setSelectedFile(file); 
+  
+      const formData = new FormData();
+      formData.append('file', file);
     }
-    // Increment step
-    setCurrentStep(currentStep + 1);
   };
 
-  const handleBack = () => {
-    setCurrentStep(currentStep - 1);
-  };
+  const uploadProfilePicture = async () => {
+    if (!selectedFile) return null;
 
-  const handleSubmit = () => {
-    if (currentStep === 2) {
-      // validate step 2 data and submit all data
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await axios.post('/images/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      return response.data.filename; // Return the uploaded filename or URL
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
     }
   };
 
@@ -169,267 +207,295 @@ export default function PatientRegister() {
           alignItems: "center",
         }}
       >
-        <Box
+        <Paper
+          elevation={3}
           sx={{
-            marginTop: 8,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             padding: 3,
-            boxShadow: "0px 3px 15px rgba(0,0,0,0.2)",
             borderRadius: "15px",
             backgroundColor: "white",
             width: "100vh",
+            maxWidth: "100%",
+            marginTop: 8,
           }}
         >
-          {currentStep === 1 && (
-            <>
-              <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-                <PersonIcon />
-              </Avatar>
-              <Typography component="h1" variant="h5">
-                Step 1: Personal Details
+          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+            <PersonIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Patient Registration
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <Box
+              sx={{
+                width: "100%",
+                borderTop: "1px solid #ccc",
+                borderBottom: "1px solid #ccc",
+              }}
+            >
+              <Typography variant="h6" sx={{ mt: 2, fontWeight: "bold" }}>
+                Personal Details
               </Typography>
-              <Box
-                component="form"
-                sx={{ mt: 1 }}
-               onSubmit={handleFormSubmit}
-              >
-                <Grid container spacing={2}>
-                  {/* Profile Picture Upload */}
-                  <Grid item xs={12}>
-                    <InputLabel htmlFor="icon-button-file">
-                      Upload Profile Picture
-                    </InputLabel>
+              <Grid container spacing={2}>
+              <Grid item sm={12}>
+                {/* Profile picture upload section */}
+                {profilePicture ? (
+                  <>
+                    {/* Profile picture display */}
+                    <Grid item>
+                      <Avatar
+                        src={profilePicture}
+                        sx={{ width: 90, height: 90 }}
+                      />
+                    </Grid>
+                    {/* Edit photo button */}
+                    <Grid item>
+                      <input
+                        accept="image/*"
+                        id="icon-button-file"
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={handleProfilePictureUpload}
+                      />
+                      <label htmlFor="icon-button-file">
+                        <Button
+                          variant="outlined"
+                          component="span"
+                          startIcon={<CloudUploadIcon />}
+                          style={{
+                            marginTop: "8px",
+                            padding: "10px 14px",
+                            border: "1px solid #ced4da",
+                            borderRadius: "4px",
+                            backgroundColor: "#fff",
+                            textTransform: "none", // Optional: prevents uppercase styling
+                          }}
+                        >
+                          Edit Photo
+                        </Button>
+                      </label>
+                    </Grid>
+                  </>
+                ) : (
+                  // Upload button only shown when no profile picture is uploaded
+                  <Grid item>
                     <input
                       accept="image/*"
                       id="icon-button-file"
                       type="file"
                       style={{ display: "none" }}
-                      onChange={handleProfilePictureChange}
+                      onChange={handleProfilePictureUpload}
                     />
-                    <IconButton
-                      color="primary"
-                      aria-label="upload picture"
-                      component="span"
-                      htmlFor="icon-button-file"
-                      style={{
-                        marginTop: "8px",
-                        padding: "18.5px 14px",
-                        border: "1px solid #ced4da",
-                        borderRadius: "4px",
-                        backgroundColor: "#fff",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      <PhotoCamera />
-                    </IconButton>
+                    <label htmlFor="icon-button-file">
+                      <Button
+                        variant="outlined"
+                        component="span"
+                        startIcon={<CloudUploadIcon />}
+                        style={{
+                          marginTop: "8px",
+                          padding: "10px 14px",
+                          border: "1px solid #ced4da",
+                          borderRadius: "4px",
+                          backgroundColor: "#fff",
+                          textTransform: "none", // Optional: prevents uppercase styling
+                        }}
+                      >
+                        Upload Profile Picture
+                      </Button>
+                    </label>
+                  </Grid>
+                )}
+              </Grid>
 
-                    {profilePicture && (
-                      <Avatar
-                        src={profilePicture}
-                        sx={{ width: 56, height: 56 }}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="firstName"
-                      label="First Name"
-                      name="firstName"
-                      autoComplete="given-name"
-                      autoFocus
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="lastName"
-                      label="Last Name"
-                      name="lastName"
-                      autoComplete="family-name"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      select
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="gender"
-                      label="Gender"
-                      name="gender"
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                      SelectProps={{
-                        native: true,
-                      }}
-                    >
-                      <option value=""></option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </TextField>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <PhoneInput
-                      required
-                      country={"us"}
-                      value={phoneNumber}
-                      onChange={(phoneNumber) => setPhoneNumber(phoneNumber)}
-                      containerStyle={{ width: "100%" }}
-                      inputStyle={{ width: "100%", height: "56px" }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CountryDropdown
-                      value={country}
-                      onChange={(val) => setCountry(val)}
-                      required
-                      style={{
-                        width: "100%",
-                        height: "56px",
-                        padding: "18.5px 14px",
-                        border: "1px solid #ced4da",
-                        borderRadius: "4px",
-                        fontSize: "1rem",
-                        marginTop: "8px",
-                      }}
-                    />
-                  </Grid>
-                  {country === "Malaysia" ? (
-                    <>
-                      <Grid item xs={12}>
-                        <TextField
-                          margin="normal"
-                          required
-                          fullWidth
-                          id="nricNumber"
-                          label="NRIC Number"
-                          name="nricNumber"
-                          autoComplete="off"
-                          value={nricNumber}
-                          onChange={(e) => {
-                            setNRICNumber(e.target.value);
-                            setAge(getCurrentAge(e.target.value));
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          margin="normal"
-                          fullWidth
-                          id="calculatedAge"
-                          label="Age"
-                          name="calculatedAge"
-                          value={age}
-                          disabled
-                        />
-                      </Grid>
-                    </>
-                  ) : (
-                    <>
-                      <Grid item xs={12}>
-                        <TextField
-                          margin="normal"
-                          required
-                          fullWidth
-                          id="passportNumber"
-                          label="Passport Number"
-                          name="passportNumber"
-                          autoComplete="off"
-                          value={passportNumber}
-                          onChange={(e) => setPassportNumber(e.target.value)}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          margin="normal"
-                          required
-                          fullWidth
-                          id="age"
-                          label="Age"
-                          name="age"
-                          type="number"
-                          autoComplete="off"
-                          value={age}
-                          onChange={(e) => setAge(e.target.value)}
-                        />
-                      </Grid>
-                    </>
-                  )}
-                  <Grid item xs={12}>
-                    <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="email"
-                      label="Email Address"
-                      name="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      name="password"
-                      label="Password"
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              aria-label="toggle password visibility"
-                              onClick={() => setShowPassword(!showPassword)}
-                              edge="end"
-                            >
-                              {showPassword ? (
-                                <VisibilityOffIcon />
-                              ) : (
-                                <VisibilityIcon />
-                              )}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="firstName"
+                    label="First Name"
+                    name="firstName"
+                    autoComplete="given-name"
+                    autoFocus
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
                 </Grid>
-              </Box>
-            </>
-          )}
-          {currentStep === 2 && (
-            <>
-              {" "}
-              <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-                <VaccinesIcon />
-              </Avatar>
-              <Typography component="h1" variant="h5">
-                Step 2 : Treatment Details
-              </Typography>
-              <Box
-                component="form"
-                onSubmit={handleSubmit}
-                noValidate
-                sx={{ mt: 1 }}
-              >
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="lastName"
+                    label="Last Name"
+                    name="lastName"
+                    autoComplete="family-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    select
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="gender"
+                    label="Gender"
+                    name="gender"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    SelectProps={{
+                      native: true,
+                    }}
+                  >
+                    <option value=''></option>
+                    <option value='male'>Male</option>
+                    <option value='female'>Female</option>
+                  </TextField>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <PhoneInput
+                    required
+                    country={"my"}
+                    value={phoneNumber}
+                    onChange={(phoneNumber) => setPhoneNumber(phoneNumber)}
+                    containerStyle={{ width: "100%" }}
+                    inputStyle={{ width: "100%", height: "56px" }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CountryDropdown
+                    value={country}
+                    onChange={(val) => setCountry(val)}
+                    required
+                    style={{
+                      width: "100%",
+                      height: "56px",
+                      padding: "18.5px 14px",
+                      border: "1px solid #ced4da",
+                      borderRadius: "4px",
+                      fontSize: "1rem",
+                      marginTop: "8px",
+                    }}
+                  />
+                </Grid>
+                {country === "Malaysia" ? (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="nricNumber"
+                        label="NRIC Number"
+                        name="nricNumber"
+                        autoComplete="off"
+                        value={nricNumber}
+                        onChange={(e) => {
+                          setNRICNumber(e.target.value);
+                          setAge(getCurrentAge(e.target.value));
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        margin="normal"
+                        fullWidth
+                        id="calculatedAge"
+                        label="Age"
+                        name="calculatedAge"
+                        value={age}
+                        disabled
+                      />
+                    </Grid>
+                  </>
+                ) : (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="passportNumber"
+                        label="Passport Number"
+                        name="passportNumber"
+                        autoComplete="off"
+                        value={passportNumber}
+                        onChange={(e) => setPassportNumber(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="age"
+                        label="Age"
+                        name="age"
+                        type="number"
+                        autoComplete="off"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                      />
+                    </Grid>
+                  </>
+                )}
+                <Grid item xs={12}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sx={{ mb: 5 }}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? (
+                              <VisibilityOffIcon />
+                            ) : (
+                              <VisibilityIcon />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+
+            <Typography variant="h6" sx={{ mt: 4, fontWeight: "bold" }}>
+              Treatment Details
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
                 <TextField
                   select
                   margin="normal"
@@ -454,6 +520,9 @@ export default function PatientRegister() {
                   </MenuItem>
                   <MenuItem value="LTBI">Latent TB infection (LTBI)</MenuItem>
                 </TextField>
+              </Grid>
+
+              <Grid item xs={12}>
                 <TextField
                   select
                   margin="normal"
@@ -478,6 +547,9 @@ export default function PatientRegister() {
                   </MenuItem>
                   <MenuItem value="Pyridoxine10mg">Pyridoxine 10mg</MenuItem>
                 </TextField>
+              </Grid>
+
+              <Grid item xs={12}>
                 <TextField
                   select
                   margin="normal"
@@ -497,6 +569,9 @@ export default function PatientRegister() {
                     </MenuItem>
                   ))}
                 </TextField>
+              </Grid>
+
+              <Grid item xs={12}>
                 <TextField
                   margin="normal"
                   required
@@ -511,29 +586,19 @@ export default function PatientRegister() {
                   onChange={(e) => setTreatmentStartMonth(e.target.value)}
                   sx={{ mt: 2, width: "100%", minWidth: 400 }}
                 />
-              </Box>
-            </>
-          )}
-          <Box sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Button
-                  onClick={handleBack}
-                  variant="contained"
-                  disabled={currentStep === 1}
-                  fullWidth
-                >
-                  Back
-                </Button>
               </Grid>
-              <Grid item xs={6}>
-        <Button variant="contained" type="submit" fullWidth>
-          {currentStep < 2 ? "Next" : "Submit"}
-        </Button>
-      </Grid>
             </Grid>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Submit
+            </Button>
           </Box>
-        </Box>
+        </Paper>
       </Box>
       <CustomDialog
         open={alertInfo.show}
