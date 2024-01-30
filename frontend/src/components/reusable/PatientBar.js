@@ -97,11 +97,11 @@ const navigateTo = (path) => {
           <ListItemText primary="Profile" />
         </ListItemButton>
 
-        {/* Password Reset */}
+        {/* Password Reset
         <ListItemButton key="PasswordReset" onClick={() => navigateTo('/patientpassword')} selected={isPasswordReset}>
           <ListItemIcon><VpnKeyIcon /></ListItemIcon>
           <ListItemText primary="Password Reset" />
-        </ListItemButton>
+        </ListItemButton> */}
 
         {/* Logout */}
         <ListItemButton key="Logout" onClick={handleLogout}>
