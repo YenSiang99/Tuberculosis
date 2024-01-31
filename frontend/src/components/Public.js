@@ -97,8 +97,6 @@ export default function Public() {
       const response = await axios.post("/auth/login", { email, password });
       const { token } = response.data;
 
-      localStorage.setItem("token", token); // Store token for authenticated requests
-
       // Decode the token to get the roles
       const decoded = jwtDecode(token);
       console.log("Decoded JWT:", decoded);

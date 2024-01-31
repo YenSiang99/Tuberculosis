@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Public from "./components/Public";
+import TBInfo from "./components/TBInfo";
 import PatientRegister from "./components/PatientRegister";
 import HealthcareRegister from "./components/HealthcareRegister";
 import SuccessfulRegister from "./components/SuccessfulRegister";
@@ -27,6 +28,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Public />} />
+        <Route path="/tb-info" element={<TBInfo />} />
         <Route path="/register/patient" element={<PatientRegister />} />
         <Route path="/register/healthcare" element={<HealthcareRegister />} />
         <Route path="/register/success" element={<SuccessfulRegister />} />
