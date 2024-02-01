@@ -15,6 +15,11 @@ exports.register = async (req, res) => {
       return res.status(400).send('Missing healthcare registration details');
     }
 
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send('Email already registered');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ email, password: hashedPassword, roles, firstName, lastName, group, mcpId, profilePicture });
     await newUser.save();
@@ -22,13 +27,8 @@ exports.register = async (req, res) => {
     res.status(201).send('User registered successfully');
     
   } catch (error) {
-    if (error.code === 11000) {
-      // This means there's a duplicate key error (i.e., the email is already in use)
-      return res.status(409).send('Email already registered');
-    } else {
-      console.error(error);
-      res.status(500).send('Error registering user');
-    }
+    console.error(error);
+    res.status(500).send('Error registering user');
   }
 };
 
