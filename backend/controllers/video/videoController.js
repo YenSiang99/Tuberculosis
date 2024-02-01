@@ -1,10 +1,6 @@
 // controllers/videoController.js
 const Video = require('../../models/Video');
-// controllers/videoController.js
 const upload = require('../../middlewares/multerConfig');
-
-
-
 
 
 exports.getVideo = async (req, res) => {

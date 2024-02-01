@@ -1,19 +1,29 @@
-// multerConfig.js
 const multer = require('multer');
 const path = require('path');
 
-// Configure storage
-const storage = multer.diskStorage({
+// Configure storage for videos
+const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'media/'); // Set the destination folder
+    cb(null, 'media/videos/'); // Adjust the destination folder for videos
   },
   filename: (req, file, cb) => {
-    // Use user ID and timestamp for unique filenames
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, `video-${uniqueSuffix}${path.extname(file.originalname)}`);
   }
 });
 
-const upload = multer({ storage: storage });
+// Configure storage for profile pictures
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'media/profiles/'); // Adjust the destination folder for profile pictures
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+    cb(null, `profile-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
 
-module.exports = upload;
+// Multer upload functions
+const uploadVideo = multer({ storage: videoStorage }).single('video');
+const uploadProfile = multer({ storage: profileStorage }).single('profilePicture');
+module.exports = { uploadVideo, uploadProfile };

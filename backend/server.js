@@ -12,12 +12,16 @@ require('dotenv').config();
 const cors = require('cors');
 const authRoutes = require('./routes/auth/authRoutes');
 const userRoutes = require('./routes/users/userRoutes');
-const imageRoutes = require('./routes/image/imageRoutes');
 const videoRoutes = require('./routes/video/videoRoutes');
 
-const mediaDir = path.join(__dirname, 'media');
-if (!fs.existsSync(mediaDir)) {
-  fs.mkdirSync(mediaDir, { recursive: true });
+const profilesDir = path.join(__dirname, 'media/profiles/');
+if (!fs.existsSync(profilesDir)) {
+  fs.mkdirSync(profilesDir, { recursive: true });
+}
+
+const videosDir = path.join(__dirname, 'media/videos/');
+if (!fs.existsSync(videosDir)) {
+  fs.mkdirSync(videosDir, { recursive: true });
 }
 
 const app = express();
@@ -30,7 +34,6 @@ app.use(cors());
 // APIs
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/images', imageRoutes);
 app.use('/api/videos', videoRoutes);
 
 // media files

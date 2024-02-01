@@ -10,4 +10,5 @@ router.post('/login', loginController.login);
 router.post('/register', registerController.register);
 router.post('/registerPatient', registerController.registerPatient);
 
+
 module.exports = router;

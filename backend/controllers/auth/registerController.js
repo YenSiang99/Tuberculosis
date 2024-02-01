@@ -2,6 +2,8 @@
 const User = require('../../models/User');
 const bcrypt = require('bcrypt');
 
+
+
 exports.register = async (req, res) => {
   try {
     const { email, password, firstName, lastName, group, mcpId, profilePicture } = req.body;
@@ -82,10 +84,12 @@ exports.registerPatient = async (req, res) => {
 
     const newUser = new User(patientFields);
     await newUser.save();
-    res.status(201).send('Patient registered successfully');
+    res.status(201).send(newUser);
   } catch (error) {
     console.error(error); // Log the full error to the console
     res.status(500).send(`Error registering patient: ${error.message}`);
   }
 };
+
+
 
