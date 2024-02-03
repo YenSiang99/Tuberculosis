@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import {
   ThemeProvider,
   Typography,
@@ -22,13 +21,17 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import theme from "./reusable/Theme";
-import BgImage from "./image/cover.jpeg";
-import logo from "./image/logo.png";
-import axios from "./axios";
-import { jwtDecode } from "jwt-decode";
+import theme from "../components/reusable/Theme";
+import BgImage from "../images/cover.jpeg";
+import logo from "../images/logo.png";
 
-export default function Public() {
+
+import axios from "../components/axios";
+import { useNavigate, Link } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import { useAuth } from '../context/AuthContext';
+
+export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +40,7 @@ export default function Public() {
   const [openRoleSelect, setOpenRoleSelect] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  const { setAuth } = useAuth();
   // Navigate to TB information page
   const handleMoreInfo = () => {
     navigate("/tb-info");
@@ -112,6 +116,8 @@ export default function Public() {
         sessionStorage.setItem("userData", JSON.stringify(decoded));
       }
 
+      setAuth(true);
+
       // Check if roles is defined and is an array
       if (decoded.roles) {
         if (decoded.roles.includes("patient")) {
@@ -119,6 +125,7 @@ export default function Public() {
         } else if (decoded.roles.includes("healthcare")) {
           navigate("/healthcarepatient");
         } else {
+          setAuth(false);
           console.log("User role not recognized or unauthorized");
         }
       } else {
@@ -126,6 +133,7 @@ export default function Public() {
         // Handle case where roles is not defined or not in the expected format
       }
     } catch (error) {
+      setAuth(false);
       console.error(
         "Login error:",
         error.response ? error.response.data : error
@@ -229,27 +237,6 @@ export default function Public() {
             </Typography>
             <form onSubmit={handleLogin}>
               <Grid container spacing={2}>
-                {/* <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel id="user-role-label">User Role</InputLabel>
-                    <Select
-                      labelId="user-role-label"
-                      id="user-role"
-                      value={userRole}
-                      label="User Role"
-                      onChange={handleRoleChange}
-                      sx={{ textAlign: "left" }}
-                    >
-                      <MenuItem value="patient">Patient</MenuItem>
-                      <MenuItem value="doctor">Doctor</MenuItem>
-                      <MenuItem value="nurse">Nurse</MenuItem>
-                      <MenuItem value="medical-assistant">
-                        Medical Assistant
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid> */}
-
                 <Grid item xs={12}>
                   <TextField
                     label="Email"
@@ -314,7 +301,6 @@ export default function Public() {
                     </Link>
                   </Grid>
                 </Grid>
-
                 {/* Login Button */}
                 <Grid item xs={12}>
                   <Button

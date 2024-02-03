@@ -12,12 +12,14 @@ import {
   useMediaQuery,
   Container,
   Paper,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 
-import theme from "./reusable/Theme";
-import HealthcareSidebar from "./reusable/HealthcareBar";
+import theme from "../../components/reusable/Theme";
+import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -64,9 +66,10 @@ export default function HealthcareSetting() {
   };
 
   const [profile, setProfile] = useState({
-    name: "Jack Doe",
+    firstName: "Mary",
+    lastName: "Doe",
     role: "Doctor",
-    category: "Government",
+    mcpId: "001",
   });
 
   const [personalInfoEditable, setPersonalInfoEditable] = useState(false);
@@ -84,10 +87,16 @@ export default function HealthcareSetting() {
       <strong>{splitCamelCaseToString(label)}:</strong> {value}
     </Typography>
   );
+  
 
   const splitCamelCaseToString = (s) => {
-    const knownAcronyms = ["IC"];
-
+    const knownAcronyms = ["MCP", "IC"];
+  
+    // Always return "MCP ID" for 'mcpId'
+    if (s === "mcpId") {
+      return "MCP ID";
+    }
+  
     return s
       .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
       .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2")
@@ -101,6 +110,7 @@ export default function HealthcareSetting() {
       })
       .join(" ");
   };
+  
 
   const handleCancelEdit = () => {
     setPersonalInfoEditable(false);
@@ -159,27 +169,50 @@ export default function HealthcareSetting() {
                 <FormGroup>
                   {Object.entries(profile)
                     .slice(0, 6)
-                    .map(([key, value]) => (
-                      <TextField
-                        key={key}
-                        label={splitCamelCaseToString(key)}
-                        name={key}
-                        value={value}
-                        onChange={handleProfileChange}
-                        margin="normal"
-                        fullWidth
-                      />
-                    ))}
+                    .map(([key, value]) => {
+                      if (key === "role") {
+                        return (
+                          <TextField
+                            select
+                            key={key}
+                            label={splitCamelCaseToString(key)}
+                            name={key}
+                            value={value}
+                            onChange={handleProfileChange}
+                            margin="normal"
+                            fullWidth
+                          >
+                            <MenuItem value="Doctor">Doctor</MenuItem>
+                            <MenuItem value="Nurse">Nurse</MenuItem>
+                            <MenuItem value="Medical Assistant">
+                              Medical Assistant
+                            </MenuItem>
+                          </TextField>
+                        );
+                      } else {
+                        return (
+                          <TextField
+                            key={key}
+                            label={splitCamelCaseToString(key)}
+                            name={key}
+                            value={value}
+                            onChange={handleProfileChange}
+                            margin="normal"
+                            fullWidth
+                          />
+                        );
+                      }
+                    })}
                 </FormGroup>
               ) : (
                 Object.entries(profile)
                   .slice(0, 6)
                   .map(([key, value]) => (
                     <ProfileView
-                      key={key}
-                      label={key.charAt(0).toUpperCase() + key.slice(1)}
-                      value={value}
-                    />
+                    key={key}
+                    label={key}
+                    value={value}
+                  />
                   ))
               )}
               <Button
@@ -189,7 +222,7 @@ export default function HealthcareSetting() {
                 color="primary"
                 variant="contained"
                 onClick={togglePersonalInfoEdit}
-                sx={{mr:2}}
+                sx={{ mr: 2 }}
               >
                 {personalInfoEditable ? "Save Changes" : "Edit"}
               </Button>
@@ -204,10 +237,6 @@ export default function HealthcareSetting() {
               )}
             </Box>
           </Paper>
-        </Container>
-
-        <Container>
-          <Button variant="contained">Reset Password</Button>
         </Container>
       </Box>
     </ThemeProvider>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ThemeProvider,
   Drawer,
@@ -16,9 +16,12 @@ import {
   Container,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import theme from "./reusable/Theme";
-import PatientSidebar from "./reusable/PatientBar";
+import theme from "../../components/reusable/Theme";
+import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
+
+import axios from "../../components/axios"; // Adjust the import path to your axios instance accordingly
+
 
 const InputLabelStyled = styled("label")(({ theme }) => ({
   display: "block",
@@ -45,6 +48,7 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 export default function PatientVideo() {
+  const [videoData, setVideoData] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
   const [videoURL, setVideoURL] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -56,6 +60,30 @@ export default function PatientVideo() {
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    // Call the getOrCreateVideo API to check or create a video for the day
+    const getOrCreateVideo = async () => {
+      try {
+        const response = await axios.put("/videos/getOrCreateVideo");
+        setVideoData(response.data);
+        if (response.data.videoUrl) {
+          setVideoURL(response.data.videoUrl);
+          setVideoUploaded(response.data.status !== 'pending upload'); // Example condition, adjust based on your API response
+        }
+      } catch (error) {
+        console.error("Error fetching or creating video:", error);
+        // Optionally set an alert or handle the error in the UI
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "Error fetching video information.",
+        });
+      }
+    };
+
+    getOrCreateVideo();
+  }, []);
 
   // Function to toggle drawer
   const handleDrawerToggle = () => {
@@ -86,19 +114,47 @@ export default function PatientVideo() {
       });
       return;
     }
-
-    setUploadProgress(10);
-    setTimeout(() => setUploadProgress(50), 1000);
-    setTimeout(() => {
-      setUploadProgress(100);
+  
+    // Initialize FormData
+    const formData = new FormData();
+    formData.append("video", videoFile); // "video" is the key expected by your backend
+  
+    // Set upload progress to 0
+    setUploadProgress(0);
+  
+    try {
+      const response = await axios.post(`/videos/uploadVideo/${videoData._id}`, // Assuming videoData contains the video ID
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(percentCompleted);
+          }
+        }
+      );
+  
+      // Video uploaded successfully
+      console.log('Finished uploading video')
+      setVideoData(response.data);
+      setVideoURL(response.data.videoUrl)
+      setVideoUploaded(true); // Update state to indicate video has been uploaded
       setAlertInfo({
         show: true,
         type: "success",
         message: "Video uploaded successfully!",
       });
-      setUploadProgress(0);
-      setVideoUploaded(true);
-    }, 2000);
+    } catch (error) {
+      console.error("Error uploading video:", error);
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Failed to upload video.",
+      });
+      setUploadProgress(0); // Reset upload progress on failure
+    }
   };
 
   const handleDeleteVideo = () => {
@@ -143,6 +199,13 @@ export default function PatientVideo() {
       >
         <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
       </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, ml: { sm: "240px", md: "240px" } }}>
+        
+          <pre style={{ overflowX: "auto", backgroundColor: "#f5f5f5", padding: "1rem" }}>
+            {JSON.stringify(videoData, null, 2)}
+          </pre>
+
+      </Box>
       <Box
         component="main"
         sx={{
@@ -152,7 +215,6 @@ export default function PatientVideo() {
         }}
       >
         <Container>
-
         <Box
             sx={{
               mt: 4,
@@ -171,10 +233,11 @@ export default function PatientVideo() {
                   : "rgba(0, 0, 0, 0.87)",
               }}
             >
-              Status: {videoUploaded ? "Pending Review" : "Pending Video"}
+              Status: {videoData ? videoData.status: null}
             </Typography>
           </Box>
-          
+
+         
           <Paper
             elevation={3}
             sx={{ p: 3, mb: 4, mt: 5 }}

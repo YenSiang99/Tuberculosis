@@ -21,9 +21,9 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
-import theme from "./reusable/Theme";
+import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
-import HealthcareSidebar from "./reusable/HealthcareBar";
+import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 
 export default function HealthcarePatient() {
   const [drawerOpen, setDrawerOpen] = useState(false);

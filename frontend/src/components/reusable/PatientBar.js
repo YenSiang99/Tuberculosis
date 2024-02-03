@@ -15,12 +15,16 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'; 
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
+
+import { useAuth } from '../../context/AuthContext';
+
 
 export default function PatientSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { setAuth } = useAuth();
+
   
 const handleDrawerToggle = () => {
   setMobileOpen(!mobileOpen);
@@ -37,7 +41,7 @@ const navigateTo = (path) => {
   const isSideEffect = location.pathname === '/patientsideeffect';
   const isAppointment = location.pathname === '/patientappointment';
   const isProfile = location.pathname === '/patientprofile';
-  const isPasswordReset = location.pathname === '/patientpassword';
+  // const isPasswordReset = location.pathname === '/patientpassword';
   
   const handleLogout = () => {
     // Clear both localStorage and sessionStorage
@@ -46,6 +50,9 @@ const navigateTo = (path) => {
 
     // Redirect to the homepage
     navigate('/'); 
+
+    // set application auth 
+    setAuth(false);
   };
 
   return (

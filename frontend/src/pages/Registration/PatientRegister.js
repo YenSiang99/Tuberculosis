@@ -23,9 +23,9 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PhoneInput from "react-phone-input-2";
 import { CountryDropdown } from "react-country-region-selector";
 import "react-phone-input-2/lib/material.css";
-import theme from "./reusable/Theme";
-import BgImage from "./image/cover.jpeg";
-import axios from "./axios";
+import theme from "../../components/reusable/Theme";
+import BgImage from "../../images/cover.jpeg";
+import axios from "../../components/axios";
 
 export default function PatientRegister() {
   const navigate = useNavigate();

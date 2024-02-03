@@ -17,9 +17,14 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'; 
 
+import { useAuth } from '../../context/AuthContext';
+
+
 export default function HealthcareSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setAuth } = useAuth();
+
 
   const navigateTo = (path) => {
     navigate(path);
@@ -40,6 +45,9 @@ export default function HealthcareSidebar() {
 
     // Redirect to the homepage
     navigate('/'); 
+
+    // set application auth 
+    setAuth(false);
   };
 
   return (

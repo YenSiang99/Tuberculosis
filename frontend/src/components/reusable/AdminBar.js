@@ -14,12 +14,20 @@ import PeopleIcon from '@mui/icons-material/People';
 // import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
+import { useAuth } from '../../context/AuthContext';
+
+
 export default function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { setAuth } = useAuth();
+
   const handleLogout = () => {
     navigate('/');
+
+    // set application auth 
+    setAuth(false);
   };
 
   const handleFAQ = () => {

@@ -1,56 +1,74 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Public from "./components/Public";
-import TBInfo from "./components/TBInfo";
-import PatientRegister from "./components/PatientRegister";
-import HealthcareRegister from "./components/HealthcareRegister";
-import SuccessfulRegister from "./components/SuccessfulRegister";
 
-import PatientVideo from "./components/PatientVideo";
-import PatientSideEffect from "./components/PatientSideEffect";
-import PatientCalendar from "./components/PatientCalendar";
-import PatientAppointment from "./components/PatientAppointment";
-import PatientProfile from "./components/PatientProfile";
-import PatientPassword from "./components/PatientPassword";
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
-import HealthcarePatient from "./components/HealthcarePatient";
-import HealthcareVideo from "./components/HealthcareVideo";
-import HealthcareSideEffect from "./components/HealthcareSideEffect";
-import HealthcareAppointment from "./components/HealthcareAppointment";
-import HealthcareProfile from "./components/HealthcareProfile";
-import HealthcarePassword from "./components/HealthcarePassword";
+// Public pages
+import Login from "./pages/Login";
+import TBInfo from "./pages/TBInfo";
 
-import AdminFAQ from "./components/AdminFAQ";
-import AdminUser from "./components/AdminUser";
+// Register pages
+import PatientRegister from "./pages/Registration/PatientRegister";
+import HealthcareRegister from "./pages/Registration/HealthcareRegister";
+import SuccessfulRegister from "./pages/Registration/SuccessfulRegister";
+
+// Patient pages
+import PatientVideo from "./pages/Patient/PatientVideo";
+import PatientSideEffect from "./pages/Patient/PatientSideEffect";
+import PatientCalendar from "./pages/Patient/PatientCalendar";
+import PatientAppointment from "./pages/Patient/PatientAppointment";
+import PatientProfile from "./pages/Patient/PatientProfile";
+import PatientPassword from "./pages/Patient/PatientPassword";
+
+// Healthcare pages
+import HealthcarePatient from "./pages/Healthcare/HealthcarePatient";
+import HealthcareVideo from "./pages/Healthcare/HealthcareVideo";
+import HealthcareSideEffect from "./pages/Healthcare/HealthcareSideEffect";
+import HealthcareAppointment from "./pages/Healthcare/HealthcareAppointment";
+import HealthcareProfile from "./pages/Healthcare/HealthcareProfile";
+import HealthcarePassword from "./pages/Healthcare/HealthcarePassword";
+
+// Admin pages
+import AdminFAQ from "./pages/Administration/AdminFAQ";
+import AdminUser from "./pages/Administration/AdminUser";
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Public />} />
-        <Route path="/tb-info" element={<TBInfo />} />
-        <Route path="/register/patient" element={<PatientRegister />} />
-        <Route path="/register/healthcare" element={<HealthcareRegister />} />
-        <Route path="/register/success" element={<SuccessfulRegister />} />
+      <AuthProvider> 
+        <Routes>
+          {/* Public paths */}
+          <Route path="/" element={<Login />} />
+          <Route path="/tb-info" element={<TBInfo />} />
 
-        <Route path="/patientvideo" element={<PatientVideo />} />
-        <Route path="/patientsideeffect" element={<PatientSideEffect />} />
-        <Route path="/patientcalendar" element={<PatientCalendar />} />
-        <Route path="/patientappointment" element={<PatientAppointment />} />
-        <Route path="/patientprofile" element={<PatientProfile />} />
-        <Route path="/patientpassword" element={<PatientPassword />} />
+          {/* Register paths */}
+          <Route path="/register/patient" element={<PatientRegister />} />
+          <Route path="/register/healthcare" element={<HealthcareRegister />} />
+          <Route path="/register/success" element={<SuccessfulRegister />} />
 
-        <Route path="/healthcarepatient" element={<HealthcarePatient />} />
-        <Route path="/healthcarevideo" element={<HealthcareVideo />} />
-        <Route path="/healthcaresideeffect" element={<HealthcareSideEffect />} />
-        <Route path="/healthcareappointment" element={<HealthcareAppointment />} />
-        <Route path="/healthcareprofile" element={<HealthcareProfile />} />
-        <Route path="/healthcarepassword" element={<HealthcarePassword />} />
+          {/* Patient paths */}
+          <Route path="/patientvideo" element={<ProtectedRoute><PatientVideo /></ProtectedRoute>} />
+          <Route path="/patientsideeffect" element={<ProtectedRoute><PatientSideEffect /></ProtectedRoute>} />
+          <Route path="/patientappointment" element={<ProtectedRoute><PatientAppointment /></ProtectedRoute>}  />
+          <Route path="/patientcalendar" element={<ProtectedRoute><PatientCalendar /></ProtectedRoute>}  />
+          <Route path="/patientprofile" element= {<ProtectedRoute><PatientProfile /></ProtectedRoute>}/>
+          <Route path="/patientpassword" element={<ProtectedRoute><PatientPassword /></ProtectedRoute>} />
 
-        <Route path="/adminfaq" element={<AdminFAQ />} />
-        <Route path="/adminuser" element={<AdminUser />} />
+          {/* healthcare paths */}
+          <Route path="/healthcarepatient" element={<ProtectedRoute><HealthcarePatient /></ProtectedRoute>} />
+          <Route path="/healthcarevideo" element={<ProtectedRoute><HealthcareVideo /></ProtectedRoute>} />
+          <Route path="/healthcaresideeffect" element={<ProtectedRoute><HealthcareSideEffect /></ProtectedRoute>} />
+          <Route path="/healthcareappointment" element={<ProtectedRoute><HealthcareAppointment /></ProtectedRoute>} />
+          <Route path="/healthcareprofile" element={<ProtectedRoute><HealthcareProfile /></ProtectedRoute>} />
+          <Route path="/healthcarepassword" element={<ProtectedRoute><HealthcarePassword /></ProtectedRoute>} />
+
+          {/* Admin paths */}
+          <Route path="/adminfaq" element={<AdminFAQ />} />
+          <Route path="/adminuser" element={<AdminUser />} />
         
-      </Routes>
+      </Routes></AuthProvider>
+     
     </Router>
   );
 }

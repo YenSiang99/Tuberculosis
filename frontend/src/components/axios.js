@@ -1,17 +1,21 @@
 import axios from 'axios';
 
-// Create an Axios instance with custom configurations
 const api = axios.create({
   baseURL: 'http://localhost:3001/api/',
 });
 
-// Get the user token from local storage or cookies
-const userToken = sessionStorage.getItem("token") || localStorage.getItem("token");
-
-if (userToken) {
-  // Set the token in Axios instance headers
-  api.defaults.headers.common["Authorization"] = `Bearer ${userToken}`;
-}
+// Use an interceptor to inject the token before each request
+api.interceptors.request.use(
+  (config) => {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default api;
-

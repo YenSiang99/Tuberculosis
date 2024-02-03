@@ -21,8 +21,8 @@ import {
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import theme from "./reusable/Theme";
-import PatientSidebar from "./reusable/PatientBar";
+import theme from "../../components/reusable/Theme";
+import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";

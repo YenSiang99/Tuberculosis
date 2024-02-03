@@ -19,19 +19,25 @@ import {
   DialogTitle,
   DialogContent,
   Divider,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
+import theme from "../../components/reusable/Theme";
+import FaceIcon from "@mui/icons-material/Face";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import NoteIcon from "@mui/icons-material/Note";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
-import CalendarIcon from "@mui/icons-material/CalendarToday";
-import theme from "./reusable/Theme";
+import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import FaceIcon from "@mui/icons-material/Face";
+import Avatar from "@mui/material/Avatar";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import HealthcareSidebar from "./reusable/HealthcareBar";
+import CalendarIcon from "@mui/icons-material/CalendarToday";
+import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
@@ -45,9 +51,13 @@ const useStyles = makeStyles({
   },
 });
 
-export default function HealthcareSideEffect() {
+export default function HealthcarePatient() {
   const classes = useStyles();
   const [dateState, setDateState] = useState(new Date());
+  const [editTreatmentInfo, setEditTreatmentInfo] = useState(false);
+  const [editNotes, setEditNotes] = useState(false);
+  const [tempTreatmentInfo, setTempTreatmentInfo] = useState({});
+  const [tempNotes, setTempNotes] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [patients, setPatients] = useState([
     {
@@ -65,6 +75,7 @@ export default function HealthcareSideEffect() {
       treatmentStartMonth: "January 2024",
       notes: "Regular check-ups needed",
       sideEffectsHistory: [
+        { date: "2024-01-01", detail: "Nausea", grade: 1 },
         { date: "2024-02-01", detail: "Headache", grade: 2 },
         // ... more side effects with grades ...
       ],
@@ -84,12 +95,14 @@ export default function HealthcareSideEffect() {
       treatmentStartMonth: "January 2024",
       notes: "Regular check-ups needed",
       sideEffectsHistory: [
-        { date: "2024-02-01", detail: "Nausea", grade: 1 },
+        { date: "2024-01-01", detail: "Nausea", grade: 1 },
+        { date: "2024-02-01", detail: "Headache", grade: 3 },
         // ... more side effects with grades ...
       ],
     },
     // ... other patients ...
   ]);
+
   const videoStatus = {
     "2024-01-01": "accepted",
     "2024-01-02": "rejected",
@@ -102,13 +115,53 @@ export default function HealthcareSideEffect() {
     setDrawerOpen(!drawerOpen);
   };
 
-  const openPatientProfile = (patientId) => {
-    const patientInfoToShow = patients.find((p) => p.id === patientId);
-    setSelectedPatient(patientInfoToShow);
+  const openManageDialog = (patient) => {
+    setSelectedPatient(patient);
   };
 
-  const closePatientProfile = () => {
+  const closeManageDialog = () => {
     setSelectedPatient(null);
+  };
+
+  const handleFieldChange = (event, field) => {
+    setSelectedPatient({ ...selectedPatient, [field]: event.target.value });
+  };
+
+  const toggleEditTreatmentInfo = () => {
+    if (editTreatmentInfo) {
+      // If canceling, revert to the original data
+      handleFieldChange(
+        { target: { value: tempTreatmentInfo.diagnosis } },
+        "diagnosis"
+      );
+      handleFieldChange(
+        { target: { value: tempTreatmentInfo.treatment } },
+        "treatment"
+      );
+      handleFieldChange(
+        { target: { value: tempTreatmentInfo.treatmentStartMonth } },
+        "treatmentStartMonth"
+      );
+    } else {
+      // If starting to edit, store the current data as a backup
+      setTempTreatmentInfo({
+        diagnosis: selectedPatient.diagnosis,
+        treatment: selectedPatient.treatment,
+        treatmentStartMonth: selectedPatient.treatmentStartMonth,
+      });
+    }
+    setEditTreatmentInfo(!editTreatmentInfo);
+  };
+
+  const toggleEditNotes = () => {
+    if (editNotes) {
+      // If canceling, revert to the original data
+      handleFieldChange({ target: { value: tempNotes } }, "notes");
+    } else {
+      // If starting to edit, store the current data as a backup
+      setTempNotes(selectedPatient.notes);
+    }
+    setEditNotes(!editNotes);
   };
 
   // Add a function to handle date change
@@ -136,6 +189,19 @@ export default function HealthcareSideEffect() {
       </Box>
     </Box>
   );
+
+  const diagnosisOptions = [
+    { value: "SPPTB", label: "Smear positive pulmonary tuberculosis (SPPTB)" },
+    { value: "SNTB", label: "Smear negative pulmonary tuberculosis (SNTB)" },
+    { value: "EXPTB", label: "Extrapulmonary tuberculosis (EXPTB)" },
+    { value: "LTBI", label: "Latent TB infection (LTBI)" },
+  ];
+
+  const treatmentOptions = [
+    { value: "Akurit-4", label: "Akurit-4 (EHRZ Fixed dose combination)" },
+    { value: "Akurit", label: "Akurit (HR Fixed dose combination)" },
+    { value: "Pyridoxine10mg", label: "Pyridoxine 10mg" },
+  ];
 
   const gradeOptions = [
     { value: 1, label: "Grade 1" },
@@ -191,8 +257,9 @@ export default function HealthcareSideEffect() {
                 component="div"
                 sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
               >
-                Review Side Effect
+                Patient List
               </Typography>
+
               <List>
                 {patients.map((patient) => (
                   <Card
@@ -201,37 +268,20 @@ export default function HealthcareSideEffect() {
                   >
                     <CardContent>
                       <ListItem>
-                        <PersonIcon color="primary" sx={{ mr: 2 }} />
+                        <Avatar
+                          src={patient.profilePicUrl}
+                          alt={`${patient.firstName} ${patient.lastName}`}
+                          sx={{ mr: 2 }}
+                        />
                         <ListItemText
                           primary={`${patient.firstName} ${patient.lastName}`}
-                          secondary={
-                            <>
-                              {patient.sideEffectsHistory.map(
-                                (effect, index) => (
-                                  <div key={index}>
-                                    <Typography
-                                      component="span"
-                                      variant="body2"
-                                      style={{
-                                        color:
-                                          effect.grade >= 2 ? "red" : "inherit",
-                                      }}
-                                    >
-                                      {`${effect.date}: ${effect.detail} (Grade: ${effect.grade})`}
-                                    </Typography>
-                                    <br />
-                                  </div>
-                                )
-                              )}
-                            </>
-                          }
                         />
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => openPatientProfile(patient.id)}
+                          onClick={() => openManageDialog(patient)}
                         >
-                          View patient profile
+                          Manage
                         </Button>
                       </ListItem>
                     </CardContent>
@@ -245,7 +295,7 @@ export default function HealthcareSideEffect() {
 
       <Dialog
         open={Boolean(selectedPatient)}
-        onClose={closePatientProfile}
+        onClose={closeManageDialog}
         fullWidth
         maxWidth="md"
       >
@@ -258,10 +308,10 @@ export default function HealthcareSideEffect() {
             alignItems: "center",
           }}
         >
-          Patient Profile
+          Manage Patient
           <IconButton
             aria-label="close"
-            onClick={closePatientProfile}
+            onClick={closeManageDialog}
             sx={{ color: "white" }}
           >
             <CloseIcon />
@@ -312,7 +362,6 @@ export default function HealthcareSideEffect() {
               </Card>
             </Grid>
 
-            {/* Treatment Information */}
             <Grid item xs={12}>
               <Card sx={{ mb: 2 }}>
                 <CardContent>
@@ -329,22 +378,116 @@ export default function HealthcareSideEffect() {
                       />{" "}
                       Treatment Information
                     </Typography>
+                    {!editTreatmentInfo && (
+                      <IconButton
+                        onClick={toggleEditTreatmentInfo}
+                        size="small"
+                      >
+                        <EditIcon color="primary" />
+                      </IconButton>
+                    )}
                   </Box>
                   <Divider sx={{ mb: 2 }} />
-                  <Typography variant="body1">
-                    <b>Diagnosis:</b> {selectedPatient?.diagnosis}
-                  </Typography>
-                  <Typography variant="body1">
-                    <b>Treatment:</b> {selectedPatient?.treatment}
-                  </Typography>
-                  <Typography variant="body1">
+                  {editTreatmentInfo ? (
+                    <>
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
+                        <Select
+                          labelId="diagnosis-label"
+                          id="diagnosis"
+                          value={selectedPatient?.diagnosis}
+                          label="Diagnosis"
+                          onChange={(event) =>
+                            handleFieldChange(event, "diagnosis")
+                          }
+                        >
+                          {diagnosisOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <FormControl fullWidth margin="normal" sx={{ mt: 2 }}>
+                        <InputLabel id="treatment-label">Treatment</InputLabel>
+                        <Select
+                          labelId="treatment-label"
+                          id="treatment"
+                          value={selectedPatient?.treatment}
+                          label="Treatment"
+                          onChange={(event) =>
+                            handleFieldChange(event, "treatment")
+                          }
+                        >
+                          {treatmentOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        label="Number of Tablets"
+                        type="number"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        InputProps={{ inputProps: { min: 2 } }}
+                        value={selectedPatient?.numberOfTablets}
+                        onChange={(event) =>
+                          handleFieldChange(event, " numberOfTablets")
+                        }
+                      />
+                      <TextField
+                        type="month"
+                        label="Treatment Start Month"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        value={selectedPatient?.treatmentStartMonth}
+                        onChange={(event) =>
+                          handleFieldChange(event, "treatmentStartMonth")
+                        }
+                      />
+                      {editTreatmentInfo && (
+                        <Box display="flex" justifyContent="flex-end">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={toggleEditTreatmentInfo}
+                            sx={{ mt: 2, mr: 2 }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={toggleEditTreatmentInfo}
+                            sx={{ mt: 2 }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Typography variant="body1">
+                        <b>Diagnosis:</b> {selectedPatient?.diagnosis}
+                      </Typography>
+                      <Typography variant="body1">
+                        <b>Treatment:</b> {selectedPatient?.treatment}
+                      </Typography>
+                      <Typography variant="body1">
                         <b>Number Of Tablets:</b>{" "}
                         {selectedPatient?.numberOfTablets}
                       </Typography>
-                  <Typography variant="body1">
-                    <b>Treatment Start Month:</b>{" "}
-                    {selectedPatient?.treatmentStartMonth}
-                  </Typography>
+                      <Typography variant="body1">
+                        <b>Treatment Start Month:</b>{" "}
+                        {selectedPatient?.treatmentStartMonth}
+                      </Typography>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -375,9 +518,8 @@ export default function HealthcareSideEffect() {
               </Card>
             </Grid>
 
-            {/* Notes */}
             <Grid item xs={12}>
-              <Card sx={{ mb: 2 }}>
+              <Card>
                 <CardContent>
                   <Box
                     display="flex"
@@ -389,16 +531,54 @@ export default function HealthcareSideEffect() {
                     <Typography variant="h6" gutterBottom>
                       <NoteIcon sx={{ verticalAlign: "middle", mr: 1 }} /> Notes
                     </Typography>
+                    {!editNotes && (
+                      <IconButton onClick={toggleEditNotes} size="small">
+                        <EditIcon color="primary" />
+                      </IconButton>
+                    )}
                   </Box>
                   <Divider sx={{ mb: 2 }} />
-                  <Typography variant="body1">
-                    {selectedPatient?.notes}
-                  </Typography>
+                  {editNotes ? (
+                    <>
+                      <TextField
+                        label="Notes"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        margin="normal"
+                        value={selectedPatient?.notes}
+                        onChange={(event) => handleFieldChange(event, "notes")}
+                      />
+                      {editNotes && (
+                        <Box display="flex" justifyContent="flex-end">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={toggleEditNotes}
+                            sx={{ mt: 2, mr: 2 }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            onClick={toggleEditNotes}
+                            sx={{ mt: 2 }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      )}
+                    </>
+                  ) : (
+                    <Typography variant="body1">
+                      {selectedPatient?.notes}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Side Effect History */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>

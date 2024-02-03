@@ -27,8 +27,8 @@ import {
 } from '@mui/material';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import theme from './reusable/Theme';
-import PatientSidebar from './reusable/PatientBar';
+import theme from '../../components/reusable/Theme';
+import PatientSidebar from '../../components/reusable/PatientBar';
 import MenuIcon from "@mui/icons-material/Menu";
 
 const StyledRadioGroup = styled(RadioGroup)(({ theme }) => ({

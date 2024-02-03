@@ -21,8 +21,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
-import theme from "./reusable/Theme";
-import PatientSidebar from "./reusable/PatientBar";
+import theme from "../../components/reusable/Theme";
+import PatientSidebar from "../../components/reusable/PatientBar";
 import { CountryDropdown } from "react-country-region-selector";
 
 const useStyles = makeStyles((theme) => ({

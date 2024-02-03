@@ -17,8 +17,8 @@ import {
   Dialog,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import theme from "./reusable/Theme";
-import HealthcareSidebar from "./reusable/HealthcareBar";
+import theme from "../../components/reusable/Theme";
+import PatientSidebar from "../../components/reusable/PatientBar";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { styled } from "@mui/material/styles";
@@ -127,7 +127,7 @@ export default function PatientSetting() {
         open={drawerOpen}
         onClose={handleDrawerToggle}
       >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
+        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
       </Drawer>
 
       <Box

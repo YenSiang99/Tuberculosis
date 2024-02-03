@@ -23,8 +23,8 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import AdminSidebar from "./reusable/AdminBar";
-import theme from "./reusable/Theme";
+import AdminSidebar from "../../components/reusable/AdminBar";
+import theme from "../../components/reusable/Theme";
 
 const initialFaqForm = {
   category: "",

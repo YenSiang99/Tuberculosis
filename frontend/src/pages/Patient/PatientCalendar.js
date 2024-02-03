@@ -12,8 +12,8 @@ import {
 } from "@mui/material";
 import { NavigateBefore, NavigateNext } from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
-import theme from "./reusable/Theme";
-import PatientSidebar from "./reusable/PatientBar";
+import theme from "../../components/reusable/Theme";
+import PatientSidebar from "../../components/reusable/PatientBar";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";

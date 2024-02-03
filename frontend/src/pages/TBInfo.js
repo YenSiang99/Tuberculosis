@@ -23,9 +23,9 @@ import {
   Button,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import theme from "./reusable/Theme";
-import BgImage from "./image/cover.jpeg";
-import logo from "./image/logo.png";
+import theme from "../components/reusable/Theme";
+import BgImage from "../images/cover.jpeg";
+import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;

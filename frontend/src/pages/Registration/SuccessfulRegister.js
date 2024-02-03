@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider, Box, Typography, Button } from "@mui/material";
-import theme from "./reusable/Theme";
-import BgImage from "./image/cover.jpeg";
+import theme from "../../components/reusable/Theme";
+import BgImage from "../../images/cover.jpeg";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // Import an icon for success
 
 export default function SuccessfulRegister() {

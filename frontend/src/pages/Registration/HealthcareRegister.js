@@ -19,9 +19,9 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import theme from "./reusable/Theme";
-import BgImage from "./image/cover.jpeg";
-import axios from "./axios";
+import theme from "../../components/reusable/Theme";
+import BgImage from "../../images/cover.jpeg";
+import axios from "../../components/axios";
 
 export default function HealthcareRegister() {
   const navigate = useNavigate();

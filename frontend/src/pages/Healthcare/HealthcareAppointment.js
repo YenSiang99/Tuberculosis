@@ -19,11 +19,11 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import PersonIcon from "@mui/icons-material/Person";
-import theme from "./reusable/Theme";
+import theme from "../../components/reusable/Theme";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import HealthcareSidebar from "./reusable/HealthcareBar";
+import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 
 const localizer = momentLocalizer(moment);
 

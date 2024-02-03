@@ -119,7 +119,7 @@ exports.uploadVideo = async (req, res) => {
     }
 
     if (req.file) {
-      video.videoUrl = `${process.env.BASE_URL}/media/${req.file.filename}`;
+      video.videoUrl = `${process.env.BASE_URL}/media/videos/${req.file.filename}`;
       video.status = 'pending approval';
       await video.save();
       res.status(200).send(video);
