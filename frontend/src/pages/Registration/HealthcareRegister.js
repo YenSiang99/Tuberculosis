@@ -127,25 +127,28 @@ export default function HealthcareRegister() {
     }
   };
 
-  const uploadProfilePicture = async () => {
-    if (!selectedFile) return null;
+const uploadProfilePicture = async () => {
+  if (!selectedFile) {
+    console.error("No file selected");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
+  const formData = new FormData();
+  formData.append('profilePicture', selectedFile); 
 
-    try {
-      const response = await axios.post('/images/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+  try {
+    const response = await axios.post(`/users/uploadProfilePicture/${userId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data.filename; // Assuming the backend responds with the path or filename of the uploaded image
+  } catch (error) {
+    console.error("Upload failed", error);
+    throw error; // Propagate error to be handled elsewhere
+  }
+};
 
-      return response.data.filename; // Return the uploaded filename or URL
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw error;
-    }
-  };
   
   return (
     <ThemeProvider theme={theme}>
