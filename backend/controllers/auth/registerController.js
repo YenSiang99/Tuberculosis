@@ -1,17 +1,16 @@
 // controllers/auth/registerController.js
 const User = require('../../models/User');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, group, mcpId, profilePicture } = req.body;
+    const { email, password, firstName, lastName, group, mcpId } = req.body;
+    const profilePicture = req.file ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}` : undefined;
 
-    let roles;
-    if (['doctor', 'nurse', 'medical assistant'].includes(group)) {
-      roles = ['healthcare'];
-    }
+    let roles = ['doctor', 'nurse', 'medical assistant'].includes(group) ? ['healthcare'] : [];
 
     if (roles.includes('healthcare') && (!firstName || !lastName || !group || !mcpId)) {
       return res.status(400).send('Missing healthcare registration details');
@@ -23,11 +22,19 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword, roles, firstName, lastName, group, mcpId, profilePicture });
+    const newUser = new User({ 
+      email, 
+      password: hashedPassword, 
+      roles, 
+      firstName, 
+      lastName, 
+      group, 
+      mcpId, 
+      profilePicture // This now saves the URL
+    });
     await newUser.save();
 
     res.status(201).send('User registered successfully');
-    
   } catch (error) {
     console.error(error);
     res.status(500).send('Error registering user');
@@ -43,6 +50,7 @@ exports.registerPatient = async (req, res) => {
       passportNumber, nricNumber, age, diagnosis, currentTreatment,
       numberOfTablets, treatmentStartMonth, profilePicture
     } = req.body;
+    const profilePicturePath = req.file ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}` : "";
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -61,7 +69,7 @@ exports.registerPatient = async (req, res) => {
       currentTreatment,
       numberOfTablets,
       treatmentStartMonth,
-      profilePicture
+      profilePicture: profilePicturePath
     };
 
     // Add passportNumber or nricNumber based on the country

@@ -26,4 +26,5 @@ const profileStorage = multer.diskStorage({
 // Multer upload functions
 const uploadVideo = multer({ storage: videoStorage }).single('video');
 const uploadProfile = multer({ storage: profileStorage }).single('profilePicture');
+
 module.exports = { uploadVideo, uploadProfile };
