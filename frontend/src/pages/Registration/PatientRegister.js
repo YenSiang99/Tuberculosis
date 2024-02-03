@@ -91,39 +91,41 @@ export default function PatientRegister() {
       return; // Prevent further processing if validation fails
     }
 
-    const uploadedFilename = await uploadProfilePicture();
+    
 
     // Construct the user data object
-    const userData = {
-      firstName,
-      lastName,
-      gender,
-      email,
-      password,
-      phoneNumber,
-      country,
-      age,
-      email,
-      password,
-      diagnosis,
-      treatment,
-      treatmentStartMonth,
-      numberOfTablets,
-      profilePicture: uploadedFilename || "",
-    };
-
-    console.log(userData);
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('gender', gender);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('phoneNumber', phoneNumber);
+    formData.append('country', country);
+    formData.append('age', age);
+    formData.append('diagnosis', diagnosis);
+    formData.append('currentTreatment', treatment); // Ensure this matches backend field name
+    formData.append('treatmentStartMonth', treatmentStartMonth);
+    formData.append('numberOfTablets', numberOfTablets);
 
     // Conditionally add NRIC or Passport Number based on the country
     if (country === "Malaysia") {
-      userData.nricNumber = nricNumber;
+      formData.append('nricNumber', nricNumber);
     } else {
-      userData.passportNumber = passportNumber;
+      formData.append('passportNumber', passportNumber);
+    }
+
+    if (selectedFile) {
+      formData.append('profilePicture', selectedFile);
     }
 
     try {
       // Send a POST request to the backend registration endpoint
-      const response = await axios.post("/auth/registerPatient", userData);
+      const response = await axios.post("/auth/registerPatient", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       console.log(response.data);
       // Registration was successful
       navigate("/register/success");
@@ -169,30 +171,11 @@ export default function PatientRegister() {
       setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
       setSelectedFile(file); 
   
-      const formData = new FormData();
-      formData.append('file', file);
+      
     }
   };
 
-  const uploadProfilePicture = async () => {
-    if (!selectedFile) return null;
-
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
-    try {
-      const response = await axios.post('/images/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      return response.data.filename; // Return the uploaded filename or URL
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw error;
-    }
-  };
+  
 
   return (
     <ThemeProvider theme={theme}>

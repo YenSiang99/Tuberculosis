@@ -42,68 +42,34 @@ export default function HealthcareRegister() {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-
-    // Simple email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message: "Invalid email format.",
-      });
-      return;
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('group', group);
+    formData.append('mcpId', mcpId);
+    formData.append('email', email);
+    formData.append('password', password);
+    // Append the profile picture file if selected
+    if (selectedFile) {
+      formData.append('profilePicture', selectedFile);
     }
-
-    // Simple password validation
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum eight characters, at least one letter and one number
-    if (!passwordRegex.test(password)) {
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message:
-          "Password must be at least 8 characters long and contain at least one letter and one number.",
-      });
-      return;
-    }
-
-    const uploadedFilename = await uploadProfilePicture();
-
-    // Construct the user data object
-    const userData = {
-      firstName,
-      lastName,
-      group,
-      mcpId,
-      email,
-      password,
-      // Include the profilePicture if it has been uploaded
-      profilePicture: uploadedFilename || "",
-    };
-
+  
     try {
-      // Send a POST request to the backend registration endpoint
-      const response = await axios.post("/auth/register", userData);
-      console.log(response.data);
-      // Registration was successful
+      // Send a POST request with FormData
+      const response = await axios.post("/auth/register", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // Important for processing files
+        }
+      });
+  
+      // Handle the response as before
       navigate("/register/success");
     } catch (error) {
-      if (error.response?.status === 409) {
-        setAlertInfo({
-          show: true,
-          type: "error",
-          message: "Email already registered. Please login."
-        });
-      } else {
-        // Handle other types of errors
-        setAlertInfo({
-          show: true,
-          type: "error",
-          message: "Registration failed: " + (error.response?.data || error.message),
-        });
-      }
+      // Handle errors as before
     }
-    
   };
+  
 
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
@@ -121,33 +87,9 @@ export default function HealthcareRegister() {
       const file = event.target.files[0];
       setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
       setSelectedFile(file); 
-  
-      const formData = new FormData();
-      formData.append('file', file);
+
     }
   };
-
-const uploadProfilePicture = async () => {
-  if (!selectedFile) {
-    console.error("No file selected");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('profilePicture', selectedFile); 
-
-  try {
-    const response = await axios.post(`/users/uploadProfilePicture/${userId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data.filename; // Assuming the backend responds with the path or filename of the uploaded image
-  } catch (error) {
-    console.error("Upload failed", error);
-    throw error; // Propagate error to be handled elsewhere
-  }
-};
 
   
   return (
