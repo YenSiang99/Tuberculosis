@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ThemeProvider,
   Drawer,
@@ -18,29 +18,51 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
 import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
+import axios from "../../components/axios";
 
 export default function HealthcarePatient() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [patients, setPatients] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      videoUrl: "./image/sample_video.mp4",
-      accepted: null,
-    },
-    {
-      id: 2,
-      name: "Jane Doe",
-      videoUrl: "./image/sample_video.mp4",
-      accepted: null,
-    },
-  ]);
+  const [patients, setPatients] = useState([]);
+  const [videos, setVideos] = useState([]);
+
+  const getToken = () => {
+    // Try to get the token from sessionStorage
+    let token = sessionStorage.getItem("token");
+
+    // If not found in sessionStorage, try localStorage
+    if (!token) {
+      token = localStorage.getItem("token");
+    }
+
+    return token;
+  };
+
+  const fetchPatients = async () => {
+    const token = getToken();
+    try {
+      const response = await axios.get("/videos/getUsersTable", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setPatients(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching patients", error);
+      // Handle error (e.g., show an error message)
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
   const [selectedPatient, setSelectedPatient] = useState(null);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -48,34 +70,27 @@ export default function HealthcarePatient() {
     setDrawerOpen(!drawerOpen);
   };
 
-  const openVideoDialog = (patient) => {
-    setSelectedPatient(patient);
+  const openVideoDialog = async (patient) => {
+    const token = getToken();
+    try {
+      // Use `patient._id` if the ID field is named `_id`
+      const response = await axios.get(`/videos/getVideo/${patient._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Assuming the video data is directly in the response
+      const videoData = response.data;
+      console.log("video response:", response.data);
+      setSelectedPatient({ ...patient, videoUrl: videoData.videoUrl });
+    } catch (error) {
+      console.error("Error fetching video for patient", error);
+      // Handle error appropriately
+    }
   };
 
   const closeVideoDialog = () => {
     setSelectedPatient(null);
-  };
-
-  const handleAccept = () => {
-    setPatients((prev) =>
-      prev.map((patient) =>
-        patient.id === selectedPatient.id
-          ? { ...patient, accepted: "accepted" }
-          : patient
-      )
-    );
-    closeVideoDialog();
-  };
-
-  const handleReject = () => {
-    setPatients((prev) =>
-      prev.map((patient) =>
-        patient.id === selectedPatient.id
-          ? { ...patient, accepted: "rejected" }
-          : patient
-      )
-    );
-    closeVideoDialog();
   };
 
   const getTodaysDateFormatted = () => {
@@ -83,6 +98,37 @@ export default function HealthcarePatient() {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return today.toLocaleDateString(undefined, options);
   };
+
+  const updateVideoStatus = async (videoId, newStatus) => {
+    const token = getToken();
+    try {
+      await axios.patch(`/videos/updateVideo/${videoId}`, { status: newStatus }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(`Video status updated to ${newStatus}`);
+      // After updating, you might want to refresh the list of patients or videos
+      fetchPatients();
+    } catch (error) {
+      console.error("Error updating video status", error);
+    }
+  };
+  
+  const handleAccept = () => {
+    if (selectedPatient && selectedPatient._id) {
+      updateVideoStatus(selectedPatient._id, "approved");
+      closeVideoDialog();
+    }
+  };
+  
+  const handleReject = () => {
+    if (selectedPatient && selectedPatient._id) {
+      updateVideoStatus(selectedPatient._id, "rejected");
+      closeVideoDialog();
+    }
+  };
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -145,35 +191,58 @@ export default function HealthcarePatient() {
               </Typography>
 
               <List>
-                {patients.map((patient) => (
-                  <Card
-                    key={patient.id}
-                    sx={{
-                      mb: 2,
-                      bgcolor:
-                        patient.accepted === "accepted"
-                          ? "#c8e6c9"
-                          : patient.accepted === "rejected"
-                          ? "#ffcdd2"
-                          : "neutral.light",
-                    }}
-                  >
-                    <CardContent>
-                      <ListItem>
-                        <PersonIcon color="primary" sx={{ mr: 2 }} />
-                        <ListItemText primary={patient.name} />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => openVideoDialog(patient)}
-                        >
-                          Review video
-                        </Button>
-                      </ListItem>
-                    </CardContent>
-                  </Card>
-                ))}
-              </List>
+  {patients.map((patient) => (
+    <Card
+      key={patient.id}
+      sx={{
+        mb: 2,
+        bgcolor: patient.status === "approved" ? "#c8e6c9"
+               : patient.status === "rejected" ? "#ffcdd2"
+               : "neutral.light",
+      }}
+    >
+      <CardContent>
+        <ListItem>
+          <Avatar
+            src={patient.profilePicture}
+            alt={`${patient.firstName} ${patient.lastName}`}
+            sx={{ mr: 2 }}
+          />
+          <ListItemText primary={`${patient.patientName}`} />
+          {patient.status === "approved" && (
+            <Button
+              variant="contained"
+              disabled
+              sx={{ bgcolor: "#c8e6c9" }}
+            >
+              Approved
+            </Button>
+          )}
+          {patient.status === "rejected" && (
+            <Button
+              variant="contained"
+              disabled
+              sx={{ bgcolor: "#ffcdd2" }}
+            >
+              Rejected
+            </Button>
+          )}
+          {patient.status === "pending approval" && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => openVideoDialog(patient)}
+            >
+              Review video
+            </Button>
+          )}
+        </ListItem>
+      </CardContent>
+    </Card>
+  ))}
+</List>
+
+
             </Box>
           </Paper>
         </Container>
@@ -208,33 +277,27 @@ export default function HealthcarePatient() {
             <Grid item xs={12}>
               <Card sx={{ mb: 2 }}>
                 <CardContent>
-                  {/* Video Player */}
-                  <video width="100%" controls>
-                    <source src={selectedPatient?.videoUrl} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-
-                  {/* Action Buttons */}
-                  <Box display="flex" justifyContent="space-around" mt={2}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={handleAccept}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={handleReject}
-                    >
-                      Reject
-                    </Button>
-                  </Box>
+                  {/* Directly display the video player if a video URL is available for the selected patient */}
+                  {selectedPatient?.videoUrl && (
+                    <video width="100%" controls>
+                      <source src={selectedPatient.videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
+
+          {/* Action Buttons */}
+          <Box display="flex" justifyContent="space-around" mt={2}>
+            <Button variant="contained" color="success" onClick={handleAccept}>
+              Approve
+            </Button>
+            <Button variant="contained" color="error" onClick={handleReject}>
+              Reject
+            </Button>
+          </Box>
         </DialogContent>
       </Dialog>
     </ThemeProvider>

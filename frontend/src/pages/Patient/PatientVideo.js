@@ -19,9 +19,7 @@ import { styled } from "@mui/material/styles";
 import theme from "../../components/reusable/Theme";
 import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
-
-import axios from "../../components/axios"; // Adjust the import path to your axios instance accordingly
-
+import axios from "../../components/axios"; 
 
 const InputLabelStyled = styled("label")(({ theme }) => ({
   display: "block",
@@ -47,6 +45,17 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
+const getStatusColor = (status) => {
+  const statusColorMap = {
+    "pending upload": "#FFF59D", // Light Yellow
+    "pending approval": "#BBDEFB", // Light Blue
+    "approved": "#C8E6C9", // Light Green
+    "rejected": "#FFCDD2", // Light Red
+  };
+
+  return statusColorMap[status] || "#e0e0e0"; // Default color if status is not recognized
+};
+
 export default function PatientVideo() {
   const [videoData, setVideoData] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
@@ -69,7 +78,7 @@ export default function PatientVideo() {
         setVideoData(response.data);
         if (response.data.videoUrl) {
           setVideoURL(response.data.videoUrl);
-          setVideoUploaded(response.data.status !== 'pending upload'); // Example condition, adjust based on your API response
+          setVideoUploaded(response.data.status !== "pending upload"); // Example condition, adjust based on your API response
         }
       } catch (error) {
         console.error("Error fetching or creating video:", error);
@@ -114,32 +123,35 @@ export default function PatientVideo() {
       });
       return;
     }
-  
+
     // Initialize FormData
     const formData = new FormData();
     formData.append("video", videoFile); // "video" is the key expected by your backend
-  
+
     // Set upload progress to 0
     setUploadProgress(0);
-  
+
     try {
-      const response = await axios.post(`/videos/uploadVideo/${videoData._id}`, // Assuming videoData contains the video ID
+      const response = await axios.post(
+        `/videos/uploadVideo/${videoData._id}`, // Assuming videoData contains the video ID
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
             setUploadProgress(percentCompleted);
-          }
+          },
         }
       );
-  
+
       // Video uploaded successfully
-      console.log('Finished uploading video')
+      console.log("Finished uploading video");
       setVideoData(response.data);
-      setVideoURL(response.data.videoUrl)
+      setVideoURL(response.data.videoUrl);
       setVideoUploaded(true); // Update state to indicate video has been uploaded
       setAlertInfo({
         show: true,
@@ -173,6 +185,13 @@ export default function PatientVideo() {
     setAlertInfo({ show: false, type: "", message: "" });
   };
 
+  const capitalizeWords = (str) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   return (
     <ThemeProvider theme={theme}>
       {matchesSM && (
@@ -199,13 +218,13 @@ export default function PatientVideo() {
       >
         <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, ml: { sm: "240px", md: "240px" } }}>
+      {/* <Box component="main" sx={{ flexGrow: 1, p: 3, ml: { sm: "240px", md: "240px" } }}>
         
           <pre style={{ overflowX: "auto", backgroundColor: "#f5f5f5", padding: "1rem" }}>
             {JSON.stringify(videoData, null, 2)}
           </pre>
 
-      </Box>
+      </Box> */}
       <Box
         component="main"
         sx={{
@@ -215,33 +234,24 @@ export default function PatientVideo() {
         }}
       >
         <Container>
-        <Box
+          <Box
             sx={{
               mt: 4,
               p: 3,
-              backgroundColor: videoUploaded ? "#BBDEFB" : "#FFF59D",
+              backgroundColor: getStatusColor(videoData?.status), 
               borderRadius: "4px",
             }}
           >
             <Typography
               variant="h6"
               component="div"
-              sx={{
-                fontWeight: "bold",
-                color: videoUploaded
-                  ? "rgba(0, 0, 0, 0.87)"
-                  : "rgba(0, 0, 0, 0.87)",
-              }}
+              sx={{fontWeight: "bold",}}
             >
-              Status: {videoData ? videoData.status: null}
+              Status: {videoData ? capitalizeWords(videoData.status) : null}
             </Typography>
           </Box>
 
-         
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5 }}
-          >
+          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
             <Box
               sx={{
                 p: 3,
@@ -308,6 +318,8 @@ export default function PatientVideo() {
                     color="error"
                     onClick={handleDeleteVideo}
                     sx={{ mt: 2 }}
+                    disabled={videoData?.status === "approved" || videoData?.status === "rejected"}
+
                   >
                     Delete Video
                   </Button>
@@ -345,8 +357,6 @@ export default function PatientVideo() {
               </CustomDialog>
             </Box>
           </Paper>
-
-
         </Container>
       </Box>
     </ThemeProvider>

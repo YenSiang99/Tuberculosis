@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ThemeProvider,
   Drawer,
@@ -19,9 +19,9 @@ import {
   DialogTitle,
   DialogContent,
   Divider,
+  Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import NoteIcon from "@mui/icons-material/Note";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
@@ -33,63 +33,22 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
+import axios from "../../components/axios";
 
-const useStyles = makeStyles({
-  accepted: {
-    backgroundColor: "#c8e6c9",
-    color: "black",
+const useStyles = makeStyles((theme) => ({
+  boldText: {
+    fontWeight: "bold",
   },
-  rejected: {
-    backgroundColor: "#ffcdd2",
-    color: "black",
+  highlightRed: {
+    color: "red",
   },
-});
+}));
 
 export default function HealthcareSideEffect() {
   const classes = useStyles();
   const [dateState, setDateState] = useState(new Date());
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [patients, setPatients] = useState([
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      icNumber: "012345010123",
-      age: 30,
-      country: "Malaysia",
-      gender: "Male",
-      phoneNumber: "0123456789",
-      diagnosis: "x",
-      treatment: "y",
-      numberOfTablets: 2,
-      treatmentStartMonth: "January 2024",
-      notes: "Regular check-ups needed",
-      sideEffectsHistory: [
-        { date: "2024-02-01", detail: "Headache", grade: 2 },
-        // ... more side effects with grades ...
-      ],
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Doe",
-      passportNumber: "A12345678",
-      age: 35,
-      country: "Singapore",
-      gender: "Female",
-      phoneNumber: "0123456789",
-      diagnosis: "x",
-      treatment: "y",
-      numberOfTablets: 3,
-      treatmentStartMonth: "January 2024",
-      notes: "Regular check-ups needed",
-      sideEffectsHistory: [
-        { date: "2024-02-01", detail: "Nausea", grade: 1 },
-        // ... more side effects with grades ...
-      ],
-    },
-    // ... other patients ...
-  ]);
+  const [patients, setPatients] = useState([]);
   const videoStatus = {
     "2024-01-01": "accepted",
     "2024-01-02": "rejected",
@@ -97,14 +56,45 @@ export default function HealthcareSideEffect() {
   };
   const [selectedPatient, setSelectedPatient] = useState(null);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+  const [sideEffects, setSideEffects] = useState([]);
+
+  const getToken = () => {
+    // Try to get the token from sessionStorage
+    let token = sessionStorage.getItem("token");
+
+    // If not found in sessionStorage, try localStorage
+    if (!token) {
+      token = localStorage.getItem("token");
+    }
+
+    return token;
+  };
+
+  useEffect(() => {
+    const fetchSideEffects = async () => {
+      try {
+        const response = await axios.get("/sideEffects/getAllSideEffects");
+        // Sort side effects by date in descending order
+        const sortedSideEffects = response.data.sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        );
+        setSideEffects(sortedSideEffects);
+        console.log(sideEffects);
+      } catch (error) {
+        console.error("Failed to fetch side effects", error);
+      }
+    };
+
+    fetchSideEffects();
+  }, []);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const openPatientProfile = (patientId) => {
-    const patientInfoToShow = patients.find((p) => p.id === patientId);
-    setSelectedPatient(patientInfoToShow);
+  const openPatientProfile = async (patient) => {
+    console.log("Patient :", patient);
+    setSelectedPatient(patient);
   };
 
   const closePatientProfile = () => {
@@ -194,44 +184,79 @@ export default function HealthcareSideEffect() {
                 Review Side Effect
               </Typography>
               <List>
-                {patients.map((patient) => (
-                  <Card
-                    key={patient.id}
-                    sx={{ mb: 2, bgcolor: "neutral.light" }}
-                  >
+                {sideEffects.map((sideEffect, index) => (
+                  <Card key={index} sx={{ mb: 2, bgcolor: "neutral.light" }}>
                     <CardContent>
-                      <ListItem>
-                        <PersonIcon color="primary" sx={{ mr: 2 }} />
+                      <ListItem alignItems="flex-start">
+                        <Avatar
+                          alt={sideEffect.patientId?.firstName}
+                          src={sideEffect.patientId?.profilePicture}
+                          sx={{ mr: 2 }}
+                        />
                         <ListItemText
-                          primary={`${patient.firstName} ${patient.lastName}`}
+                          primary={
+                            <Typography className={classes.boldText}>
+                              {sideEffect.patientId?.firstName}{" "}
+                              {sideEffect.patientId?.lastName}
+                            </Typography>
+                          }
                           secondary={
                             <>
-                              {patient.sideEffectsHistory.map(
-                                (effect, index) => (
-                                  <div key={index}>
-                                    <Typography
-                                      component="span"
-                                      variant="body2"
-                                      style={{
-                                        color:
-                                          effect.grade >= 2 ? "red" : "inherit",
-                                      }}
-                                    >
-                                      {`${effect.date}: ${effect.detail} (Grade: ${effect.grade})`}
-                                    </Typography>
-                                    <br />
-                                  </div>
-                                )
-                              )}
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="textPrimary"
+                              >
+                                {new Date(sideEffect.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  }
+                                )}{" "}
+                                at {sideEffect.time}
+                              </Typography>
+                              <br />
+                              {"Side Effects: "}
+                              {sideEffect.sideEffects
+                                .map((effect, index) => (
+                                  <Typography
+                                    key={index}
+                                    component="span"
+                                    className={
+                                      effect.grade >= 2
+                                        ? classes.highlightRed
+                                        : ""
+                                    }
+                                    style={{ display: "inline" }}
+                                  >
+                                    {effect.effect ===
+                                    "Others (Please Describe)"
+                                      ? effect.description
+                                      : `${effect.effect} (Grade ${effect.grade})`}
+                                  </Typography>
+                                ))
+                                .reduce(
+                                  (prev, curr, index) => [
+                                    ...prev,
+                                    index > 0 ? ", " : "",
+                                    curr,
+                                  ],
+                                  []
+                                )}
                             </>
                           }
                         />
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => openPatientProfile(patient.id)}
+                          onClick={() =>
+                            openPatientProfile(sideEffect.patientId)
+                          }
+                          sx={{ mt: 2 }}
                         >
-                          View patient profile
+                          View profile
                         </Button>
                       </ListItem>
                     </CardContent>
@@ -338,9 +363,8 @@ export default function HealthcareSideEffect() {
                     <b>Treatment:</b> {selectedPatient?.treatment}
                   </Typography>
                   <Typography variant="body1">
-                        <b>Number Of Tablets:</b>{" "}
-                        {selectedPatient?.numberOfTablets}
-                      </Typography>
+                    <b>Number Of Tablets:</b> {selectedPatient?.numberOfTablets}
+                  </Typography>
                   <Typography variant="body1">
                     <b>Treatment Start Month:</b>{" "}
                     {selectedPatient?.treatmentStartMonth}
@@ -409,21 +433,18 @@ export default function HealthcareSideEffect() {
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
-                  <List>
-                    {selectedPatient?.sideEffectsHistory?.map(
-                      (effect, index) => (
-                        <ListItem key={index}>
-                          <ListItemText
-                            primary={effect.date}
-                            secondary={`${effect.detail}, ${
-                              gradeOptions.find((g) => g.value === effect.grade)
-                                ?.label
-                            }`}
-                          />
-                        </ListItem>
-                      )
-                    )}
-                  </List>
+                  {/* <List>
+  {selectedPatient?.sideEffectsHistory?.map((effect, index) => (
+    <ListItem key={index}>
+      <ListItemText
+        primary={effect.date}
+        secondary={
+          effect.detail === "Others (Please Describe)" ? effect.detail : `${effect.detail}, ${gradeOptions.find((g) => g.value === effect.grade)?.label}`
+        }
+      />
+    </ListItem>
+  ))}
+</List> */}
                 </CardContent>
               </Card>
             </Grid>

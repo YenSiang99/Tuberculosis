@@ -27,6 +27,7 @@ import theme from "../components/reusable/Theme";
 import BgImage from "../images/cover.jpeg";
 import logo from "../images/logo.png";
 import { useNavigate } from "react-router-dom";
+import infographic from "../images/TBInfographic.png";
 
 const drawerWidth = 240;
 
@@ -67,18 +68,15 @@ export default function Public() {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Infographic Title 1
-                  </Typography>
                   <img
-                    src="/path-to-infographic1.jpg"
-                    alt="Infographic 1"
+                    src={infographic}
                     style={{ width: "100%", height: "auto" }}
                   />
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} md={6}>
+            {/* Infographic Card 2 */}
+            {/* <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="subtitle1" gutterBottom>
@@ -91,8 +89,7 @@ export default function Public() {
                   />
                 </CardContent>
               </Card>
-            </Grid>
-            {/* Repeat for other infographics */}
+            </Grid> */}
           </Grid>
         </Box>
 
@@ -283,8 +280,8 @@ export default function Public() {
 
             {/* Back to Login Button */}
             <Button
-              variant="outlined"
-              sx={{ borderColor: "#0046c0", color: "#0046c0", marginRight: 5 }}
+              variant="contained"
+              sx={{  color: "white", marginRight: 5 }}
               onClick={() => navigate("/")}
             >
               Back to Login

@@ -28,6 +28,7 @@ exports.login = async (req, res) => {
         fullname : user.firstName + ' ' + user.lastName, 
         roles : user.roles,
         group : user.group,
+        profilePicture : user.profilePicture,
       },
       'yourSecretKey', // Replace with your secret key
       { expiresIn: '1h' }

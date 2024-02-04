@@ -13,6 +13,16 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+exports.getPatients = async (req, res) => {
+  try {
+    const patients = await User.find({ group: 'patient' }).select("-password"); // Filters users who are patients
+    res.json(patients);
+  } catch (error) {
+    res.status(500).send('Error retrieving patients');
+  }
+};
+
+
 exports.uploadProfilePicture = async (req, res) => {
   const userId = req.params.userId; // Assuming the user ID is passed in the URL
 

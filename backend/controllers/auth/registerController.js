@@ -30,7 +30,7 @@ exports.register = async (req, res) => {
       lastName, 
       group, 
       mcpId, 
-      profilePicture // This now saves the URL
+      profilePicture 
     });
     await newUser.save();
 

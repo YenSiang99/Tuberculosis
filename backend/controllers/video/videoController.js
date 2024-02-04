@@ -32,29 +32,29 @@ exports.getUsersTable = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const videos = await Video.find({ date: { $gte: today } })
-        .populate('patient', 'firstName lastName'); // Populating patient name
+    // Fetch videos with "pending approval" status and populate patient details
+    const videos = await Video.find({
+      date: { $gte: today },
+      status: { $in: ["pending approval", "approved", "rejected"] } // Filter by status
+    }).populate('patient', 'firstName lastName profilePicture'); 
 
-    // const videosWithPatientNames = videos.map(video => ({
-    //   ...video.toObject(),
-    //   patientName: `${video.patient.firstName} ${video.patient.lastName}`
-    //   patient: undefined // Remove the patient property
-    // }));
-    
-    const videosWithPatientNames = videos.map(video => {
+    const videosWithPatientDetails = videos.map(video => {
       const videoObject = video.toObject();
+      // Construct a new object with the desired structure, including the patient's profile picture
       return {
         ...videoObject,
         patientName: `${videoObject.patient.firstName} ${videoObject.patient.lastName}`,
-        patient: undefined // Remove the patient property
+        profilePicture: videoObject.patient.profilePicture,
+        patient: undefined // Optionally remove the patient object to clean up the data
       };
     });
 
-    res.json(videosWithPatientNames);
+    res.json(videosWithPatientDetails);
   } catch (error) {
     res.status(500).send('Error retrieving videos Table: ' + error.message);
   }
 };
+
 
 exports.updateVideoStatus = async (req, res) => {
   try {

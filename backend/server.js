@@ -13,6 +13,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth/authRoutes');
 const userRoutes = require('./routes/users/userRoutes');
 const videoRoutes = require('./routes/video/videoRoutes');
+const sideEffectRoutes = require('./routes/sideEffect/sideEffectRoutes');
 
 const profilesDir = path.join(__dirname, 'media/profiles/');
 if (!fs.existsSync(profilesDir)) {
@@ -35,6 +36,7 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/sideEffects', sideEffectRoutes);
 
 // media files
 app.use('/media', express.static(path.join(__dirname, 'media')));

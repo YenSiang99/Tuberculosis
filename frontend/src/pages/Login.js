@@ -219,7 +219,7 @@ export default function Login() {
         {/* Ensuring that the login form does not block the text */}
         <Box sx={{ position: "absolute", top: "50%", width: "100%", p: 4 }}>
           <Container
-            maxWidth="sm"
+            maxWidth="md"
             sx={{
               backgroundColor: "background.paper",
               boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
@@ -321,6 +321,7 @@ export default function Login() {
                       style={{
                         textDecoration: "none",
                         color: theme.palette.primary.main,
+                        fontWeight: "bold"
                       }}
                       onClick={handleRegister}
                     >
@@ -334,7 +335,7 @@ export default function Login() {
         </Box>
       </Box>
       {/* Role Selection Dialog */}
-      <Dialog open={openRoleSelect} onClose={toggleRoleSelectDialog}>
+      <Dialog open={openRoleSelect} onClose={toggleRoleSelectDialog} >
         <DialogTitle style={dialogTitleStyle}>Select Your Role</DialogTitle>
         <List>
           <ListItemButton
