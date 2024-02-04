@@ -33,6 +33,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
+import { parseISO, format } from 'date-fns';
 import axios from "../../components/axios";
 
 const useStyles = makeStyles((theme) => ({
@@ -207,15 +208,7 @@ export default function HealthcareSideEffect() {
                                 variant="body2"
                                 color="textPrimary"
                               >
-                                {new Date(sideEffect.date).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    day: "numeric",
-                                    month: "long",
-                                    year: "numeric",
-                                  }
-                                )}{" "}
-                                at {sideEffect.time}
+{format(parseISO(sideEffect.datetime), "d MMMM yyyy, h:mm a")}
                               </Typography>
                               <br />
                               {"Side Effects: "}

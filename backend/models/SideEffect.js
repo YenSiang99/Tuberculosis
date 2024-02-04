@@ -7,12 +7,8 @@ const SideEffectSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  date: {
+  datetime: { // Combine date and time into one field
     type: Date,
-    required: true,
-  },
-  time: {
-    type: String,
     required: true,
   },
   sideEffects: [{

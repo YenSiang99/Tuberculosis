@@ -25,12 +25,8 @@ import {
   Alert,
   Dialog,
 } from "@mui/material";
-import {
-  LocalizationProvider,
-  DatePicker,
-  TimePicker,
-} from "@mui/x-date-pickers";
-import { format } from "date-fns";
+import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
+import { isValid, parseISO, format } from 'date-fns';
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import theme from "../../components/reusable/Theme";
 import PatientSidebar from "../../components/reusable/PatientBar";
@@ -84,8 +80,8 @@ const SideEffectHistory = ({ history }) => {
               <TableRow key={index}>
                 <TableCell>
                   {/* Format the date string */}
-                  {format(new Date(report.date), "d MMMM yyyy, h:mm a")}
-                </TableCell>
+                  {format(parseISO(report.datetime), "d MMMM yyyy, h:mm a")}
+           </TableCell>
                 <TableCell>
                   {report.sideEffects
                     ? report.sideEffects
@@ -108,8 +104,7 @@ const SideEffectHistory = ({ history }) => {
 
 export default function PatientSideEffectReport() {
   const [patientId, setPatientId] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [selectedSideEffects, setSelectedSideEffects] = useState([]);
   const [sideEffectDetails, setSideEffectDetails] = useState({});
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -117,11 +112,12 @@ export default function PatientSideEffectReport() {
   const [otherDescription, setOtherDescription] = useState("");
   const [showMedicalAssistanceMessage, setShowMedicalAssistanceMessage] =
     useState(false);
-  const [alertInfo, setAlertInfo] = useState({
-    show: false,
-    type: "",
-    message: "",
-  });
+    const [alertInfo, setAlertInfo] = useState({
+      show: false,
+      type: "",
+      message: "",
+      nextAlert: null, 
+    });    
   const historyRef = useRef(null);
   const [sideEffectHistory, setSideEffectHistory] = useState([]);
 
@@ -136,8 +132,18 @@ export default function PatientSideEffectReport() {
   }, []);
 
   const handleCloseAlert = () => {
-    setAlertInfo({ show: false, type: "", message: "" });
+    if (alertInfo.nextAlert) {
+      // If there's a next alert, show it
+      setAlertInfo({
+        ...alertInfo.nextAlert,
+        nextAlert: null, // Clear the next alert
+      });
+    } else {
+      // If there's no next alert, just close the current alert
+      setAlertInfo({ show: false, type: "", message: "" });
+    }
   };
+  
 
   const CustomDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiPaper-root": {
@@ -206,56 +212,50 @@ export default function PatientSideEffectReport() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+  
     // Convert the side effects to the required format and check for grade 2 or 3
     const formattedSideEffects = selectedSideEffects.map((effect) => ({
       effect,
       grade: parseInt(sideEffectDetails[effect]?.grade || "1", 10),
-      description:
-        effect === "Others (Please Describe)" ? otherDescription : "",
+      description: effect === "Others (Please Describe)" ? otherDescription : "",
     }));
-
+  
     const hasGrade2Or3 = formattedSideEffects.some(
       (effect) => effect.grade === 2 || effect.grade === 3
     );
-
-    // Construct the payload with the formatted side effects
+  
+    // Construct the payload with the formatted side effects and use selectedDateTime for date and time
     const payload = {
       patientId,
-      date: selectedDate,
-      time: selectedTime.toTimeString().substring(0, 5),
+      datetime: selectedDateTime.toISOString(), // Convert to ISO string if not already
       sideEffects: formattedSideEffects,
     };
-
+  
     try {
       await axios.post("/sideEffects", payload);
-
-      // After successful submission, check for grade 2 or 3 to show appropriate message
-      if (hasGrade2Or3) {
-        setAlertInfo({
-          show: true,
-          type: "warning",
-          message: [
-            "Side effect report submitted successfully.",
-            "At least one side effect Grade 2/3, please seek medical assistance at the nearest hospital.",
-          ],
-        });
-      } else {
-        setAlertInfo({
-          show: true,
-          type: "success",
-          message: "Side effect report submitted successfully.",
-        });
-      }
-
+  
+      const nextAlert = hasGrade2Or3 ? {
+        show: true,
+        type: "warning",
+        message: "At least one side effect Grade 2/3, please seek medical assistance at the nearest hospital.",
+      } : null;
+  
+      // Show the success alert and queue the next alert
+      setAlertInfo({
+        show: true,
+        type: "success",
+        message: "Side effect submitted successfully.",
+        nextAlert, // Queue the next alert
+      });
+  
       // Reset the form fields to initial state here
-      setSelectedDate(new Date());
-      setSelectedTime(new Date());
+      setSelectedDateTime(new Date()); // Reset the combined date-time picker
       setSelectedSideEffects([]);
       setSideEffectDetails({});
       setOtherDescription("");
-
+  
       fetchSideEffectHistory();
-
+  
       // Optionally, scroll to history or refresh history here
       if (historyRef.current) {
         historyRef.current.scrollIntoView({ behavior: "smooth" });
@@ -265,16 +265,12 @@ export default function PatientSideEffectReport() {
       setAlertInfo({
         show: true,
         type: "error",
-        message:
-          "An error occurred while submitting the side effect report: " +
-          (error.response?.data?.message || error.message),
+        message: "An error occurred while submitting the side effect report: " + (error.response?.data?.message || error.message),
       });
-      console.error(
-        "Error submitting side effect report:",
-        error.response?.data || error.message
-      );
+      console.error("Error submitting side effect report:", error.response?.data || error.message);
     }
   };
+  
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -338,29 +334,17 @@ export default function PatientSideEffectReport() {
                 When did these symptoms start?
               </TitleWithBackground>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                  <Grid item xs={12} sm={6}>
-                    <DatePicker
-                      label="Date"
-                      value={selectedDate}
-                      onChange={setSelectedDate}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth />
-                      )}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TimePicker
-                      label="Time"
-                      value={selectedTime}
-                      onChange={setSelectedTime}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-              </LocalizationProvider>
+  <Grid container spacing={2} sx={{ mt: 2 }}>
+    <Grid item xs={12}>
+      <DateTimePicker
+        label="Select Date and Time"
+        value={selectedDateTime}
+        onChange={setSelectedDateTime}
+        renderInput={(params) => <TextField {...params} fullWidth />}
+      />
+    </Grid>
+  </Grid>
+</LocalizationProvider>
 
               <TitleWithBackground variant="subtitle1" sx={{ mt: 4 }}>
                 Symptoms (Choose all that apply)
