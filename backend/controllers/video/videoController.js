@@ -55,7 +55,6 @@ exports.getUsersTable = async (req, res) => {
   }
 };
 
-
 exports.updateVideoStatus = async (req, res) => {
   try {
     const videoId = req.params.videoId;
@@ -90,7 +89,7 @@ exports.getOrCreateVideo = async (req, res) => {
     });
 
     if (!video) {
-      console.log('Video not created for the day, creating video with status pending approval')
+      // console.log('Video not created for the day, creating video with status pending approval')
       // No video for today, create a new record
       video = new Video({
         patient: userId,
@@ -100,7 +99,7 @@ exports.getOrCreateVideo = async (req, res) => {
       });
       await video.save();
     }else{
-      console.log('Video created, returning video data...')
+      // console.log('Video created, returning video data...')
     }
 
     res.json(video);
