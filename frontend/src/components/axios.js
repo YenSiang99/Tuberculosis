@@ -18,4 +18,19 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  response => response, // Simply return the response for successful requests
+  error => {
+    // Check if we received a 401 response, which indicates an unauthorized request
+    if (error.response && error.response.status === 401) {
+      // Redirect the user to the login page
+      // If using React Router, you might replace the line below with history.push('/login');
+      window.location.href = '/';
+    }
+
+    // Return a rejected promise to maintain the promise chain
+    return Promise.reject(error);
+  }
+);
+
 export default api;
