@@ -127,10 +127,20 @@ exports.readPatientAppointments = async (req, res) => {
 //Doctor
 exports.showRequestedAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find({ status: 'awaiting approval' })
+    let appointments = await Appointment.find({ status: 'awaiting approval' })
                                           .populate('patient', 'firstName lastName')
                                           .populate('healthcare',  'firstName lastName' );
-    res.json(appointments);
+    appointments = appointments.map(appointment => {
+      const appointmentObj = appointment.toObject(); // Convert to plain JavaScript object
+      if (appointmentObj.patient) {
+        const fullName = `${appointmentObj.patient.firstName} ${appointmentObj.patient.lastName}`;
+        // Add fullName directly to the appointmentObj, not nested under patient
+        appointmentObj.fullName = fullName;
+      }
+
+      return appointmentObj;
+    });
+  res.json(appointments);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -139,7 +149,18 @@ exports.showRequestedAppointments = async (req, res) => {
 exports.readHealthcareAppointments = async (req, res) => {
   const healthcareId = req.user.userId;
   try {
-    const appointments = await Appointment.find({ healthcare: healthcareId });
+    let appointments = await Appointment.find({ healthcare: healthcareId })
+                          .populate('patient', 'firstName lastName');
+    appointments = appointments.map(appointment => {
+      const appointmentObj = appointment.toObject(); // Convert to plain JavaScript object
+      if (appointmentObj.patient) {
+        const fullName = `${appointmentObj.patient.firstName} ${appointmentObj.patient.lastName}`;
+        // Add fullName directly to the appointmentObj, not nested under patient
+        appointmentObj.fullName = fullName;
+      }
+
+      return appointmentObj;
+    });
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -150,9 +171,6 @@ exports.readHealthcareAppointments = async (req, res) => {
 exports.deleteAppointment = async (req, res) => {
   const { appointmentId } = req.params;
   const userId = req.user.userId;
-
-  console.log('appointmentId',appointmentId)
-
   try {
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {

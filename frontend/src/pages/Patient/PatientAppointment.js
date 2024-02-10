@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { makeStyles } from '@mui/styles';
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import theme from "../../components/reusable/Theme";
 import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -33,8 +33,9 @@ import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
 import { styled } from "@mui/material/styles";
 import DataViewer from '../../components/reusable/DataViewer';
 import axios from "../../components/axios"; 
-import { format, parseISO } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+
+
+import { formatDate, formatTimeSlot } from '../../utils/dateUtils';
 
 const useStyles = makeStyles({
   alignMe: {
@@ -76,7 +77,6 @@ export default function PatientAppointment() {
   // Appointment
   const [appointmentHistory, setAppointmentHistory] = useState([]);
 
-
   // Controllers
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [alertInfo, setAlertInfo] = useState({
@@ -84,14 +84,6 @@ export default function PatientAppointment() {
     type: "",
     message: "",
   });
-
-  const CustomDialog = styled(Dialog)(({ theme }) => ({
-    "& .MuiPaper-root": {
-      boxShadow: "none",
-      overflow: "visible",
-    },
-  }));
-
 
   // Functions
   // Api fetching
@@ -113,7 +105,6 @@ export default function PatientAppointment() {
       // Handle the error as needed
     }
   };
-
   const fetchPatientAppointments = async () => {
     try {
       const response = await axios.get('appointments/patientAppointments');
@@ -130,12 +121,10 @@ export default function PatientAppointment() {
       // Handle the error as needed, e.g., setting an alert state
     }
   };
-
   // Controller function
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -151,9 +140,6 @@ export default function PatientAppointment() {
       // Handle error (e.g., display a notification to the user)
     }
   };
-
-  // Appointment function
-
   const handleCancelAppointment = async (appointmentId) => {
     console.log("Canceling appointment ID:", appointmentId);
     try {
@@ -168,59 +154,8 @@ export default function PatientAppointment() {
       // Handle the error as needed, e.g., setting an alert state
     }
   };
-
-  // CSS Components
-  const Legend = () => (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-      <Chip label="Available" sx={{ bgcolor: "#e3f2fd", mr: 1 }} />
-      <Chip label="Limited Slots" sx={{ bgcolor: "#90caf9", mr: 1 }} />
-      <Chip label="Fully Booked" sx={{ bgcolor: "#2196f3" }} />
-    </Box>
-  );
-  const CustomToolbar = ({ onNavigate, label, onMonthChange }) => {
-    const navigate = (action) => {
-      // "action" can be "PREV", "NEXT", or "TODAY"
-      // Create a new Date object based on the current label
-      const currentDate = new Date(label);
-      let newDate = new Date(currentDate);
-  
-      if (action === "NEXT") {
-        newDate.setMonth(currentDate.getMonth() + 1);
-      } else if (action === "PREV") {
-        newDate.setMonth(currentDate.getMonth() - 1);
-      }
-  
-      // Call the onNavigate function provided by react-big-calendar
-      onNavigate(action);
-  
-      // Call the function passed from the parent component
-      onMonthChange(newDate);
-    };
-  
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <IconButton onClick={() => navigate("PREV")}>
-          <ArrowBackIos />
-        </IconButton>
-        <Typography>{label}</Typography>
-        <IconButton onClick={() => navigate("NEXT")}>
-          <ArrowForwardIos />
-        </IconButton>
-      </div>
-    );
-  };
-  
-  
   // Calendar logic
-  // Function to grey out unavailable dates
   const dayPropGetter = (date) => {
-    console.log('date',date)
     const dateString = [
       date.getFullYear(),
       ('0' + (date.getMonth() + 1)).slice(-2),
@@ -284,7 +219,7 @@ export default function PatientAppointment() {
     console.log(`year ${year} month ${month}`)
     fetchAvailableSlots(year, month);
   };
-  // Function to customize event appearance based on status
+  //Additional Components
   const eventStyleGetter = (event) => {
     let backgroundColor = "#fff"; // Default color
     switch (event.status) {
@@ -297,6 +232,8 @@ export default function PatientAppointment() {
       case "Fully Booked":
         backgroundColor = "#2196f3";
         break;
+      default:
+        backgroundColor = "#f5f5f5"; // Gray out the day if not available for booking
     }
   
     const style = {
@@ -320,19 +257,57 @@ export default function PatientAppointment() {
       </div>
     );
   };
-  const formatTimeSlot = ({ startDateTime, endDateTime }) => {
-    const timeZone = 'UTC';
-    const start = utcToZonedTime(parseISO(startDateTime), timeZone);
-    const end = utcToZonedTime(parseISO(endDateTime), timeZone);
+  const Legend = () => (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+      <Chip label="Available" sx={{ bgcolor: "#e3f2fd", mr: 1 }} />
+      <Chip label="Limited Slots" sx={{ bgcolor: "#90caf9", mr: 1 }} />
+      <Chip label="Fully Booked" sx={{ bgcolor: "#2196f3" }} />
+    </Box>
+  );
+  const CustomToolbar = ({ onNavigate, label, onMonthChange }) => {
+    const navigate = (action) => {
+      // "action" can be "PREV", "NEXT", or "TODAY"
+      // Create a new Date object based on the current label
+      const currentDate = new Date(label);
+      let newDate = new Date(currentDate);
   
-    return `${format(start, 'p', { timeZone })} - ${format(end, 'p', { timeZone })}`;
-  };
-  const formatDate = (dateString) => {
-    const timeZone = 'UTC'; // Adjust the timeZone if necessary
-    const date = utcToZonedTime(parseISO(dateString), timeZone);
+      if (action === "NEXT") {
+        newDate.setMonth(currentDate.getMonth() + 1);
+      } else if (action === "PREV") {
+        newDate.setMonth(currentDate.getMonth() - 1);
+      }
   
-    return format(date, 'dd MMM yyyy', { timeZone });
+      // Call the onNavigate function provided by react-big-calendar
+      onNavigate(action);
+  
+      // Call the function passed from the parent component
+      onMonthChange(newDate);
+    };
+  
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <IconButton onClick={() => navigate("PREV")}>
+          <ArrowBackIos />
+        </IconButton>
+        <Typography>{label}</Typography>
+        <IconButton onClick={() => navigate("NEXT")}>
+          <ArrowForwardIos />
+        </IconButton>
+      </div>
+    );
   };
+  const CustomDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+      boxShadow: "none",
+      overflow: "visible",
+    },
+  }));
 
   useEffect(() => {
     // Call the getOrCreateVideo API to check or create a video for the day
@@ -381,8 +356,6 @@ export default function PatientAppointment() {
           ml: { sm: "240px", md: "240px" },
         }}
       > 
-        <DataViewer data={selectedDate} />
-        <DataViewer data={selectedTime} />
         <Container>
           {/* book your appointment */}
           <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>

@@ -24,91 +24,80 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
+import DataViewer from '../../components/reusable/DataViewer';
+import axios from "../../components/axios"; 
+
+import { formatDate, formatTimeSlot } from '../../utils/dateUtils';
+import {  parseISO } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
+
 
 const localizer = momentLocalizer(moment);
 
 export default function HealthcareAppointment() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      patientName: "John Doe",
-      dateTime: "2024-01-10 10:30 AM",
-      acceptedBy: null,
-    },
-    {
-      id: 2,
-      patientName: "Jane Doe",
-      dateTime: "2024-01-12 11:00 AM",
-      acceptedBy: null,
-    },
-    {
-      id: 3,
-      patientName: "Jane Doe",
-      dateTime: "2024-01-12 12:00 PM",
-      acceptedBy: true,
-    },
-    // ... other appointments
-  ]);
-
-  const [yourAppointments, setYourAppointments] = useState([]);
-  const [pendingAppointments, setPendingAppointments] = useState([]);
+  // own appointments
+  const [appointments, setAppointments] = useState([]);
+  // patient requested
+  const [requestedAppointments, setRequestedAppointments] = useState([]);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
-  const doctorName = "Dr. Jack";
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
-
-  const handleAccept = (appointmentId) => {
-    setAppointments((prev) =>
-      prev.map((appointment) =>
-        appointment.id === appointmentId
-          ? { ...appointment, acceptedBy: doctorName }
-          : appointment
-      )
-    );
+  // Functions
+  // Api functions
+  const fetchAppointmentRequests = async () => {
+    try {
+      const response = await axios.get(`/appointments/requestedAppointments`);
+      setRequestedAppointments(response.data.map(appointment => ({
+        ...appointment,
+        timeslot: formatTimeSlot(appointment),
+        date: formatDate(appointment.startDateTime), 
+        id: appointment._id,
+      })));
+            
+    } catch (error) {
+      console.error("Error fetching Available Date Time Slots:", error);
+      // Handle the error as needed
+    }
   };
 
-  function parseAppointmentDate(dateTimeStr) {
-    // Convert "YYYY-MM-DD hh:mm AM/PM" to a Date object
-    const [datePart, timePart] = dateTimeStr.split(" ");
-    const [year, month, day] = datePart.split("-");
-    let [hour, minute] = timePart.substring(0, 5).split(":");
-
-    if (timePart.includes("PM") && hour !== "12") {
-      hour = parseInt(hour, 10) + 12;
-    } else if (timePart.includes("AM") && hour === "12") {
-      hour = 0;
+  const fetchAppointments = async () => {
+    try {
+      const response = await axios.get(`/appointments/healthcareAppointments`);
+      const timeZone = 'UTC'
+      setAppointments(response.data.map(appointment => ({
+        ...appointment,
+        title: `Appointment with ${appointment.patient}`, // Assuming you have patient names
+        start:  utcToZonedTime(parseISO(appointment.startDateTime), timeZone),
+        end: utcToZonedTime(parseISO(appointment.endDateTime), timeZone),
+        timeslot: formatTimeSlot(appointment),
+        id: appointment._id,
+      })));
+            
+    } catch (error) {
+      console.error("Error fetching Appointments:", error);
     }
+  };
+  const handleAccept = async (appointmentId) => {
+    const payload = {
+      "status": "approved"
+    }
+    try {
+      const response = await axios.patch(`/appointments/${appointmentId}`, payload);
+      fetchAppointments()
+      fetchAppointmentRequests() 
+    } catch (error) {
+      console.error("Error fetching updating appointment:", error);
+      // Handle the error as needed
+    }
+  };
 
-    return new Date(year, month - 1, day, hour, minute);
-  }
-
-useEffect(() => {
-  // Filter out appointments that have been accepted
-  setYourAppointments(
-    appointments.filter(appointment => appointment.acceptedBy === true)
-  );
-  // Filter out pending appointments
-  setPendingAppointments(
-    appointments.filter(appointment => appointment.acceptedBy === null)
-  );
-}, [appointments]);
-
-// Now, your calendarAppointments will be based on yourAppointments, which includes only accepted appointments.
-const calendarAppointments = yourAppointments.map(appointment => ({
-  ...appointment,
-  title: appointment.patientName,
-  start: parseAppointmentDate(appointment.dateTime),
-  end: new Date(
-    moment(parseAppointmentDate(appointment.dateTime)).add(1, "hours")
-  ),
-}));
-
+  // Additional components
   const EventComponent = ({ event }) => {
     // Format the title and time as desired
-    const tooltipTitle = `${event.title} - ${event.start && moment(event.start).format("LT")}`;
+    const tooltipTitle =`${event.fullName}`;
   
     return (
       <Tooltip title={tooltipTitle} placement="top">
@@ -121,19 +110,24 @@ const calendarAppointments = yourAppointments.map(appointment => ({
             },
           }}
         >
-          <strong>{event.title}</strong>
-          <div>{moment(event.start).format("LT")}</div>
+          <strong>{event.fullName}</strong>
+          <div>{event.timeslot}</div>
         </Box>
       </Tooltip>
     );
   };
   
-
   const eventStyleGetter = (event, start, end, isSelected) => {
     // Example logic to determine height, you would replace this with your own logic
-    const eventCountAtThisTime = calendarAppointments.filter(
-      (e) => e.start === event.start
+    // console.log('event',event)
+    
+    const eventCountAtThisTime = appointments.filter(
+      (e) => e.startDateTime === event.start
     ).length;
+
+    console.log('eventCountAtThisTime',eventCountAtThisTime)
+    
+    // const eventCountAtThisTime = 1
     const height = eventCountAtThisTime > 1 ? 100 / eventCountAtThisTime : 100;
 
     const style = {
@@ -146,8 +140,16 @@ const calendarAppointments = yourAppointments.map(appointment => ({
     };
   };
 
+  useEffect(() => {
+    fetchAppointmentRequests()
+    fetchAppointments()
+   
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
+      {/* <DataViewer data={requestedAppointments} variableName="requestedAppointments"></DataViewer>
+      <DataViewer data={appointments} variableName="appointments"></DataViewer> */}
       <GlobalStyles
         styles={{
           ".rbc-event": {
@@ -194,7 +196,7 @@ const calendarAppointments = yourAppointments.map(appointment => ({
         }}
       >
         <Container>
-            {/* Pending Appointments Section */}
+            {/* requested Appointments Section */}
             <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}>
             <Typography
               variant="h5"
@@ -203,7 +205,7 @@ const calendarAppointments = yourAppointments.map(appointment => ({
               Pending Appointments
             </Typography>
             <Grid container spacing={2}>
-              {pendingAppointments.map((appointment) => (
+              {requestedAppointments.map((appointment) => (
                 <Grid item xs={12} md={6} key={appointment.id}>
                   <Card
                     sx={{
@@ -214,26 +216,39 @@ const calendarAppointments = yourAppointments.map(appointment => ({
                       p: 2,
                     }}
                   >
-                    <CardContent>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: "bold", mb: 1 }}
-                      >
-                        {appointment.patientName}
+                    <CardContent sx={{ 
+                        '& b': {
+                          display: 'inline-block',
+                          width: '30%',
+                          position: 'relative',
+                          pr: '10px', // paddingRight in 'sx' prop
+                          // For '::after', you might need an alternative approach
+                        },
+                        '& b::after': {
+                          content: '":"',
+                          position: 'absolute',
+                          right: '10px',
+                        }            
+                      }}>
+                      <Typography  sx={{ fontWeight: "bold", mb: 1 }}> 
+                        <b>Date</b> {appointment.date}
                       </Typography>
-                      <Typography
-                        color="textSecondary"
-                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
-                      >
-                        <EventNoteIcon sx={{ mr: 1 }} />
-                        {appointment.dateTime}
+
+                      <Typography  sx={{ fontWeight: "bold", mb: 1 }}> 
+                        <b>Time Slot</b> {appointment.timeslot}
                       </Typography>
+
+                      <Typography sx={{ fontWeight: "bold", mb: 1 }}
+                      >
+                        <b>Patient Name</b> {appointment.fullName}
+                      </Typography>
+                      
                     </CardContent>
                     <CardActions>
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => handleAccept(appointment.id)}
+                        onClick={() => handleAccept(appointment._id)}
                       >
                         Accept
                       </Button>
@@ -241,7 +256,7 @@ const calendarAppointments = yourAppointments.map(appointment => ({
                         variant="outlined"
                         color="secondary"
                       >
-                        Reschedule
+                        Cancel
                       </Button>
                     </CardActions>
                   </Card>
@@ -264,7 +279,7 @@ const calendarAppointments = yourAppointments.map(appointment => ({
             <Box>
               <Calendar
                 localizer={localizer}
-                events={calendarAppointments}
+                events={appointments}
                 startAccessor="start"
                 endAccessor="end"
                 style={{ height: 600 }}
