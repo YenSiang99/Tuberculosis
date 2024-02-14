@@ -39,6 +39,8 @@ export default function HealthcareRegister() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null); 
+  const [passwordError, setPasswordError] = useState({valid: true, message: "",});
+  const [emailError, setEmailError] = useState({ valid: true, message: "" });
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -62,11 +64,23 @@ export default function HealthcareRegister() {
           'Content-Type': 'multipart/form-data' // Important for processing files
         }
       });
-  
-      // Handle the response as before
       navigate("/register/success");
     } catch (error) {
-      // Handle errors as before
+      if (error.response && error.response.status === 409) {
+        // Email already registered
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "Email already registered."
+        });
+      } else {
+        // General error handling
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "An unexpected error occurred. Please try again."
+        });
+      }
     }
   };
   
@@ -91,7 +105,46 @@ export default function HealthcareRegister() {
     }
   };
 
-  
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return {
+        valid: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one letter and one number.",
+      };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const handlePasswordChange = () => {
+    const validationResult = validatePassword(password);
+    setPasswordError(validationResult);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        valid: false,
+        message: "Invalid email format.",
+      };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const handleEmailChange = () => {
+    const validationResult = validateEmail(email);
+    setEmailError(validationResult);
+  };
+
+  const isFormValid = () => {
+    return (
+      emailError.valid &&
+      passwordError.valid
+    );
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -259,48 +312,55 @@ export default function HealthcareRegister() {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+              <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={handleEmailChange}
+                    error={!emailError.valid}
+                    helperText={emailError.valid ? "" : emailError.message}
+                  />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? (
-                            <VisibilityOffIcon />
-                          ) : (
-                            <VisibilityIcon />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+              <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={handlePasswordChange}
+                    error={!passwordError.valid}
+                    helperText={
+                      passwordError.valid ? "" : passwordError.message
+                    }
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? (
+                              <VisibilityOffIcon />
+                            ) : (
+                              <VisibilityIcon />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
               </Grid>
             </Grid>
             <Button
@@ -308,6 +368,7 @@ export default function HealthcareRegister() {
               variant="contained"
               fullWidth
               sx={{ mt: 3, mb: 2 }}
+              disabled={!isFormValid()}
             >
               Register
             </Button>

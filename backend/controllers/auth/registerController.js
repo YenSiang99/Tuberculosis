@@ -48,7 +48,7 @@ exports.registerPatient = async (req, res) => {
     const {
       email, password, firstName, lastName, gender, phoneNumber, country,
       passportNumber, nricNumber, age, diagnosis, currentTreatment,
-      numberOfTablets, treatmentStartMonth, profilePicture
+      numberOfTablets, diagnosisDate, treatmentStartMonth, profilePicture
     } = req.body;
     const profilePicturePath = req.file ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}` : "";
 
@@ -68,6 +68,7 @@ exports.registerPatient = async (req, res) => {
       diagnosis,
       currentTreatment,
       numberOfTablets,
+      diagnosisDate,
       treatmentStartMonth,
       profilePicture: profilePicturePath
     };

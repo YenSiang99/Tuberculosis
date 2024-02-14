@@ -17,7 +17,5 @@ router.get('/getUsersTable', authenticate, videoController.getUsersTable);
 router.post('/uploadVideo/:videoId', authenticate, uploadVideo, videoController.uploadVideo);
 router.patch('/updateVideo/:videoId', authenticate, videoController.updateVideoStatus);
 
-// ... other routes ...
-
 module.exports = router;
 

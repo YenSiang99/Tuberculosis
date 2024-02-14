@@ -18,40 +18,32 @@ import {
   Alert,
   Dialog,
   Chip,
+  Card,
+  CardContent,
+  CardHeader,
+  Avatar,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from "@mui/styles";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import theme from "../../components/reusable/Theme";
 import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import ArrowBackIos from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
 import { styled } from "@mui/material/styles";
-import DataViewer from '../../components/reusable/DataViewer';
-import axios from "../../components/axios"; 
+import axios from "../../components/axios";
 
-
-import { formatDate, formatTimeSlot } from '../../utils/dateUtils';
-
-const useStyles = makeStyles({
-  alignMe: {
-    '& b': {
-      display: 'inline-block',
-      width: '20%',
-      position: 'relative',
-      paddingRight: '10px',
-    },
-    '& b::after': {
-      content: '":"',
-      position: 'absolute',
-      right: '10px',
-    }
-  }
-});
+import { formatDate, formatTimeSlot } from "../../utils/dateUtils";
 
 const TitleWithBackground = styled(Typography)(({ theme }) => ({
   fontWeight: theme.typography.fontWeightBold,
@@ -65,7 +57,6 @@ const TitleWithBackground = styled(Typography)(({ theme }) => ({
 }));
 
 export default function PatientAppointment() {
-  const classes = useStyles();
   const localizer = momentLocalizer(moment);
 
   // Date Time Slot Variables
@@ -79,22 +70,31 @@ export default function PatientAppointment() {
 
   // Controllers
   const [drawerOpen, setDrawerOpen] = useState(false);
+
   const [alertInfo, setAlertInfo] = useState({
     show: false,
     type: "",
     message: "",
   });
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [appointmentIdToCancel, setAppointmentIdToCancel] = useState(null);
 
   // Functions
   // Api fetching
   const fetchAvailableSlots = async (year, month) => {
     try {
-      const response = await axios.get(`/appointments/availableSlots/?year=${year}&month=${month}`);
+      const response = await axios.get(
+        `/appointments/availableSlots/?year=${year}&month=${month}`
+      );
       setAvailableDateTimeSlots(response.data);
-      
+
       // Automatically select the current date's available slots if any, for initial load or when changing months
-      const formattedSelectedDateString = `${year}-${('0' + month).slice(-2)}-${('0' + selectedDate.getDate()).slice(-2)}`;
-      const dayInfo = response.data.find(d => d.day.startsWith(formattedSelectedDateString));
+      const formattedSelectedDateString = `${year}-${("0" + month).slice(
+        -2
+      )}-${("0" + selectedDate.getDate()).slice(-2)}`;
+      const dayInfo = response.data.find((d) =>
+        d.day.startsWith(formattedSelectedDateString)
+      );
       if (dayInfo) {
         setAvailableTimeSlots(dayInfo.availableTimeSlotList);
       } else {
@@ -107,15 +107,19 @@ export default function PatientAppointment() {
   };
   const fetchPatientAppointments = async () => {
     try {
-      const response = await axios.get('appointments/patientAppointments');
+      const response = await axios.get("appointments/patientAppointments");
       // Assuming you set the fetched appointments to a state variable
-      setAppointmentHistory(response.data.map(appointment => ({
-        ...appointment,
-        timeslot: formatTimeSlot(appointment),
-        date: formatDate(appointment.startDateTime), 
-        healthcare: appointment.healthcare ? appointment.healthcare : "No Healthcare Provider Assigned Yet",
-        id: appointment._id,
-      })));
+      setAppointmentHistory(
+        response.data.map((appointment) => ({
+          ...appointment,
+          timeslot: formatTimeSlot(appointment),
+          date: formatDate(appointment.startDateTime),
+          healthcare: appointment.healthcare
+            ? appointment.healthcare
+            : "No Healthcare Provider Assigned Yet",
+          id: appointment._id,
+        }))
+      );
     } catch (error) {
       console.error("Error fetching patient appointments:", error);
       // Handle the error as needed, e.g., setting an alert state
@@ -127,76 +131,132 @@ export default function PatientAppointment() {
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     try {
-      const response = await axios.post('appointments/', selectedTime);
+      const response = await axios.post("appointments/", selectedTime);
+      setAlertInfo({
+        show: true,
+        type: "success",
+        message: "Appointment booked and awaiting healthcare confirmation.",
+      });
       console.log("Appointment booked successfully", response.data);
       const year = selectedDate.getFullYear();
-      const month = selectedDate.getMonth() + 1; 
-      fetchAvailableSlots(year, month); 
+      const month = selectedDate.getMonth() + 1;
+      fetchAvailableSlots(year, month);
       fetchPatientAppointments();
     } catch (error) {
       console.error("Error booking appointment", error);
-      // Handle error (e.g., display a notification to the user)
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Failed to book the appointment.",
+      });
     }
   };
-  const handleCancelAppointment = async (appointmentId) => {
-    console.log("Canceling appointment ID:", appointmentId);
+
+  const handleCancelAppointment = async () => {
+    if (!appointmentIdToCancel) return;
+
+    console.log("Canceling appointment ID:", appointmentIdToCancel);
     try {
-      const response = await axios.delete(`appointments/${appointmentId}`);
-      // Assuming you set the fetched appointments to a state variable
-      const year = selectedDate.getFullYear();
-      const month = selectedDate.getMonth() + 1; 
-      fetchAvailableSlots(year, month); 
-      fetchPatientAppointments()
+      await axios.delete(`/appointments/${appointmentIdToCancel}`);
+      fetchAvailableSlots(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth() + 1
+      );
+      fetchPatientAppointments();
+      setIsCancelDialogOpen(false); // Close the confirmation dialog
+      setAppointmentIdToCancel(null); // Reset the cancellation ID
+
+      // Set alert info for successful cancellation
+      setAlertInfo({
+        show: true,
+        type: "success",
+        message: "Appointment cancelled successfully.",
+      });
     } catch (error) {
       console.error("Error deleting appointment", error);
-      // Handle the error as needed, e.g., setting an alert state
+      setIsCancelDialogOpen(false); // Ensure the dialog is closed even on error
+      // Set alert info for error
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Failed to cancel the appointment.",
+      });
     }
   };
+
   // Calendar logic
   const dayPropGetter = (date) => {
-    const dateString = [
-      date.getFullYear(),
-      ('0' + (date.getMonth() + 1)).slice(-2),
-      ('0' + date.getDate()).slice(-2),
-    ].join('-');
-    const dayInfo = availableDateTimeSlots.find(d => d.day.startsWith(dateString));
-  
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const isBeforeToday = date < currentDate;
+    const isValidDayOfWeek = [1, 3, 5].includes(date.getDay());
+
     let style = {};
-    if (dayInfo) {
-      switch (dayInfo.status) {
-        case "Available":
-          style.backgroundColor = "#e3f2fd"; // Light blue for available
-          break;
-        case "Limited Slots":
-          style.backgroundColor = "#90caf9"; // Darker blue for limited slots
-          break;
-        case "Fully Booked":
-          style.backgroundColor = "#2196f3"; // Even darker blue for fully booked
-          break;
-        default:
-          style.backgroundColor = "#f5f5f5"; // Gray out the day if not available for booking
+    if (isBeforeToday || !isValidDayOfWeek) {
+      style = {
+        backgroundColor: "#f5f5f5",
+        cursor: "not-allowed",
+      };
+    } else {
+      const dateString = [
+        date.getFullYear(),
+        ("0" + (date.getMonth() + 1)).slice(-2),
+        ("0" + date.getDate()).slice(-2),
+      ].join("-");
+      const dayInfo = availableDateTimeSlots.find((d) =>
+        d.day.startsWith(dateString)
+      );
+
+      if (dayInfo) {
+        switch (dayInfo.status) {
+          case "Available":
+            style.backgroundColor = "#e3f2fd"; // Light blue for available
+            break;
+          case "Limited Slots":
+            style.backgroundColor = "#90caf9"; // Darker blue for limited slots
+            break;
+          case "Fully Booked":
+            style.backgroundColor = "#2196f3"; // Even darker blue for fully booked
+            break;
+        }
       }
-    }else{
-      style.backgroundColor = "#f5f5f5"; // Gray out the day if not available for booking
     }
-  
+
     // Highlight the selected date
     if (selectedDate && moment(selectedDate).isSame(date, "day")) {
       style.border = "2px solid #FF0000"; // Red border for the selected date
     }
-  
+
     return { style };
   };
+
   const handleSelectSlot = ({ start }) => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const dayOfWeek = start.getDay();
+
+    if (start < currentDate || ![1, 3, 5].includes(dayOfWeek)) {
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message:
+          "Please select a future date that falls on a Monday, Wednesday, or Friday.",
+      });
+      return;
+    }
+
     setSelectedDate(start);
     const selectedDateString = [
       start.getFullYear(),
-      ('0' + (start.getMonth() + 1)).slice(-2),
-      ('0' + start.getDate()).slice(-2),
-    ].join('-');
-    const dayInfo = availableDateTimeSlots.find(d => d.day.startsWith(selectedDateString));
+      ("0" + (start.getMonth() + 1)).slice(-2),
+      ("0" + start.getDate()).slice(-2),
+    ].join("-");
+    const dayInfo = availableDateTimeSlots.find((d) =>
+      d.day.startsWith(selectedDateString)
+    );
 
     if (!dayInfo || dayInfo.status === "Fully Booked") {
       setAlertInfo({
@@ -206,17 +266,18 @@ export default function PatientAppointment() {
       });
       return;
     }
-  
+
     setAlertInfo({ show: false, type: "", message: "" });
     setAvailableTimeSlots(dayInfo.availableTimeSlotList);
   };
+
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
   };
   const handleMonthChange = (newDate) => {
     const year = newDate.getFullYear();
     const month = newDate.getMonth() + 1; // JavaScript months are 0-indexed
-    console.log(`year ${year} month ${month}`)
+    console.log(`year ${year} month ${month}`);
     fetchAvailableSlots(year, month);
   };
   //Additional Components
@@ -235,12 +296,12 @@ export default function PatientAppointment() {
       default:
         backgroundColor = "#f5f5f5"; // Gray out the day if not available for booking
     }
-  
+
     const style = {
       backgroundColor,
       // Other styles if needed
     };
-  
+
     return { style };
   };
   const EventComponent = ({ event }) => {
@@ -270,20 +331,20 @@ export default function PatientAppointment() {
       // Create a new Date object based on the current label
       const currentDate = new Date(label);
       let newDate = new Date(currentDate);
-  
+
       if (action === "NEXT") {
         newDate.setMonth(currentDate.getMonth() + 1);
       } else if (action === "PREV") {
         newDate.setMonth(currentDate.getMonth() - 1);
       }
-  
+
       // Call the onNavigate function provided by react-big-calendar
       onNavigate(action);
-  
+
       // Call the function passed from the parent component
       onMonthChange(newDate);
     };
-  
+
     return (
       <div
         style={{
@@ -311,12 +372,17 @@ export default function PatientAppointment() {
 
   useEffect(() => {
     // Call the getOrCreateVideo API to check or create a video for the day
-    console.log('use effect hook called')
+    console.log("use effect hook called");
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth() + 1; // JavaScript months are 0-indexed
     fetchAvailableSlots(year, month);
-    fetchPatientAppointments()
+    fetchPatientAppointments();
   }, [selectedDate]);
+
+  const promptCancelAppointment = (appointmentId) => {
+    setAppointmentIdToCancel(appointmentId);
+    setIsCancelDialogOpen(true);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -355,7 +421,7 @@ export default function PatientAppointment() {
           p: 3,
           ml: { sm: "240px", md: "240px" },
         }}
-      > 
+      >
         <Container>
           {/* book your appointment */}
           <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
@@ -378,7 +444,6 @@ export default function PatientAppointment() {
             >
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Grid container spacing={3}>
-                  
                   {/* Calender picker */}
                   <Grid item xs={12} md={7}>
                     <TitleWithBackground gutterBottom>
@@ -395,13 +460,18 @@ export default function PatientAppointment() {
                       views={{ month: true }}
                       eventPropGetter={eventStyleGetter}
                       components={{
-                        toolbar: props => <CustomToolbar {...props} onMonthChange={handleMonthChange} />,
+                        toolbar: (props) => (
+                          <CustomToolbar
+                            {...props}
+                            onMonthChange={handleMonthChange}
+                          />
+                        ),
                         event: EventComponent,
                       }}
                     />
                     <Legend />
                   </Grid>
-                  
+
                   {/* Divider */}
                   <Grid
                     item
@@ -413,34 +483,32 @@ export default function PatientAppointment() {
                     {/* The Divider will be hidden on extra-small (xs) screens */}
                     <Divider orientation="vertical" flexItem />
                   </Grid>
-                  
+
                   {/* Time slot */}
                   <Grid item xs={12} md={4}>
                     <TitleWithBackground gutterBottom>
                       Step 2: Select a Time Slot
                     </TitleWithBackground>
-                    {availableTimeSlots.length > 0 ? 
-                      (
-                        <List>
-                          {availableTimeSlots.map((timeSlot, index) => {
-                            const timeSlotString = formatTimeSlot(timeSlot);
-                            return (
-                              <ListItemButton
-                                key={index}
-                                selected={selectedTime === timeSlot}
-                                onClick={() => setSelectedTime(timeSlot)}
-                              >
-                                <ListItemText primary={timeSlotString} />
-                              </ListItemButton>
-                            );
-                          })}
-                        </List>
-                      ) : (
-                        <Typography>
-                          No time slots available for this date.
-                        </Typography>
-                      )
-                    }
+                    {availableTimeSlots.length > 0 ? (
+                      <List>
+                        {availableTimeSlots.map((timeSlot, index) => {
+                          const timeSlotString = formatTimeSlot(timeSlot);
+                          return (
+                            <ListItemButton
+                              key={index}
+                              selected={selectedTime === timeSlot}
+                              onClick={() => setSelectedTime(timeSlot)}
+                            >
+                              <ListItemText primary={timeSlotString} />
+                            </ListItemButton>
+                          );
+                        })}
+                      </List>
+                    ) : (
+                      <Typography>
+                        No time slots available for this date.
+                      </Typography>
+                    )}
                   </Grid>
                 </Grid>
               </LocalizationProvider>
@@ -448,67 +516,130 @@ export default function PatientAppointment() {
                 type="submit"
                 variant="contained"
                 color="primary"
+                disabled={!selectedTime}
                 sx={{ mt: 4, display: "block", width: "100%" }}
               >
                 Book Appointment
               </Button>
             </Box>
           </Paper>
-          {/* Your appointments */}
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Typography
-              variant="h5"
-              gutterBottom
-              component="div"
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-              }}
-            >
-               Your Appointment 
-            </Typography>
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 2 }}
-            >
-          <List
-            className={classes.alignMe}
-          >
-            {appointmentHistory.map((appointment, index) => (
-              <React.Fragment key={index}>
-                <ListItem >
-                  <b>Status</b> {appointment.status}
-                </ListItem>
-                <ListItem > 
-                  <b>Date</b> {appointment.date}
-                </ListItem>
-                <ListItem >
-                  <b>Time Slot</b> {appointment.timeslot}
-                </ListItem>
-                <ListItem >
-                  <b>Healthcare Assigned</b> {appointment.healthcare}
-                </ListItem>
-                <ListItem >
-                  <Button
-                    color="error"
-                    size="small"
-                    onClick={() => handleCancelAppointment(appointment.id)}
-                    sx={{ alignSelf: 'flex-start', marginTop: '8px' }}
-                  >
-                    Cancel
-                  </Button>
-                </ListItem>
-                {index < appointmentHistory.length - 1 && (
-                  <Divider variant="inset" component="li" />
-                )}
-              </React.Fragment>
-            ))}
-          </List>
+          {/* Pending Appointments */}
 
-          </Box>
-          </Paper>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Paper elevation={3} sx={{ p: 2 }}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+                >
+                  Pending Appointments
+                </Typography>
+                {appointmentHistory
+                  .filter(
+                    (appointment) =>
+                      !appointment.healthcare ||
+                      appointment.healthcare ===
+                        "No Healthcare Provider Assigned Yet"
+                  )
+                  .map((appointment, index) => (
+                    <Card
+                      key={index}
+                      sx={{ mb: 2, borderLeft: "6px solid orange" }}
+                    >
+                      <CardHeader
+                        avatar={
+                          <Avatar sx={{ bgcolor: "orange" }}>
+                            <PendingActionsIcon />
+                          </Avatar>
+                        }
+                        title={`Appointment on ${appointment.date}`}
+                        subheader={`Status: ${appointment.status}`}
+                      />
+                      <CardContent>
+                        <Typography variant="body2">
+                          <b>Time Slot:</b> {appointment.timeslot}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          <b>Status:</b> Awaiting Healthcare Assignment
+                        </Typography>
+                        {/* Cancel Button */}
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          onClick={() =>
+                            promptCancelAppointment(appointment.id)
+                          }
+                          sx={{ mt: 2 }}
+                        >
+                          Cancel Appointment
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </Paper>
+            </Grid>
+            {/* Your Appointments */}
+            <Grid item xs={12} md={6}>
+              <Paper elevation={3} sx={{ p: 2 }}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+                >
+                  Confirmed Appointments
+                </Typography>
+                {appointmentHistory
+                  .filter(
+                    (appointment) =>
+                      appointment.healthcare &&
+                      appointment.healthcare !==
+                        "No Healthcare Provider Assigned Yet"
+                  )
+                  .map((appointment, index) => (
+                    <Card
+                      key={index}
+                      sx={{ mb: 2, borderLeft: "6px solid green" }}
+                    >
+                      <CardHeader
+                        avatar={
+                          <Avatar sx={{ bgcolor: "green" }}>
+                            <CheckCircleOutlineIcon />
+                          </Avatar>
+                        }
+                        title={`Appointment on ${appointment.date}`}
+                        subheader={`With Healthcare: ${
+                          appointment.healthcare
+                            ? `${appointment.healthcare.firstName} ${appointment.healthcare.lastName}`
+                            : "No Healthcare Provider Assigned Yet"
+                        }`}
+                      />
+                      <CardContent>
+                        <Typography variant="body2">
+                          <b>Time Slot:</b> {appointment.timeslot}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          <b>Status:</b> Confirmed
+                        </Typography>
+                                                {/* Cancel Button */}
+                                                <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          onClick={() =>
+                            promptCancelAppointment(appointment.id)
+                          }
+                          sx={{ mt: 2 }}
+                        >
+                          Cancel Appointment
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </Paper>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
       <CustomDialog
@@ -521,6 +652,29 @@ export default function PatientAppointment() {
           {alertInfo.message}
         </Alert>
       </CustomDialog>
+      <Dialog
+        open={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        aria-labelledby="confirmation-dialog-title"
+        aria-describedby="confirmation-dialog-description"
+      >
+        <DialogTitle id="confirmation-dialog-title">
+          {"Cancel Appointment"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirmation-dialog-description">
+            Are you sure you want to cancel this appointment?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsCancelDialogOpen(false)} color="primary">
+            No
+          </Button>
+          <Button onClick={handleCancelAppointment} color="primary" autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }

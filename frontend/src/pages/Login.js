@@ -18,6 +18,8 @@ import {
   Checkbox,
   FormControlLabel,
   InputAdornment,
+  Alert,
+  styled
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -25,11 +27,10 @@ import theme from "../components/reusable/Theme";
 import BgImage from "../images/cover.jpeg";
 import logo from "../images/logo.png";
 
-
 import axios from "../components/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,6 +40,11 @@ export default function Login() {
   const [userRole, setUserRole] = useState("");
   const [openRoleSelect, setOpenRoleSelect] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
 
   const { setAuth } = useAuth();
   // Navigate to TB information page
@@ -138,9 +144,34 @@ export default function Login() {
         "Login error:",
         error.response ? error.response.data : error
       );
-      // Handle login errors here
+      if (error.response && error.response.status === 401) {
+        // Show alert with error message
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "Invalid email or password",
+        });
+      } else {
+        // Handle other kinds of errors
+        setAlertInfo({
+          show: true,
+          type: "error",
+          message: "An error occurred. Please try again later.",
+        });
+      }
     }
   };
+
+  const handleCloseAlert = () => {
+    setAlertInfo({ show: false, type: "", message: "" });
+  };
+
+  const CustomDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+      boxShadow: "none",
+      overflow: "visible",
+    },
+  }));
 
   return (
     <ThemeProvider theme={theme}>
@@ -149,7 +180,7 @@ export default function Login() {
           <img
             src={logo}
             alt="Logo"
-            style={{ height: "50px", marginRight: theme.spacing(2) }}
+            style={{ height: "70px", marginRight: theme.spacing(2) }}
           />
           <Typography variant="h5" color="inherit">
             <span style={{ color: "#0046c0", fontWeight: "bold" }}>My</span>
@@ -321,7 +352,7 @@ export default function Login() {
                       style={{
                         textDecoration: "none",
                         color: theme.palette.primary.main,
-                        fontWeight: "bold"
+                        fontWeight: "bold",
                       }}
                       onClick={handleRegister}
                     >
@@ -335,7 +366,7 @@ export default function Login() {
         </Box>
       </Box>
       {/* Role Selection Dialog */}
-      <Dialog open={openRoleSelect} onClose={toggleRoleSelectDialog} >
+      <Dialog open={openRoleSelect} onClose={toggleRoleSelectDialog}>
         <DialogTitle style={dialogTitleStyle}>Select Your Role</DialogTitle>
         <List>
           <ListItemButton
@@ -352,6 +383,16 @@ export default function Login() {
           </ListItemButton>
         </List>
       </Dialog>
+      <CustomDialog
+        open={alertInfo.show}
+        onClose={handleCloseAlert}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
+          {alertInfo.message}
+        </Alert>
+      </CustomDialog>
     </ThemeProvider>
   );
 }

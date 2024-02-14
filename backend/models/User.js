@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
   roles: [{ type: String, enum: ['admin', 'patient', 'healthcare'] }],
   group: { type: String, required: true, enum: ['patient','doctor', 'nurse', 'medical assistant', ] },
 
+  // Healthcare-specific fields
+  mcpId: String,
+
   // Patient-specific fields
   firstName: String,
   lastName: String,
@@ -21,7 +24,8 @@ const userSchema = new mongoose.Schema({
   diagnosis: { type: String, enum: ['SPPTB', 'SNTB', 'EXPTB', 'LTBI'] },
   currentTreatment: { type: String, enum: ['Akurit-4', 'Akurit', 'Pyridoxine10mg'] },
   numberOfTablets: Number,
-  treatmentStartMonth: String, // Or Date type, depending on the format you choose
+  diagnosisDate: Date,
+  treatmentStartMonth: String, 
 });
 
 module.exports = mongoose.model('User', userSchema);

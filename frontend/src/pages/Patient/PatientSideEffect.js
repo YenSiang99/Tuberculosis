@@ -24,14 +24,18 @@ import {
   TableRow,
   Alert,
   Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
-import { isValid, parseISO, format } from 'date-fns';
+import { isValid, parseISO, format } from "date-fns";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import theme from "../../components/reusable/Theme";
 import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
+import InfoIcon from "@mui/icons-material/Info";
 import axios from "../../components/axios";
+import CloseIcon from '@mui/icons-material/Close';
 
 const StyledRadioGroup = styled(RadioGroup)(({ theme }) => ({
   flexDirection: "row",
@@ -81,7 +85,7 @@ const SideEffectHistory = ({ history }) => {
                 <TableCell>
                   {/* Format the date string */}
                   {format(parseISO(report.datetime), "d MMMM yyyy, h:mm a")}
-           </TableCell>
+                </TableCell>
                 <TableCell>
                   {report.sideEffects
                     ? report.sideEffects
@@ -110,16 +114,15 @@ export default function PatientSideEffectReport() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [otherDescription, setOtherDescription] = useState("");
-  const [showMedicalAssistanceMessage, setShowMedicalAssistanceMessage] =
-    useState(false);
-    const [alertInfo, setAlertInfo] = useState({
-      show: false,
-      type: "",
-      message: "",
-      nextAlert: null, 
-    });    
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    type: "",
+    message: "",
+    nextAlert: null,
+  });
   const historyRef = useRef(null);
   const [sideEffectHistory, setSideEffectHistory] = useState([]);
+  const [openGradeInfo, setOpenGradeInfo] = useState(false);
 
   useEffect(() => {
     // Attempt to fetch user data from session storage or local storage
@@ -143,7 +146,6 @@ export default function PatientSideEffectReport() {
       setAlertInfo({ show: false, type: "", message: "" });
     }
   };
-  
 
   const CustomDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiPaper-root": {
@@ -171,6 +173,16 @@ export default function PatientSideEffectReport() {
     "Stomach Pain (Particularly Right Upper Area)",
     "Others (Please Describe)",
   ];
+
+  const splitSymptomsArray = (array) => {
+    const midpoint = Math.ceil(array.length / 2);
+    const firstHalf = array.slice(0, midpoint);
+    const secondHalf = array.slice(midpoint);
+    return [firstHalf, secondHalf];
+  };
+
+  const [firstHalfOptions, secondHalfOptions] =
+    splitSymptomsArray(sideEffectsOptions);
 
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
@@ -212,34 +224,38 @@ export default function PatientSideEffectReport() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     // Convert the side effects to the required format and check for grade 2 or 3
     const formattedSideEffects = selectedSideEffects.map((effect) => ({
       effect,
       grade: parseInt(sideEffectDetails[effect]?.grade || "1", 10),
-      description: effect === "Others (Please Describe)" ? otherDescription : "",
+      description:
+        effect === "Others (Please Describe)" ? otherDescription : "",
     }));
-  
+
     const hasGrade2Or3 = formattedSideEffects.some(
       (effect) => effect.grade === 2 || effect.grade === 3
     );
-  
+
     // Construct the payload with the formatted side effects and use selectedDateTime for date and time
     const payload = {
       patientId,
       datetime: selectedDateTime.toISOString(), // Convert to ISO string if not already
       sideEffects: formattedSideEffects,
     };
-  
+
     try {
       await axios.post("/sideEffects", payload);
-  
-      const nextAlert = hasGrade2Or3 ? {
-        show: true,
-        type: "warning",
-        message: "At least one side effect Grade 2/3, please seek medical assistance at the nearest hospital.",
-      } : null;
-  
+
+      const nextAlert = hasGrade2Or3
+        ? {
+            show: true,
+            type: "warning",
+            message:
+              "At least one side effect Grade 2/3, please seek medical assistance at the nearest hospital.",
+          }
+        : null;
+
       // Show the success alert and queue the next alert
       setAlertInfo({
         show: true,
@@ -247,15 +263,15 @@ export default function PatientSideEffectReport() {
         message: "Side effect submitted successfully.",
         nextAlert, // Queue the next alert
       });
-  
+
       // Reset the form fields to initial state here
       setSelectedDateTime(new Date()); // Reset the combined date-time picker
       setSelectedSideEffects([]);
       setSideEffectDetails({});
       setOtherDescription("");
-  
+
       fetchSideEffectHistory();
-  
+
       // Optionally, scroll to history or refresh history here
       if (historyRef.current) {
         historyRef.current.scrollIntoView({ behavior: "smooth" });
@@ -265,12 +281,16 @@ export default function PatientSideEffectReport() {
       setAlertInfo({
         show: true,
         type: "error",
-        message: "An error occurred while submitting the side effect report: " + (error.response?.data?.message || error.message),
+        message:
+          "An error occurred while submitting the side effect report: " +
+          (error.response?.data?.message || error.message),
       });
-      console.error("Error submitting side effect report:", error.response?.data || error.message);
+      console.error(
+        "Error submitting side effect report:",
+        error.response?.data || error.message
+      );
     }
   };
-  
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -278,6 +298,14 @@ export default function PatientSideEffectReport() {
 
   const handleOtherDescriptionChange = (event) => {
     setOtherDescription(event.target.value);
+  };
+
+  const handleGradeInfoClick = () => {
+    setOpenGradeInfo(true);
+  };
+
+  const handleGradeInfoClose = () => {
+    setOpenGradeInfo(false);
   };
 
   return (
@@ -334,73 +362,178 @@ export default function PatientSideEffectReport() {
                 When did these symptoms start?
               </TitleWithBackground>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
-  <Grid container spacing={2} sx={{ mt: 2 }}>
-    <Grid item xs={12}>
-      <DateTimePicker
-        label="Select Date and Time"
-        value={selectedDateTime}
-        onChange={setSelectedDateTime}
-        renderInput={(params) => <TextField {...params} fullWidth />}
-      />
-    </Grid>
-  </Grid>
-</LocalizationProvider>
+                <Grid container spacing={2} sx={{ mt: 2 }}>
+                  <Grid item xs={12}>
+                    <DateTimePicker
+                      label="Select Date and Time"
+                      value={selectedDateTime}
+                      onChange={setSelectedDateTime}
+                      renderInput={(params) => (
+                        <TextField {...params} fullWidth />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+              </LocalizationProvider>
 
-              <TitleWithBackground variant="subtitle1" sx={{ mt: 4 }}>
+              <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
                 Symptoms (Choose all that apply)
               </TitleWithBackground>
-
+              <IconButton onClick={handleGradeInfoClick} size="big">
+                <InfoIcon sx={{ fontSize: "1.5rem" }} />
+              </IconButton>
               <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
+                sx={{
+                  mt: 2,
+                }}
               >
-                {sideEffectsOptions.map((sideEffect) => (
-                  <Box key={sideEffect}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={selectedSideEffects.includes(sideEffect)}
-                          onChange={handleCheckboxChange}
-                          name={sideEffect}
-                        />
-                      }
-                      label={sideEffect}
-                    />
-                    {selectedSideEffects.includes(sideEffect) &&
-                      sideEffect !== "Others (Please Describe)" && (
-                        <StyledRadioGroup
-                          aria-label={`grade-${sideEffect}`}
-                          name={`grade-${sideEffect}`}
-                          value={sideEffectDetails[sideEffect]?.grade || ""}
-                          onChange={(e) => handleRadioChange(e, sideEffect)}
+                <Box sx={{ my: 2 }}>
+                  <Box
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mt: 2,
+                      mb: 2,
+                    }}
+                  >
+                    {["Mild", "Moderate", "Serious"].map((grade, index) => (
+                      <Box
+                        key={grade}
+                        sx={{
+                          flexDirection: "column",
+                          alignItems:
+                            index === 0
+                              ? "flex-start"
+                              : index === 1
+                              ? "center"
+                              : "flex-end",
+                          width: "33%",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
                         >
-                          <FormControlLabel
-                            value="1"
-                            control={<Radio />}
-                            label="Grade 1"
-                          />
-                          <FormControlLabel
-                            value="2"
-                            control={<Radio />}
-                            label="Grade 2"
-                          />
-                          <FormControlLabel
-                            value="3"
-                            control={<Radio />}
-                            label="Grade 3"
-                          />
-                        </StyledRadioGroup>
-                      )}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: "bold",
+                              fontSize: "0.875rem",
+                              color:
+                                index === 0
+                                  ? "#4caf50"
+                                  : index === 1
+                                  ? "#ff9800"
+                                  : "#f44336",
+                            }}
+                          >
+                            Grade {index + 1}: {grade}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
                   </Box>
-                ))}
-                {selectedSideEffects.includes("Others (Please Describe)") && (
-                  <TextField
-                    label="Please describe"
-                    value={otherDescription}
-                    onChange={handleOtherDescriptionChange}
-                    margin="normal"
-                    fullWidth
-                  />
-                )}
+                </Box>
+                <Grid container spacing={2}>
+                  {/* First Column */}
+                  <Grid item xs={12} md={6}>
+                    {firstHalfOptions.map((sideEffect) => (
+                      <Box key={sideEffect}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={selectedSideEffects.includes(sideEffect)}
+                              onChange={handleCheckboxChange}
+                              name={sideEffect}
+                            />
+                          }
+                          label={sideEffect}
+                        />
+                        {selectedSideEffects.includes(sideEffect) &&
+                          sideEffect !== "Others (Please Describe)" && (
+                            <StyledRadioGroup
+                              aria-label={`grade-${sideEffect}`}
+                              name={`grade-${sideEffect}`}
+                              value={sideEffectDetails[sideEffect]?.grade || ""}
+                              onChange={(e) => handleRadioChange(e, sideEffect)}
+                            >
+                              <FormControlLabel
+                                value="1"
+                                control={<Radio />}
+                                label="Grade 1"
+                              />
+                              <FormControlLabel
+                                value="2"
+                                control={<Radio />}
+                                label="Grade 2"
+                              />
+                              <FormControlLabel
+                                value="3"
+                                control={<Radio />}
+                                label="Grade 3"
+                              />
+                            </StyledRadioGroup>
+                          )}
+                      </Box>
+                    ))}
+                  </Grid>
+
+                  {/* Second Column */}
+                  <Grid item xs={12} md={6}>
+                    {secondHalfOptions.map((sideEffect) => (
+                      <Box key={sideEffect}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={selectedSideEffects.includes(sideEffect)}
+                              onChange={handleCheckboxChange}
+                              name={sideEffect}
+                            />
+                          }
+                          label={sideEffect}
+                        />
+                        {selectedSideEffects.includes(sideEffect) &&
+                          sideEffect === "Others (Please Describe)" && (
+                            <TextField
+                              label="Please describe"
+                              value={otherDescription}
+                              onChange={handleOtherDescriptionChange}
+                              margin="normal"
+                              fullWidth
+                            />
+                          )}
+                        {selectedSideEffects.includes(sideEffect) &&
+                          sideEffect !== "Others (Please Describe)" && (
+                            <StyledRadioGroup
+                              aria-label={`grade-${sideEffect}`}
+                              name={`grade-${sideEffect}`}
+                              value={sideEffectDetails[sideEffect]?.grade || ""}
+                              onChange={(e) => handleRadioChange(e, sideEffect)}
+                            >
+                              <FormControlLabel
+                                value="1"
+                                control={<Radio />}
+                                label="Grade 1"
+                              />
+                              <FormControlLabel
+                                value="2"
+                                control={<Radio />}
+                                label="Grade 2"
+                              />
+                              <FormControlLabel
+                                value="3"
+                                control={<Radio />}
+                                label="Grade 3"
+                              />
+                            </StyledRadioGroup>
+                          )}
+                      </Box>
+                    ))}
+                  </Grid>
+                </Grid>
               </Box>
 
               <Button type="submit" variant="contained" sx={{ mt: 4 }}>
@@ -430,6 +563,42 @@ export default function PatientSideEffectReport() {
             : alertInfo.message}
         </Alert>
       </CustomDialog>
+      <Dialog open={openGradeInfo} onClose={handleGradeInfoClose} fullWidth maxWidth="sm">
+  <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold', textAlign: 'center' }}>
+    Grade Explanations
+    <IconButton
+      aria-label="close"
+      onClick={handleGradeInfoClose}
+      sx={{
+        position: 'absolute',
+        right: 8,
+        top: 8,
+        color: (theme) => theme.palette.grey[500],
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+ <DialogContent sx={{ pt: 2 }}>
+  {[
+    { grade: "Grade 1: Mild", description: "Effects are mild and generally not bothersome.", color: "#4caf50" },
+    { grade: "Grade 2: Moderate", description: "Effects are bothersome and may interfere with doing some activities but are not dangerous.", color: "#ff9800" },
+    { grade: "Grade 3: Serious", description: "Effects are serious and interfere with a person's ability to do basic things like eat or get dressed.", color: "#f44336" }
+  ].map((item, index) => (
+    <Box key={index} sx={{ mb: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Typography variant="h6" sx={{ color: item.color, fontWeight: 'bold' }}>
+          {item.grade}
+        </Typography>
+      </Box>
+      <Typography variant="body2" sx={{ ml: 3 }}>
+        {item.description}
+      </Typography>
+    </Box>
+  ))}
+</DialogContent>
+
+</Dialog>
     </ThemeProvider>
   );
 }

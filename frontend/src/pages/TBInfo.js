@@ -47,6 +47,41 @@ export default function Public() {
 
   // }));
 
+  const StyledAccordion = styled(Accordion)(({ theme }) => ({
+    margin: '0.5rem 0',
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: '8px',
+    '&:before': {
+      display: 'none',
+    },
+    '&.Mui-expanded': {
+      margin: '0.5rem 0',
+    },
+    '&:first-of-type': {
+      marginTop: 0,
+    },
+    '&:last-of-type': {
+      marginBottom: 0,
+    },
+  }));
+
+  const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
+    backgroundColor: theme.palette.grey[100],
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    marginBottom: -1,
+    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+      transform: 'rotate(180deg)',
+    },
+    '& .MuiAccordionSummary-content': {
+      marginLeft: theme.spacing(1),
+    },
+  }));
+  
+  const StyledAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
+    padding: theme.spacing(2),
+    borderTop: '1px solid rgba(0, 0, 0, .125)',
+  }));
+
   const AboutTBContent = () => {
     return (
       <Box>
@@ -59,7 +94,7 @@ export default function Public() {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
+            sx={{ fontWeight: "bold", color: theme.palette.primary.light, }}
           >
             Infographics
           </Typography>
@@ -93,8 +128,118 @@ export default function Public() {
           </Grid>
         </Box>
 
-        {/* Videos Section */}
+        {/* FAQ Section */}
         <Box my={4}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
+      >
+        Frequently Asked Questions (FAQ)
+      </Typography>
+
+      {/* FAQ 1 */}
+      <StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+  <Typography>
+      What is Tuberculosis (TB)?
+    </Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      Tuberculosis (TB) is an infectious disease that most often affects the lungs. 
+      TB is caused by a type of bacteria. It spreads through the air when infected people cough, 
+      sneeze or spit.
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+{/* FAQ 2 */}
+<StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Typography>What are the common signs and symptoms of TB?</Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      The most common symptoms of TB include:
+      <ul>
+        <li>A cough that lasts for more than two (2) weeks</li>
+        <li>Cough with sputum which is occasionally bloodstained</li>
+        <li>Loss of appetite and weight</li>
+        <li>Fever</li>
+        <li>Dyspnea, night sweats, chest pain, and hoarseness of voice</li>
+      </ul>
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+
+{/* FAQ 3 */}
+<StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Typography>How does TB spread?</Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      Infection is usually by direct airborne transmission from person to person.
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+
+{/* FAQ 4 */}
+<StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Typography>Can TB be cured?</Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      The vast majority of TB cases can be cured when medicines are provided and taken properly.
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+
+{/* FAQ 5 */}
+<StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Typography>What is the treatment and management of TB?</Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      TB disease is treated with a multiple drug regimen for 6-8 months 
+      (usually isoniazid, rifampin, ethambutol, and pyrazinamide for 2 months, 
+      followed by isoniazid and rifampin for 4 to 6 months) if the TB is not drug resistant.
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+
+{/* FAQ 6 */}
+<StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Typography>What is Direct Observed Therapy (DOT)?</Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      DOT is a strategy used to ensure TB patient adherence to and tolerability of the 
+      prescribed treatment regimen; a health care worker or another designated person watches 
+      the TB patient swallow each dose of the prescribed drugs.
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+
+{/* FAQ 7 */}
+<StyledAccordion>
+  <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Typography>What is Video Observed Therapy (VOT)?</Typography>
+  </StyledAccordionSummary>
+  <StyledAccordionDetails>
+    <Typography>
+      VOT is the use of a videophone or other video/computer equipment to observe tuberculosis (TB) 
+      patients taking their medications remotely.
+    </Typography>
+  </StyledAccordionDetails>
+</StyledAccordion>
+</Box>
+
+        {/* Videos Section */}
+        {/* <Box my={4}>
           <Typography
             variant="h6"
             gutterBottom
@@ -118,12 +263,11 @@ export default function Public() {
                 </CardContent>
               </Card>
             </Grid>
-            {/* ... Add more videos as needed */}
           </Grid>
-        </Box>
+        </Box> */}
 
         {/* Links */}
-        <Box my={4}>
+        {/* <Box my={4}>
           <Typography
             variant="h6"
             gutterBottom
@@ -138,9 +282,8 @@ export default function Public() {
                 secondary="https://www.who.int/tb"
               />
             </ListItem>
-            {/* ... Add more links as needed */}
           </List>
-        </Box>
+        </Box> */}
       </Box>
     );
   };
@@ -153,7 +296,7 @@ export default function Public() {
         </Typography>
 
         {/* Videos */}
-        <Box my={4}>
+        {/* <Box my={4}>
           <Typography
             variant="h6"
             gutterBottom
@@ -164,10 +307,8 @@ export default function Public() {
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <Paper elevation={3}>
-                {/* Replace with actual video */}
                 <Box p={2} textAlign="center">
                   <Typography variant="subtitle1">Video Title 1</Typography>
-                  {/* Example placeholder for video */}
                   <Box sx={{ position: "relative", paddingTop: "56.25%" }}>
                     <iframe
                       style={{
@@ -177,16 +318,15 @@ export default function Public() {
                         width: "100%",
                         height: "100%",
                       }}
-                      src="https://www.youtube.com/embed/videoID" // Replace with your video link
+                      src="https://www.youtube.com/embed/videoID" 
                       allowFullScreen
                     ></iframe>
                   </Box>
                 </Box>
               </Paper>
             </Grid>
-            {/* ... Add more videos as needed */}
           </Grid>
-        </Box>
+        </Box> */}
 
         {/* FAQ Section */}
         {/* <Box my={4}>
@@ -228,9 +368,9 @@ export default function Public() {
     "& .MuiDrawer-paper": {
       width: drawerWidth,
       boxSizing: "border-box",
-      top: 64, // Adjust this value to match the height of AppBar
-      height: `calc(100% - 64px)`, // Adjust this value to match the height of AppBar
-      backgroundColor: "#f4f4f4", // Drawer background color
+      top: 64,
+      height: `calc(100% - 64px)`,
+      backgroundColor: "#f4f4f4",
     },
   };
 
@@ -247,27 +387,27 @@ export default function Public() {
             zIndex: (theme) => theme.zIndex.drawer + 1,
             backgroundColor: "white",
             borderBottom: "1px solid #ddd",
-            display: "flex", // Ensure AppBar is using flex layout
+            display: "flex",
           }}
         >
           <Toolbar
             sx={{
-              display: "flex", // Use flex layout for the contents
-              justifyContent: "space-between", // Space between logo and button
-              width: "100%", // Ensure the Toolbar takes up full width
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
             }}
           >
             {/* Logo and Title */}
             <Box
               sx={{
-                display: "flex", // Use flex layout for the logo and title
-                alignItems: "center", // Align items vertically
+                display: "flex", //
+                alignItems: "center",
               }}
             >
               <img
                 src={logo}
                 alt="Logo"
-                style={{ height: "50px", marginRight: theme.spacing(2) }}
+                style={{ height: "70px", marginRight: theme.spacing(2) }}
               />
               <Typography variant="h5" color="inherit">
                 <span style={{ color: "#0046c0", fontWeight: "bold" }}>My</span>
@@ -281,7 +421,7 @@ export default function Public() {
             {/* Back to Login Button */}
             <Button
               variant="contained"
-              sx={{  color: "white", marginRight: 5 }}
+              sx={{ color: "white", marginRight: 5 }}
               onClick={() => navigate("/")}
             >
               Back to Login

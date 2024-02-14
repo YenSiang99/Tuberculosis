@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ThemeProvider,
@@ -50,80 +50,118 @@ export default function PatientRegister() {
   const [treatment, setTreatment] = useState("");
   const [treatmentStartMonth, setTreatmentStartMonth] = useState("");
   const [numberOfTablets, setNumberOfTablets] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null); 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [passwordError, setPasswordError] = useState({
+    valid: true,
+    message: "",
+  });
+  const [emailError, setEmailError] = useState({ valid: true, message: "" });
+  const [nricError, setNricError] = useState({ valid: true, message: "" });
+  const [diagnosisDate, setDiagnosisDate] = useState("");
+  const [diagnosisDateError, setDiagnosisDateError] = useState({
+    valid: true,
+    message: "",
+  });
 
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
   };
 
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return {
+        valid: false,
+        message:
+          "Password must be at least 8 characters long and contain at least one letter and one number.",
+      };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const handlePasswordChange = () => {
+    const validationResult = validatePassword(password);
+    setPasswordError(validationResult);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        valid: false,
+        message: "Invalid email format.",
+      };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const handleEmailChange = () => {
+    const validationResult = validateEmail(email);
+    setEmailError(validationResult);
+  };
+
+  const validateNric = (nricNumber) => {
+    if (country === "Malaysia" && nricNumber.length !== 12) {
+      return {
+        valid: false,
+        message: "IC Number must have exactly 12 digits.",
+      };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const handleNricChange = () => {
+    const validationResult = validateNric(nricNumber);
+    setNricError(validationResult);
+    if (validationResult.valid) {
+      setAge(getCurrentAge(nricNumber));
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      emailError.valid &&
+      passwordError.valid &&
+      nricError.valid &&
+      diagnosisDateError.valid
+    );
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Simple email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message: "Invalid email format.",
-      });
-      return;
-    }
-
-    // Simple password validation
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // Minimum eight characters, at least one letter and one number
-    if (!passwordRegex.test(password)) {
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message:
-          "Password must be at least 8 characters long and contain at least one letter and one number.",
-      });
-      return;
-    }
-
-    if (country === "Malaysia" && nricNumber.length !== 12) {
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message: "IC Number must have exactly 12 digits.",
-      });
-      return; // Prevent further processing if validation fails
-    }
-
-    
-
     // Construct the user data object
     const formData = new FormData();
-    formData.append('firstName', firstName);
-    formData.append('lastName', lastName);
-    formData.append('gender', gender);
-    formData.append('email', email);
-    formData.append('password', password);
-    formData.append('phoneNumber', phoneNumber);
-    formData.append('country', country);
-    formData.append('age', age);
-    formData.append('diagnosis', diagnosis);
-    formData.append('currentTreatment', treatment); // Ensure this matches backend field name
-    formData.append('treatmentStartMonth', treatmentStartMonth);
-    formData.append('numberOfTablets', numberOfTablets);
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("gender", gender);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("phoneNumber", phoneNumber);
+    formData.append("country", country);
+    formData.append("age", age);
+    formData.append("diagnosis", diagnosis);
+    formData.append("currentTreatment", treatment); 
+    formData.append("diagnosisDate", diagnosisDate); 
+    formData.append("treatmentStartMonth", treatmentStartMonth);
+    formData.append("numberOfTablets", numberOfTablets);
 
     // Conditionally add NRIC or Passport Number based on the country
     if (country === "Malaysia") {
-      formData.append('nricNumber', nricNumber);
+      formData.append("nricNumber", nricNumber);
     } else {
-      formData.append('passportNumber', passportNumber);
+      formData.append("passportNumber", passportNumber);
     }
 
     if (selectedFile) {
-      formData.append('profilePicture', selectedFile);
+      formData.append("profilePicture", selectedFile);
     }
 
     try {
       // Send a POST request to the backend registration endpoint
       const response = await axios.post("/auth/registerPatient", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       console.log(response.data);
@@ -169,13 +207,37 @@ export default function PatientRegister() {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
-      setSelectedFile(file); 
-  
-      
+      setSelectedFile(file);
     }
   };
 
+  const validateDiagnosisDate = () => {
+    if (!diagnosisDate || !treatmentStartMonth) {
+      setDiagnosisDateError({ valid: true, message: "" });
+      return;
+    }
   
+    const diagnosisDateObj = new Date(diagnosisDate);
+    const treatmentStartYear = parseInt(treatmentStartMonth.substring(0, 4));
+    const treatmentStartMonthIndex = parseInt(treatmentStartMonth.substring(5)) - 1; // Subtract 1 because months are 0-indexed in JavaScript dates
+  
+    // Get the last day of the treatment start month
+    const lastDayOfTreatmentStartMonth = new Date(treatmentStartYear, treatmentStartMonthIndex + 1, 0);
+  
+    if (diagnosisDateObj > lastDayOfTreatmentStartMonth) {
+      setDiagnosisDateError({
+        valid: false,
+        message: "Diagnosis date must be within the same month or earlier than the treatment start month.",
+      });
+    } else {
+      setDiagnosisDateError({ valid: true, message: "" });
+    }
+  };
+  
+
+  useEffect(() => {
+    validateDiagnosisDate();
+  }, [diagnosisDate, treatmentStartMonth]); 
 
   return (
     <ThemeProvider theme={theme}>
@@ -222,18 +284,47 @@ export default function PatientRegister() {
                 Personal Details
               </Typography>
               <Grid container spacing={2}>
-              <Grid item sm={12}>
-                {/* Profile picture upload section */}
-                {profilePicture ? (
-                  <>
-                    {/* Profile picture display */}
-                    <Grid item>
-                      <Avatar
-                        src={profilePicture}
-                        sx={{ width: 90, height: 90 }}
-                      />
-                    </Grid>
-                    {/* Edit photo button */}
+                <Grid item sm={12}>
+                  {/* Profile picture upload section */}
+                  {profilePicture ? (
+                    <>
+                      {/* Profile picture display */}
+                      <Grid item>
+                        <Avatar
+                          src={profilePicture}
+                          sx={{ width: 90, height: 90 }}
+                        />
+                      </Grid>
+                      {/* Edit photo button */}
+                      <Grid item>
+                        <input
+                          accept="image/*"
+                          id="icon-button-file"
+                          type="file"
+                          style={{ display: "none" }}
+                          onChange={handleProfilePictureUpload}
+                        />
+                        <label htmlFor="icon-button-file">
+                          <Button
+                            variant="outlined"
+                            component="span"
+                            startIcon={<CloudUploadIcon />}
+                            style={{
+                              marginTop: "8px",
+                              padding: "10px 14px",
+                              border: "1px solid #ced4da",
+                              borderRadius: "4px",
+                              backgroundColor: "#fff",
+                              textTransform: "none", // Optional: prevents uppercase styling
+                            }}
+                          >
+                            Edit Photo
+                          </Button>
+                        </label>
+                      </Grid>
+                    </>
+                  ) : (
+                    // Upload button only shown when no profile picture is uploaded
                     <Grid item>
                       <input
                         accept="image/*"
@@ -256,41 +347,12 @@ export default function PatientRegister() {
                             textTransform: "none", // Optional: prevents uppercase styling
                           }}
                         >
-                          Edit Photo
+                          Upload Profile Picture
                         </Button>
                       </label>
                     </Grid>
-                  </>
-                ) : (
-                  // Upload button only shown when no profile picture is uploaded
-                  <Grid item>
-                    <input
-                      accept="image/*"
-                      id="icon-button-file"
-                      type="file"
-                      style={{ display: "none" }}
-                      onChange={handleProfilePictureUpload}
-                    />
-                    <label htmlFor="icon-button-file">
-                      <Button
-                        variant="outlined"
-                        component="span"
-                        startIcon={<CloudUploadIcon />}
-                        style={{
-                          marginTop: "8px",
-                          padding: "10px 14px",
-                          border: "1px solid #ced4da",
-                          borderRadius: "4px",
-                          backgroundColor: "#fff",
-                          textTransform: "none", // Optional: prevents uppercase styling
-                        }}
-                      >
-                        Upload Profile Picture
-                      </Button>
-                    </label>
-                  </Grid>
-                )}
-              </Grid>
+                  )}
+                </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -334,18 +396,20 @@ export default function PatientRegister() {
                       native: true,
                     }}
                   >
-                    <option value=''></option>
-                    <option value='male'>Male</option>
-                    <option value='female'>Female</option>
+                    <option value=""></option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
                   </TextField>
                 </Grid>
 
                 <Grid item xs={12}>
                   <PhoneInput
-                    required
                     country={"my"}
                     value={phoneNumber}
-                    onChange={(phoneNumber) => setPhoneNumber(phoneNumber)}
+                    onChange={setPhoneNumber}
+                    onlyCountries={["my"]}
+                    disableDropdown={true}
+                    countryCodeEditable={false}
                     containerStyle={{ width: "100%" }}
                     inputStyle={{ width: "100%", height: "56px" }}
                   />
@@ -378,10 +442,10 @@ export default function PatientRegister() {
                         name="nricNumber"
                         autoComplete="off"
                         value={nricNumber}
-                        onChange={(e) => {
-                          setNRICNumber(e.target.value);
-                          setAge(getCurrentAge(e.target.value));
-                        }}
+                        onChange={(e) => setNRICNumber(e.target.value)} // Set value on change.
+                        onBlur={handleNricChange} // Validate on blur.
+                        error={!nricError.valid}
+                        helperText={nricError.valid ? "" : nricError.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -438,6 +502,9 @@ export default function PatientRegister() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={handleEmailChange}
+                    error={!emailError.valid}
+                    helperText={emailError.valid ? "" : emailError.message}
                   />
                 </Grid>
                 <Grid item xs={12} sx={{ mb: 5 }}>
@@ -452,11 +519,15 @@ export default function PatientRegister() {
                     autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={handlePasswordChange}
+                    error={!passwordError.valid}
+                    helperText={
+                      passwordError.valid ? "" : passwordError.message
+                    }
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
-                            aria-label="toggle password visibility"
                             onClick={() => setShowPassword(!showPassword)}
                             edge="end"
                           >
@@ -559,6 +630,28 @@ export default function PatientRegister() {
                   margin="normal"
                   required
                   fullWidth
+                  id="diagnosisDate"
+                  label="Diagnosis Date"
+                  name="diagnosisDate"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={diagnosisDate}
+                  onChange={(e) => {
+                    setDiagnosisDate(e.target.value);
+                    validateDiagnosisDate();
+                  }}
+                  error={!diagnosisDateError.valid}
+                  helperText={
+                    diagnosisDateError.valid ? "" : diagnosisDateError.message
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
                   id="treatmentStartMonth"
                   label="Treatment Start Month"
                   name="treatmentStartMonth"
@@ -577,8 +670,9 @@ export default function PatientRegister() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={!isFormValid()}
             >
-              Submit
+              Register
             </Button>
           </Box>
         </Paper>

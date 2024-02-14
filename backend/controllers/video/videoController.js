@@ -94,7 +94,7 @@ exports.getOrCreateVideo = async (req, res) => {
       video = new Video({
         patient: userId,
         doctor: req.body.doctorId, // This needs to come from somewhere
-        status: 'pending upload',
+        status: 'pending upload for today',
         date: new Date() // Today's date
       });
       await video.save();

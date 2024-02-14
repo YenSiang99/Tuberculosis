@@ -46,6 +46,7 @@ exports.updateAppointment = async (req, res) => {
 
 // Read
 // Available Slots
+// Show Available Slots with Confirmed Bookings Excluded
 exports.showAvailableSlots = async (req, res) => {
   const { year, month } = req.query; // Expecting year and month in the query parameters
   const startOfTheMonth = new Date(year, month - 1, 1);
@@ -72,9 +73,10 @@ exports.showAvailableSlots = async (req, res) => {
       }
     });
 
-    // Fetch booked or awaiting approval slots from the database for the month
+    // Fetch booked, awaiting approval, and confirmed (approved) slots from the database for the month
+    const excludedStatuses = ["booked", "awaiting approval", "approved"]; // Include "approved" status to exclude confirmed appointments
     const bookedSlots = await Appointment.find({
-      $or: [{ status: "booked" }, { status: "awaiting approval" }],
+      status: { $in: excludedStatuses },
       startDateTime: { $gte: startOfTheMonth },
       endDateTime: { $lte: endOfTheMonth }
     }, 'startDateTime endDateTime');
@@ -88,16 +90,13 @@ exports.showAvailableSlots = async (req, res) => {
       });
   
       let status = "Available";
-      const bookedCount = 6 - availableTimeSlotList.length;
-      if (bookedCount === 6) {
+      if (availableTimeSlotList.length === 0) {
         status = "Fully Booked";
-      } else if (bookedCount >= 3) {
+      } else if (availableTimeSlotList.length <= 3) {
         status = "Limited Slots";
       }
   
-      // Correcting the day property to accurately reflect the start of the day
       return {
-        // Ensure the 'day' represents the start of the day in the correct time zone
         day: formatISO(startOfDay(daySlot.day), { representation: 'date' }) + "T00:00:00.000Z",
         status,
         availableTimeSlotList: availableTimeSlotList.map(slot => ({
@@ -113,16 +112,19 @@ exports.showAvailableSlots = async (req, res) => {
   }
 };
 
+
 // Patient
 exports.readPatientAppointments = async (req, res) => {
   const patientId = req.user.userId;
   try {
-    const appointments = await Appointment.find({ patient: patientId });
+    const appointments = await Appointment.find({ patient: patientId })
+      .populate('healthcare', 'firstName lastName'); // Include the healthcare provider's name
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 //Doctor
 exports.showRequestedAppointments = async (req, res) => {
@@ -180,9 +182,9 @@ exports.deleteAppointment = async (req, res) => {
     // Check if the user is the patient who booked the appointment or the healthcare provider assigned to it
     // Assumes appointment.patient and appointment.healthcare are storing user IDs
     // Adjust field names as per your Appointment model
-    if (appointment.patient.toString() !== userId && (!appointment.healthcare || appointment.healthcare.toString() !== userId)) {
-      return res.status(403).json({ message: 'You are not authorized to delete this appointment' });
-    }
+    // if (appointment.patient.toString() !== userId && (!appointment.healthcare || appointment.healthcare.toString() !== userId)) {
+    //   return res.status(403).json({ message: 'You are not authorized to delete this appointment' });
+    // }
 
     // Authorized to delete the appointment
     await Appointment.deleteOne({ _id: appointmentId });

@@ -47,7 +47,7 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
 
 const getStatusColor = (status) => {
   const statusColorMap = {
-    "pending upload": "#FFF59D", // Light Yellow
+    "pending upload for today": "#FFF59D", // Light Yellow
     "pending approval": "#BBDEFB", // Light Blue
     "approved": "#C8E6C9", // Light Green
     "rejected": "#FFCDD2", // Light Red
@@ -78,7 +78,7 @@ export default function PatientVideo() {
         setVideoData(response.data);
         if (response.data.videoUrl) {
           setVideoURL(response.data.videoUrl);
-          setVideoUploaded(response.data.status !== "pending upload"); // Example condition, adjust based on your API response
+          setVideoUploaded(response.data.status !== "pending upload for today"); // Example condition, adjust based on your API response
         }
       } catch (error) {
         console.error("Error fetching or creating video:", error);
