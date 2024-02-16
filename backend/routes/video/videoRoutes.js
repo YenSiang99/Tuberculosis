@@ -5,17 +5,21 @@ const authenticate = require('../../middlewares/authenticate');
 const { uploadVideo, uploadProfile } = require('../../middlewares/multerConfig');
 const router = express.Router();
 
-// Create
-router.put('/getOrCreateVideo', authenticate, videoController.getOrCreateVideo);
+
 
 // Read
+router.get('/getDailyUserVideo', authenticate, videoController.getDailyUserVideo);
 router.get('/getVideo', authenticate, videoController.getVideo);
 router.get('/getVideo/:videoId', authenticate, videoController.getVideo);
 router.get('/getUsersTable', authenticate, videoController.getUsersTable);
 
 // Update
-router.post('/uploadVideo/:videoId', authenticate, uploadVideo, videoController.uploadVideo);
+router.post('/uploadVideo', authenticate, uploadVideo, videoController.uploadVideo);
 router.patch('/updateVideo/:videoId', authenticate, videoController.updateVideoStatus);
+
+// Test api to inject video for different dates
+router.post('/uploadVideoForDates', authenticate, uploadVideo, videoController.uploadVideoForDates);
+
 
 module.exports = router;
 

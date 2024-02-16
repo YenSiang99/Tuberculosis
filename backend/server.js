@@ -15,6 +15,7 @@ const userRoutes = require('./routes/users/userRoutes');
 const videoRoutes = require('./routes/video/videoRoutes');
 const sideEffectRoutes = require('./routes/sideEffect/sideEffectRoutes');
 const appointmentRoutes = require('./routes/appointment/appointmentRoutes');
+const progressTrackerRoutes = require('./routes/progressTracker/progressTrackerRoutes');
 
 
 const profilesDir = path.join(__dirname, 'media/profiles/');
@@ -40,6 +41,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/sideEffects', sideEffectRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/progressTracker', progressTrackerRoutes);
+
 
 
 // media files

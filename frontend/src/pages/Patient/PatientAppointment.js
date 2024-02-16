@@ -201,6 +201,8 @@ export default function PatientAppointment() {
         cursor: "not-allowed",
       };
     } else {
+      console.log('Date',date)
+
       const dateString = [
         date.getFullYear(),
         ("0" + (date.getMonth() + 1)).slice(-2),
@@ -294,7 +296,7 @@ export default function PatientAppointment() {
         backgroundColor = "#2196f3";
         break;
       default:
-        backgroundColor = "#f5f5f5"; // Gray out the day if not available for booking
+        backgroundColor = "#f5f5f5"; 
     }
 
     const style = {

@@ -19,8 +19,7 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import axios from "../../components/axios";
 import DataViewer from "../../components/reusable/DataViewer";
-
-
+import { format } from 'date-fns';
 
 const localizer = momentLocalizer(moment);
 
@@ -29,28 +28,36 @@ export default function PatientCalendar() {
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const daysPassed = moment().diff(moment().startOf("month"), "days") + 1;
 
-  // Date time varialbes
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedMonth, setSelectedMonth] = useState(moment().month());
-  const [selectedYear, setSelectedYear] = useState(moment().year());
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarViewDate, setCalendarViewDate] = useState(new Date());
 
   const [videoData, setVideoData] = useState([]);
+  const [progressData, setProgressData] = useState({
+    relativeCompletionPercentage: 0,
 
-  const handleMonthChange = (month, year) => {
-    setSelectedMonth(month);
-    setSelectedYear(year);
-  };
+  });
+  const [encouragingWords, setEncouragingWords] = useState();
 
-  const CustomToolbar = ({ onNavigate, label }) => {
+
+
+  const CustomToolbar = ({ onNavigate, label, onMonthChange }) => {
     const navigate = (action) => {
-      const newDate = moment(label, "MMMM YYYY");
-      if (action === "PREV") {
-        newDate.subtract(1, "month");
-      } else if (action === "NEXT") {
-        newDate.add(1, "month");
+      // "action" can be "PREV", "NEXT", or "TODAY"
+      // Create a new Date object based on the current label
+      const currentDate = new Date(label);
+      let newDate = new Date(currentDate);
+
+      if (action === "NEXT") {
+        newDate.setMonth(currentDate.getMonth() + 1);
+      } else if (action === "PREV") {
+        newDate.setMonth(currentDate.getMonth() - 1);
       }
-      handleMonthChange(newDate.month(), newDate.year());
+
+      // Call the onNavigate function provided by react-big-calendar
       onNavigate(action);
+
+      // Call the function passed from the parent component
+      onMonthChange(newDate);
     };
 
     return (
@@ -73,69 +80,10 @@ export default function PatientCalendar() {
     );
   };
 
-  const generateTrackerEvents = (month, year) => {
-    // Correctly initialize the moment object with the desired month and year
-    const startDate = moment()
-      .set({ year: year, month: month })
-      .startOf("month");
-    const endDate = moment().isSame(
-      moment().set({ year: year, month: month }),
-      "month"
-    )
-      ? moment()
-      : moment().set({ year: year, month: month }).endOf("month");
-    const dates = [];
-
-    // Loop through the month to create event dates, but only up to today
-    for (
-      let date = startDate.clone();
-      date.isSameOrBefore(endDate);
-      date.add(1, "days")
-    ) {
-      dates.push({
-        start: date.toDate(),
-        end: date.toDate(),
-        allDay: true,
-      });
-    }
-
-    return dates;
-  };
-
-  const calculateProgress = (events) => {
-    const today = moment();
-    const startOfMonth = moment().startOf("month");
-    const daysPassed = today.diff(startOfMonth, "days") + 1;
-
-    const submittedCount = events.filter((event) => {
-      let eventDate = moment(event.start);
-      return eventDate.isSameOrBefore(today, "day");
-    }).length;
-
-    return Math.round((submittedCount / daysPassed) * 100);
-  };
-
-  const wasVideoSubmitted = (date) => {
-    // Check if the date is today or in the past
-    return moment(date).isSameOrBefore(moment(), "day");
-  };
-
-  const calculateMonthlyProgress = (events, month, year) => {
-    const monthEvents = events.filter((event) => {
-      const eventMonth = moment(event.start).month();
-      const eventYear = moment(event.start).year();
-      return eventMonth === month && eventYear === year;
-    });
-
-    const submittedCount = monthEvents.filter((event) =>
-      wasVideoSubmitted(event.start)
-    ).length;
-    const totalDays = moment().month(month).year(year).daysInMonth();
-
-    return {
-      submittedCount,
-      percentage: Math.round((submittedCount / totalDays) * 100),
-    };
+  const getProgressColor = (progress) => {
+    if (progress < 50) return "#ff4c4c";
+    if (progress < 75) return "#FF9300";
+    return "#32CD32";
   };
 
   const getEncouragingWords = (progress, daysPassed, submittedCount) => {
@@ -149,26 +97,6 @@ export default function PatientCalendar() {
       return "You're on the right track!";
     }
   };
-
-  const getProgressColor = (progress) => {
-    if (progress < 50) return "#ff4c4c";
-    if (progress < 75) return "#FF9300";
-    return "#32CD32";
-  };
-
-  const events = generateTrackerEvents(selectedMonth, selectedYear);
-  const progress = calculateProgress(events);
-  const { submittedCount, percentage } = calculateMonthlyProgress(
-    events,
-    selectedMonth,
-    selectedYear
-  );
-  const encouragingWords = getEncouragingWords(
-    percentage,
-    daysPassed,
-    submittedCount
-  );
-
   function SemiCircleProgressBar({ progress, size = 500 }) {
     const strokeWidth = 8;
     const radius = (size - strokeWidth) / 2;
@@ -231,70 +159,57 @@ export default function PatientCalendar() {
     setDrawerOpen(!drawerOpen);
   };
 
-  const eventStyleGetter = (event, start, end, isSelected) => {
-    // let newStyle = {
-    //   borderRadius: "0px",
-    //   border: "none",
-    // };
+  const eventStyleGetter = (event) => {
+    let backgroundColor = "#fff"; // Default color
+    const style = {
+      backgroundColor,
+      // Other styles if needed
+    };
 
-    // if (wasVideoSubmitted(start)) {
-    //   newStyle.backgroundColor = "#7CC36A";
-    // } else {
-    //   newStyle.backgroundColor = "#ff4c4c";
-    // }
-
-    // return {
-    //   style: newStyle,
-    // };
+    return { style };
   };
-
   const Legend = () => (
     <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
       {/* <Chip label="Video Submitted" sx={{ bgcolor: "#7CC36A", mr: 1 }} /> */}
       {/* <Chip label="Video Not Submitted" sx={{ bgcolor: "#ff4c4c" }} /> */}
     </Box>
   );
-
   const dayPropGetter = (date) => {
-    // let style = {
-    //   backgroundColor: "",
-    //   borderRadius: "0px",
-    // };
-
-    // if (moment(date).isSameOrBefore(moment(), "day")) {
-    //   style.backgroundColor = wasVideoSubmitted(date) ? "#7CC36A" : "#ff4c4c";
-    // }
-
-    // return {
-    //   style: style,
-    // };
     let style = {
       backgroundColor: "",
       borderRadius: "0px",
     };
+    console.log(date)
+    const diagnosisStartDate = moment(progressData.diagnosisDate).startOf('day');
   
-    // Convert the date to the start of the day for comparison
-    const currentDayStart = moment(date).startOf('day');
+    const calendarDay = moment(date).startOf('day');
     const todayStart = moment().startOf('day');
   
-    if (currentDayStart.isBefore(todayStart)) { // Check only for days before today
-      const hasUploaded = videoData.some(video => {
-        const videoDate = moment(video.date).startOf('day');
-        // Check if the video's date is the same as the current day and status is not 'pending upload for today'
-        return currentDayStart.isSame(videoDate) && video.status !== 'pending upload for today';
-      });
+    const targetYear = moment(calendarViewDate).year();
+    const targetMonth = moment(calendarViewDate).month(); // month() returns a 0-based index
   
-      style.backgroundColor = hasUploaded ? "#7CC36A" : "#ff4c4c"; // Green if uploaded, red if not
+    if (calendarDay.year() === targetYear && calendarDay.month() === targetMonth) {
+      if (calendarDay.isBefore(diagnosisStartDate)) {
+        style.backgroundColor = "#F5F5F5"; // Light grey for dates before diagnosis
+      } else if (calendarDay.isBefore(todayStart) && calendarDay.isSameOrAfter(diagnosisStartDate)) {
+        const hasUploaded = videoData.some(video => {
+          // Adjust the video date to the start of the day in the local timezone for fair comparison
+          const videoDate = moment(video.date).startOf('day');
+          return calendarDay.isSame(videoDate);
+        });
+        style.backgroundColor = hasUploaded ? "#7CC36A" : "#ff4c4c"; // Green if uploaded, red if not
+      } else if (calendarDay.isSameOrAfter(todayStart)) {
+        style.backgroundColor = "#E0E0E0"; // Grey out future dates
+      }
     } else {
-      // For today or future dates, you might want to set a default or leave it unstyled
-      style.backgroundColor = ""; // No color or whatever default you wish
+      style.backgroundColor = ""; // No specific style for dates outside the target month/year
     }
   
     return {
       style: style,
     };
   };
-
+  
   const Event = ({ event }) => {
     return (
       <div
@@ -308,10 +223,11 @@ export default function PatientCalendar() {
     );
   };
 
+  // Api functions
   const fetchVideoData = async (year, month) => {
     try {
       const response = await axios.get(
-        `/videos//getVideo?year=${year}&month=${month}`
+        `/videos/getVideo?year=${year}&month=${month}`
       );
       setVideoData(response.data);
     } catch (error) {
@@ -319,18 +235,36 @@ export default function PatientCalendar() {
       // Handle the error as needed
     }
   };
+  const fetchProgressTrackerData = async (year, month) => {
+    try {
+      const response = await axios.get(
+        `/progressTracker?year=${year}&month=${month}`
+      );
+      setProgressData(response.data);
+      setEncouragingWords(getEncouragingWords(response.data.relativeCompletionPercentage,
+        daysPassed,
+        response.data.uploadedDays))
+
+    } catch (error) {
+      console.error("Error fetching Available Date Time Slots:", error);
+      // Handle the error as needed
+    }
+  };
+
+  const handleMonthChange = (newDate) => {
+    setCalendarViewDate(newDate); 
+    const year = newDate.getFullYear();
+    const month = newDate.getMonth() + 1; 
+    fetchVideoData(year, month);
+    fetchProgressTrackerData(year, month);
+  };
 
   useEffect(() => {
-    // Call the getOrCreateVideo API to check or create a video for the day
-    console.log("use effect hook called");
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth() + 1; // JavaScript months are 0-indexed
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
     fetchVideoData(year, month);
-  }, [selectedDate]);
-  
-
- 
-
+    fetchProgressTrackerData(year,month);
+  }, [currentDate]);
   return (
     <ThemeProvider theme={theme}>
       {useMediaQuery(theme.breakpoints.down("sm")) && (
@@ -389,15 +323,12 @@ export default function PatientCalendar() {
                 alignItems: "center",
               }}
             >
-              <SemiCircleProgressBar progress={percentage} size={500} />
+              <SemiCircleProgressBar progress={progressData ? progressData.relativeCompletionPercentage : 0} size={500} />
               <Typography variant="h6" sx={{ fontWeight: "medium", mt: -6 }}>
-                {submittedCount}/
-                {moment().month(selectedMonth).year(selectedYear).daysInMonth()}{" "}
+                {progressData ? progressData.uploadedDays : 0}/
+                {progressData ? progressData.totalDaysInMonth : 0}{" "}
                 videos submitted in{" "}
-                {moment()
-                  .month(selectedMonth)
-                  .year(selectedYear)
-                  .format("MMMM YYYY")}
+                {format(calendarViewDate, 'MMMM yyyy')}
               </Typography>
 
               <Typography
@@ -405,14 +336,16 @@ export default function PatientCalendar() {
                 sx={{
                   mt: 1,
                   mb: 4,
-                  color: getProgressColor(percentage),
+                  color: getProgressColor(progressData ? progressData.relativeCompletionPercentage : 0),
                   fontWeight: "bold",
                 }}
               >
                 {encouragingWords}
               </Typography>
             </Box>
-             <DataViewer data={videoData} variableName="videoData for the month"></DataViewer>
+             {/* <DataViewer data={videoData} variableName="videoData for the month"></DataViewer> */}
+             {/* <DataViewer data={progressData} variableName="progressTracker"></DataViewer> */}
+            
 
             <Calendar
               localizer={localizer}
@@ -423,7 +356,12 @@ export default function PatientCalendar() {
               dayPropGetter={dayPropGetter}
               eventPropGetter={eventStyleGetter}
               components={{
-                toolbar: CustomToolbar,
+                toolbar: (props) => (
+                  <CustomToolbar
+                    {...props}
+                    onMonthChange={handleMonthChange}
+                  />
+                ),
                 event: Event,
               }}
             />

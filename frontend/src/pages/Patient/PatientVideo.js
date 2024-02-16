@@ -57,7 +57,9 @@ const getStatusColor = (status) => {
 };
 
 export default function PatientVideo() {
-  const [videoData, setVideoData] = useState(null);
+  const [videoData, setVideoData] = useState({
+    status: 'pending upload for today',
+  });
   const [videoFile, setVideoFile] = useState(null);
   const [videoURL, setVideoURL] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -66,33 +68,35 @@ export default function PatientVideo() {
     show: false,
     type: "",
     message: "",
-  });
+  });                                                                                                                
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const getDailyUserVideo = async () => {
+    try {
+      const response = await axios.get("/videos/getDailyUserVideo");
+      console.log(response.data)
+      if (response.data){
+        setVideoData(response.data)
+        setVideoURL(response.data.videoUrl);
+        setVideoUploaded(true);
+      }
+      
+    } catch (error) {
+      console.error("Error fetching or creating video:", error);
+      // Optionally set an alert or handle the error in the UI
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Error fetching video daily user video.",
+      });
+    }
+  };
 
   useEffect(() => {
     // Call the getOrCreateVideo API to check or create a video for the day
     console.log('use effect hook called...')
-    const getOrCreateVideo = async () => {
-      try {
-        const response = await axios.put("/videos/getOrCreateVideo");
-        setVideoData(response.data);
-        if (response.data.videoUrl) {
-          setVideoURL(response.data.videoUrl);
-          setVideoUploaded(response.data.status !== "pending upload for today"); // Example condition, adjust based on your API response
-        }
-      } catch (error) {
-        console.error("Error fetching or creating video:", error);
-        // Optionally set an alert or handle the error in the UI
-        setAlertInfo({
-          show: true,
-          type: "error",
-          message: "Error fetching video information.",
-        });
-      }
-    };
-
-    getOrCreateVideo();
+    getDailyUserVideo();
   }, []);
 
   // Function to toggle drawer
@@ -124,17 +128,12 @@ export default function PatientVideo() {
       });
       return;
     }
-
-    // Initialize FormData
     const formData = new FormData();
     formData.append("video", videoFile); // "video" is the key expected by your backend
-
-    // Set upload progress to 0
     setUploadProgress(0);
-
     try {
       const response = await axios.post(
-        `/videos/uploadVideo/${videoData._id}`, // Assuming videoData contains the video ID
+        `/videos/uploadVideo`, // Assuming videoData contains the video ID
         formData,
         {
           headers: {

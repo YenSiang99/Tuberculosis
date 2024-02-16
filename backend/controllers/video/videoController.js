@@ -1,6 +1,6 @@
 // controllers/videoController.js
 const Video = require('../../models/Video');
-const upload = require('../../middlewares/multerConfig');
+const User = require('../../models/User');
 
 
 exports.getVideo = async (req, res) => {
@@ -39,8 +39,6 @@ exports.getVideo = async (req, res) => {
     res.status(500).send('Error retrieving videos: ' + error.message);
   }
 };
-
-
 
 exports.getUsersTable = async (req, res) => {
   try {
@@ -91,7 +89,7 @@ exports.updateVideoStatus = async (req, res) => {
   }
 };
 
-exports.getOrCreateVideo = async (req, res) => {
+exports.getDailyUserVideo = async (req, res) => {
   try {
     // console.log('User : ', req.user)
     const userId = req.user.userId; // Assuming this is set from the authentication middleware
@@ -103,19 +101,19 @@ exports.getOrCreateVideo = async (req, res) => {
       date: { $gte: today }
     });
 
-    if (!video) {
-      // console.log('Video not created for the day, creating video with status pending approval')
-      // No video for today, create a new record
-      video = new Video({
-        patient: userId,
-        doctor: req.body.doctorId, // This needs to come from somewhere
-        status: 'pending upload for today',
-        date: new Date() // Today's date
-      });
-      await video.save();
-    }else{
-      // console.log('Video created, returning video data...')
-    }
+    // if (!video) {
+    //   // console.log('Video not created for the day, creating video with status pending approval')
+    //   // No video for today, create a new record
+    //   video = new Video({
+    //     patient: userId,
+    //     doctor: req.body.doctorId, // This needs to come from somewhere
+    //     status: 'pending upload for today',
+    //     date: new Date() // Today's date
+    //   });
+    //   await video.save();
+    // }else{
+    //   // console.log('Video created, returning video data...')
+    // }
 
     res.json(video);
   } catch (error) {
@@ -125,25 +123,101 @@ exports.getOrCreateVideo = async (req, res) => {
 
 exports.uploadVideo = async (req, res) => {
   try {
-    const videoId = req.params.videoId;
+    const userId = req.user.userId;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of the day
 
-    const video = await Video.findById(videoId);
+    let video = await Video.findOne({
+      patient: userId,
+      date: { $gte: today }
+    });
+
     if (!video) {
-      return res.status(404).send('Video not found');
+      // If no video exists for today, create a new record
+      video = new Video({
+        patient: userId,
+        date: new Date()
+      });
     }
-
     if (req.file) {
+      // Update or set the video URL and status
       video.videoUrl = `${process.env.BASE_URL}/media/videos/${req.file.filename}`;
       video.status = 'pending approval';
       await video.save();
-      res.status(200).send(video);
+      res.status(200).json(video);
     } else {
+      // If no file is provided in the request
       res.status(400).send('No video file provided');
     }
   } catch (error) {
     res.status(500).send('Error uploading video: ' + error.message);
   }
 };
+
+exports.uploadVideoForDates = async (req, res) => {
+  const userId = req.user.userId;
+  const { year, month } = req.query;
+  
+  if (!year || !month) {
+    return res.status(400).json({ message: "Year and month are required as query parameters." });
+  }
+
+  // Retrieve the patient's diagnosis date
+  const patient = await User.findById(userId);
+  if (!patient || !patient.diagnosisDate) {
+    return res.status(404).json({ message: "Patient not found or diagnosis date is missing." });
+  }
+  const diagnosisDate = new Date(patient.diagnosisDate);
+
+  const videoUrl = `${process.env.BASE_URL}/media/videos/${req.file.filename}`;
+
+  // Calculate the range of dates for the specified month and year
+  const startDate = new Date(Date.UTC(year, month - 1, 1)); // Use UTC date for start of month
+  const currentDate = new Date();
+  const currentUTCDate = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()));
+  const endDate = currentUTCDate.getFullYear() === +year && currentUTCDate.getMonth() + 1 === +month ? currentUTCDate : new Date(Date.UTC(year, month, 0)); // Last day of specified month in UTC
+
+  let date = new Date(startDate.getTime());
+  let videoRecords = []
+  while (date <= endDate) {
+    // Ensure date is on or after the diagnosis date
+    if (date >= diagnosisDate) {
+      const videoExists = await Video.findOne({
+        patient: userId,
+        date: {
+          $gte: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0)),
+          $lt: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999))
+        }
+      });
+
+      if (!videoExists) {
+        const videoData = {
+          videoUrl,
+          patient: userId,
+          date: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0)), // Use start of day in UTC
+          status: 'pending approval'
+        };
+        
+        const video = new Video(videoData);
+        await video.save();
+        videoRecords.push(video);
+      }
+    }
+    
+    // Move to the next day
+    date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0)); // Move to next day in UTC
+  }
+
+  if (videoRecords.length > 0) {
+    res.status(201).json(videoRecords);
+  } else {
+    res.status(200).json({ message: "No new video records were created. They either already exist or are before the diagnosis date." });
+  }
+};
+
+
+
+
 
 
 
