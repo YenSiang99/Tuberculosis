@@ -29,7 +29,7 @@ router.get('/patientAppointments', authenticate, readPatientAppointments);
 router.get('/requestedAppointments', authenticate, authorize('healthcare'), showRequestedAppointments);
 
 // Delete
-// router.delete('/:appointmentId', authenticate,authorize(["healthcare","patient"]), deleteAppointment);
-router.delete('/:appointmentId', authenticate, deleteAppointment);
+router.delete('/:appointmentId', authenticate,authorize(["healthcare","patient"]), deleteAppointment);
+// router.delete('/:appointmentId', authenticate, deleteAppointment);
 
 module.exports = router;

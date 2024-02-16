@@ -1,0 +1,10 @@
+
+
+
+/* .rbc-agenda-view table.rbc-agenda-table tbody > tr > td + td {
+  border-left: 1px solid !important
+} */
+
+.rbc-agenda-time-cell {
+  border-left: 1px solid #ddd !important; /* Adjust color as needed */
+}

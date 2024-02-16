@@ -72,6 +72,7 @@ export default function PatientVideo() {
 
   useEffect(() => {
     // Call the getOrCreateVideo API to check or create a video for the day
+    console.log('use effect hook called...')
     const getOrCreateVideo = async () => {
       try {
         const response = await axios.put("/videos/getOrCreateVideo");

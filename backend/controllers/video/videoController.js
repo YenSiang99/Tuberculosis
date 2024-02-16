@@ -6,7 +6,8 @@ const upload = require('../../middlewares/multerConfig');
 exports.getVideo = async (req, res) => {
   try {
     const videoId = req.params.videoId;
-
+    const { year, month } = req.query; // Capture year and month from query params
+    let userId = req.user.userId
     if (videoId) {
       // Fetch a single video by ID
       const video = await Video.findById(videoId);
@@ -14,18 +15,32 @@ exports.getVideo = async (req, res) => {
         return res.status(404).send('Video not found');
       }
       return res.json(video);
-    } else {
-      // Fetch all videos for the current day
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    } else if (year && month) {
+      // Fetch videos for the specified month and year
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0); // 0th day of the next month is the last day of the current month
+      endDate.setHours(23, 59, 59, 999); // Include the end of the last day of the month
 
-      const videos = await Video.find({ date: { $gte: today } });
+      const videos = await Video.find({
+        date: {
+          $gte: startDate,
+          $lte: endDate
+        },
+        patient: userId
+      });
+      res.json(videos);
+    } else {
+      // Fetch all videos for the current day if no year and month are specified
+
+      const videos = await Video.find({});
       res.json(videos);
     }
   } catch (error) {
     res.status(500).send('Error retrieving videos: ' + error.message);
   }
 };
+
+
 
 exports.getUsersTable = async (req, res) => {
   try {

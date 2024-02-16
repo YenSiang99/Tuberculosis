@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ThemeProvider,
   Drawer,
@@ -17,6 +17,10 @@ import PatientSidebar from "../../components/reusable/PatientBar";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import axios from "../../components/axios";
+import DataViewer from "../../components/reusable/DataViewer";
+
+
 
 const localizer = momentLocalizer(moment);
 
@@ -24,8 +28,13 @@ export default function PatientCalendar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const daysPassed = moment().diff(moment().startOf("month"), "days") + 1;
+
+  // Date time varialbes
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMonth, setSelectedMonth] = useState(moment().month());
   const [selectedYear, setSelectedYear] = useState(moment().year());
+
+  const [videoData, setVideoData] = useState([]);
 
   const handleMonthChange = (month, year) => {
     setSelectedMonth(month);
@@ -223,39 +232,64 @@ export default function PatientCalendar() {
   };
 
   const eventStyleGetter = (event, start, end, isSelected) => {
-    let newStyle = {
-      borderRadius: "0px",
-      border: "none",
-    };
+    // let newStyle = {
+    //   borderRadius: "0px",
+    //   border: "none",
+    // };
 
-    if (wasVideoSubmitted(start)) {
-      newStyle.backgroundColor = "#7CC36A";
-    } else {
-      newStyle.backgroundColor = "#ff4c4c";
-    }
+    // if (wasVideoSubmitted(start)) {
+    //   newStyle.backgroundColor = "#7CC36A";
+    // } else {
+    //   newStyle.backgroundColor = "#ff4c4c";
+    // }
 
-    return {
-      style: newStyle,
-    };
+    // return {
+    //   style: newStyle,
+    // };
   };
 
   const Legend = () => (
     <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-      <Chip label="Video Submitted" sx={{ bgcolor: "#7CC36A", mr: 1 }} />
-      <Chip label="Video Not Submitted" sx={{ bgcolor: "#ff4c4c" }} />
+      {/* <Chip label="Video Submitted" sx={{ bgcolor: "#7CC36A", mr: 1 }} /> */}
+      {/* <Chip label="Video Not Submitted" sx={{ bgcolor: "#ff4c4c" }} /> */}
     </Box>
   );
 
   const dayPropGetter = (date) => {
+    // let style = {
+    //   backgroundColor: "",
+    //   borderRadius: "0px",
+    // };
+
+    // if (moment(date).isSameOrBefore(moment(), "day")) {
+    //   style.backgroundColor = wasVideoSubmitted(date) ? "#7CC36A" : "#ff4c4c";
+    // }
+
+    // return {
+    //   style: style,
+    // };
     let style = {
       backgroundColor: "",
       borderRadius: "0px",
     };
-
-    if (moment(date).isSameOrBefore(moment(), "day")) {
-      style.backgroundColor = wasVideoSubmitted(date) ? "#7CC36A" : "#ff4c4c";
+  
+    // Convert the date to the start of the day for comparison
+    const currentDayStart = moment(date).startOf('day');
+    const todayStart = moment().startOf('day');
+  
+    if (currentDayStart.isBefore(todayStart)) { // Check only for days before today
+      const hasUploaded = videoData.some(video => {
+        const videoDate = moment(video.date).startOf('day');
+        // Check if the video's date is the same as the current day and status is not 'pending upload for today'
+        return currentDayStart.isSame(videoDate) && video.status !== 'pending upload for today';
+      });
+  
+      style.backgroundColor = hasUploaded ? "#7CC36A" : "#ff4c4c"; // Green if uploaded, red if not
+    } else {
+      // For today or future dates, you might want to set a default or leave it unstyled
+      style.backgroundColor = ""; // No color or whatever default you wish
     }
-
+  
     return {
       style: style,
     };
@@ -273,6 +307,29 @@ export default function PatientCalendar() {
       />
     );
   };
+
+  const fetchVideoData = async (year, month) => {
+    try {
+      const response = await axios.get(
+        `/videos//getVideo?year=${year}&month=${month}`
+      );
+      setVideoData(response.data);
+    } catch (error) {
+      console.error("Error fetching Available Date Time Slots:", error);
+      // Handle the error as needed
+    }
+  };
+
+  useEffect(() => {
+    // Call the getOrCreateVideo API to check or create a video for the day
+    console.log("use effect hook called");
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth() + 1; // JavaScript months are 0-indexed
+    fetchVideoData(year, month);
+  }, [selectedDate]);
+  
+
+ 
 
   return (
     <ThemeProvider theme={theme}>
@@ -355,9 +412,10 @@ export default function PatientCalendar() {
                 {encouragingWords}
               </Typography>
             </Box>
+             <DataViewer data={videoData} variableName="videoData for the month"></DataViewer>
+
             <Calendar
               localizer={localizer}
-              events={generateTrackerEvents()}
               startAccessor="start"
               endAccessor="end"
               style={{ height: "60vh" }}
