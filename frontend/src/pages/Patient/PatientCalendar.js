@@ -41,24 +41,32 @@ export default function PatientCalendar() {
 
 
   const CustomToolbar = ({ onNavigate, label, onMonthChange }) => {
+    const treatmentStartDate = moment(progressData.treatmentStartDate);
+  
     const navigate = (action) => {
-      // "action" can be "PREV", "NEXT", or "TODAY"
-      // Create a new Date object based on the current label
-      const currentDate = new Date(label);
-      let newDate = new Date(currentDate);
-
+      const currentDate = moment(label, "MMMM YYYY");
+      let newDate = moment(currentDate);
+  
       if (action === "NEXT") {
-        newDate.setMonth(currentDate.getMonth() + 1);
+        newDate.add(1, 'months');
       } else if (action === "PREV") {
-        newDate.setMonth(currentDate.getMonth() - 1);
+        newDate.subtract(1, 'months');
       }
-
-      // Call the onNavigate function provided by react-big-calendar
+  
+      // Check if newDate is before treatmentStartDate
+      if (newDate.isBefore(treatmentStartDate, 'month')) {
+        alert("You cannot access months before your treatment started.");
+        return; // Stop the navigation if it's before the treatment start date
+      }
+  
+      // Proceed with navigation
       onNavigate(action);
-
-      // Call the function passed from the parent component
-      onMonthChange(newDate);
+      onMonthChange(newDate.toDate());
     };
+  
+    // Determine if the PREV button should be disabled
+    const isPrevDisabled = moment(label, "MMMM YYYY").isSameOrBefore(treatmentStartDate, 'month');
+  
 
     return (
       <Box
@@ -69,7 +77,7 @@ export default function PatientCalendar() {
           margin: "10px 0",
         }}
       >
-        <IconButton onClick={() => navigate("PREV")}>
+        <IconButton onClick={() => navigate("PREV")} disabled={isPrevDisabled}>
           <NavigateBefore />
         </IconButton>
         <span>{label}</span>
@@ -97,6 +105,9 @@ export default function PatientCalendar() {
       return "You're on the right track!";
     }
   };
+
+
+
   function SemiCircleProgressBar({ progress, size = 500 }) {
     const strokeWidth = 8;
     const radius = (size - strokeWidth) / 2;
@@ -170,8 +181,29 @@ export default function PatientCalendar() {
   };
   const Legend = () => (
     <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-      {/* <Chip label="Video Submitted" sx={{ bgcolor: "#7CC36A", mr: 1 }} /> */}
-      {/* <Chip label="Video Not Submitted" sx={{ bgcolor: "#ff4c4c" }} /> */}
+      <Chip 
+        label="Video Submitted" 
+        sx={{ 
+          bgcolor: "#7CC36A", 
+          mr: 1, 
+          fontSize: '1rem', 
+          height: '35px', 
+          '& .MuiChip-label': { 
+            padding: '0 12px',
+          },
+        }} 
+      />
+      <Chip 
+        label="Video Missed" 
+        sx={{ 
+          bgcolor: "#ff8080", 
+          fontSize: '1rem', 
+          height: '35px', 
+          '& .MuiChip-label': { 
+            padding: '0 12px',
+          },
+        }} 
+      />
     </Box>
   );
   const dayPropGetter = (date) => {
@@ -179,9 +211,7 @@ export default function PatientCalendar() {
       backgroundColor: "",
       borderRadius: "0px",
     };
-    console.log(date)
-    const diagnosisStartDate = moment(progressData.diagnosisDate).startOf('day');
-  
+    const treatmentStartDate = moment(progressData.treatmentStartDate).startOf('day');
     const calendarDay = moment(date).startOf('day');
     const todayStart = moment().startOf('day');
   
@@ -189,16 +219,23 @@ export default function PatientCalendar() {
     const targetMonth = moment(calendarViewDate).month(); // month() returns a 0-based index
   
     if (calendarDay.year() === targetYear && calendarDay.month() === targetMonth) {
-      if (calendarDay.isBefore(diagnosisStartDate)) {
-        style.backgroundColor = "#F5F5F5"; // Light grey for dates before diagnosis
-      } else if (calendarDay.isBefore(todayStart) && calendarDay.isSameOrAfter(diagnosisStartDate)) {
+      if (calendarDay.isBefore(treatmentStartDate)) {
+        style.backgroundColor = "#E0E0E0"; // Light grey for dates before treatment
+      } else if (calendarDay.isBefore(todayStart) && calendarDay.isSameOrAfter(treatmentStartDate)) {
         const hasUploaded = videoData.some(video => {
-          // Adjust the video date to the start of the day in the local timezone for fair comparison
           const videoDate = moment(video.date).startOf('day');
           return calendarDay.isSame(videoDate);
         });
-        style.backgroundColor = hasUploaded ? "#7CC36A" : "#ff4c4c"; // Green if uploaded, red if not
-      } else if (calendarDay.isSameOrAfter(todayStart)) {
+        style.backgroundColor = hasUploaded ? "#7CC36A" : "#ff8080"; // Green if uploaded, red if not
+      } else if (calendarDay.isSame(todayStart)) {
+        // Check if there is a video uploaded for today
+        const todayUploaded = videoData.some(video => moment(video.date).startOf('day').isSame(todayStart));
+        if (todayUploaded) {
+          style.backgroundColor = "#7CC36A"; // Green for today if video uploaded
+        } else {
+          style.backgroundColor = "#FFFFFF"; // White for today if no video uploaded
+        }
+      } else if (calendarDay.isAfter(todayStart)) {
         style.backgroundColor = "#E0E0E0"; // Grey out future dates
       }
     } else {
@@ -210,6 +247,8 @@ export default function PatientCalendar() {
     };
   };
   
+  
+
   const Event = ({ event }) => {
     return (
       <div

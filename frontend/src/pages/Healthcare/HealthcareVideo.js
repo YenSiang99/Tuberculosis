@@ -31,26 +31,9 @@ export default function HealthcarePatient() {
   const [patients, setPatients] = useState([]);
   const [videos, setVideos] = useState([]);
 
-  const getToken = () => {
-    // Try to get the token from sessionStorage
-    let token = sessionStorage.getItem("token");
-
-    // If not found in sessionStorage, try localStorage
-    if (!token) {
-      token = localStorage.getItem("token");
-    }
-
-    return token;
-  };
-
   const fetchPatients = async () => {
-    const token = getToken();
     try {
-      const response = await axios.get("/videos/getUsersTable", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get("/videos/getUsersTable");
       setPatients(response.data);
       console.log(response.data);
     } catch (error) {
@@ -71,15 +54,9 @@ export default function HealthcarePatient() {
   };
 
   const openVideoDialog = async (patient) => {
-    const token = getToken();
     try {
       // Use `patient._id` if the ID field is named `_id`
-      const response = await axios.get(`/videos/getVideo/${patient._id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      // Assuming the video data is directly in the response
+      const response = await axios.get(`/videos/getVideo/${patient._id}`);
       const videoData = response.data;
       console.log("video response:", response.data);
       setSelectedPatient({ ...patient, videoUrl: videoData.videoUrl });
@@ -100,12 +77,9 @@ export default function HealthcarePatient() {
   };
 
   const updateVideoStatus = async (videoId, newStatus) => {
-    const token = getToken();
     try {
-      await axios.patch(`/videos/updateVideo/${videoId}`, { status: newStatus }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await axios.patch(`/videos/updateVideo/${videoId}`, {
+        status: newStatus,
       });
       console.log(`Video status updated to ${newStatus}`);
       // After updating, you might want to refresh the list of patients or videos
@@ -114,21 +88,20 @@ export default function HealthcarePatient() {
       console.error("Error updating video status", error);
     }
   };
-  
+
   const handleAccept = () => {
     if (selectedPatient && selectedPatient._id) {
       updateVideoStatus(selectedPatient._id, "approved");
       closeVideoDialog();
     }
   };
-  
+
   const handleReject = () => {
     if (selectedPatient && selectedPatient._id) {
       updateVideoStatus(selectedPatient._id, "rejected");
       closeVideoDialog();
     }
   };
-  
 
   return (
     <ThemeProvider theme={theme}>
@@ -191,58 +164,59 @@ export default function HealthcarePatient() {
               </Typography>
 
               <List>
-  {patients.map((patient) => (
-    <Card
-      key={patient.id}
-      sx={{
-        mb: 2,
-        bgcolor: patient.status === "approved" ? "#c8e6c9"
-               : patient.status === "rejected" ? "#ffcdd2"
-               : "neutral.light",
-      }}
-    >
-      <CardContent>
-        <ListItem>
-          <Avatar
-            src={patient.profilePicture}
-            alt={`${patient.firstName} ${patient.lastName}`}
-            sx={{ mr: 2 }}
-          />
-          <ListItemText primary={`${patient.patientName}`} />
-          {patient.status === "approved" && (
-            <Button
-              variant="contained"
-              disabled
-              sx={{ bgcolor: "#c8e6c9" }}
-            >
-              Approved
-            </Button>
-          )}
-          {patient.status === "rejected" && (
-            <Button
-              variant="contained"
-              disabled
-              sx={{ bgcolor: "#ffcdd2" }}
-            >
-              Rejected
-            </Button>
-          )}
-          {patient.status === "pending approval" && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => openVideoDialog(patient)}
-            >
-              Review video
-            </Button>
-          )}
-        </ListItem>
-      </CardContent>
-    </Card>
-  ))}
-</List>
-
-
+                {patients.map((patient) => (
+                  <Card
+                    key={patient.id}
+                    sx={{
+                      mb: 2,
+                      bgcolor:
+                        patient.status === "approved"
+                          ? "#c8e6c9"
+                          : patient.status === "rejected"
+                          ? "#ffcdd2"
+                          : "neutral.light",
+                    }}
+                  >
+                    <CardContent>
+                      <ListItem>
+                        <Avatar
+                          src={patient.profilePicture}
+                          alt={`${patient.firstName} ${patient.lastName}`}
+                          sx={{ mr: 2 }}
+                        />
+                        <ListItemText primary={`${patient.patientName}`} />
+                        {patient.status === "approved" && (
+                          <Button
+                            variant="contained"
+                            disabled
+                            sx={{ bgcolor: "#c8e6c9" }}
+                          >
+                            Approved
+                          </Button>
+                        )}
+                        {patient.status === "rejected" && (
+                          <Button
+                            variant="contained"
+                            disabled
+                            sx={{ bgcolor: "#ffcdd2" }}
+                          >
+                            Rejected
+                          </Button>
+                        )}
+                        {patient.status === "pending approval" && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => openVideoDialog(patient)}
+                          >
+                            Review video
+                          </Button>
+                        )}
+                      </ListItem>
+                    </CardContent>
+                  </Card>
+                ))}
+              </List>
             </Box>
           </Paper>
         </Container>
@@ -279,7 +253,7 @@ export default function HealthcarePatient() {
                 <CardContent>
                   {/* Directly display the video player if a video URL is available for the selected patient */}
                   {selectedPatient?.videoUrl && (
-                    <video width="100%" controls>
+                    <video width="40%" height="60%" controls>
                       <source src={selectedPatient.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>

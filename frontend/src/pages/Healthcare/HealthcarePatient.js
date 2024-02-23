@@ -24,12 +24,19 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  TableContainer,
+  Table,
+  TableHead,
+  TableCell,
+  TableBody,
+  TableRow,
+  Alert,
+  styled,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import theme from "../../components/reusable/Theme";
 import FaceIcon from "@mui/icons-material/Face";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import NoteIcon from "@mui/icons-material/Note";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
@@ -39,6 +46,7 @@ import "react-calendar/dist/Calendar.css";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
+import { format, isValid, parseISO } from "date-fns";
 import axios from "../../components/axios";
 
 const useStyles = makeStyles({
@@ -56,35 +64,33 @@ export default function HealthcarePatient() {
   const classes = useStyles();
   const [dateState, setDateState] = useState(new Date());
   const [editTreatmentInfo, setEditTreatmentInfo] = useState(false);
-  const [editNotes, setEditNotes] = useState(false);
   const [tempTreatmentInfo, setTempTreatmentInfo] = useState({});
-  const [tempNotes, setTempNotes] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [patients, setPatients] = useState([]);
-  const [noteOption, setNoteOption] = useState("");
+  const [videoStatuses, setVideoStatuses] = useState([]);
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    type: "",
+    message: "",
+    nextAlert: null,
+  });
 
-  const getToken = () => {
-    // Try to get the token from sessionStorage
-    let token = sessionStorage.getItem("token");
-
-    // If not found in sessionStorage, try localStorage
-    if (!token) {
-      token = localStorage.getItem("token");
-    }
-
-    return token;
+  const handleCloseAlert = () => {
+    setAlertInfo({ show: false, type: "", message: "" });
   };
 
+  const CustomDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+      boxShadow: "none",
+      overflow: "visible",
+    },
+  }));
+
   const fetchPatients = async () => {
-    const token = getToken();
     try {
-      const response = await axios.get("/users/patients", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get("/users/patients");
       setPatients(response.data);
-      console.log(patients)
+      console.log(patients);
     } catch (error) {
       console.error("Error fetching patients", error);
       // Handle error (e.g., show an error message)
@@ -95,11 +101,6 @@ export default function HealthcarePatient() {
     fetchPatients();
   }, []);
 
-  const videoStatus = {
-    "2024-01-01": "accepted",
-    "2024-01-02": "rejected",
-    // ... other dates
-  };
   const [selectedPatient, setSelectedPatient] = useState(null);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -108,7 +109,11 @@ export default function HealthcarePatient() {
   };
 
   const openManageDialog = (patient) => {
+    console.log("Patient", patient);
     setSelectedPatient(patient);
+    setVideoStatuses([]);
+    fetchSideEffectsForPatient(patient._id);
+    fetchVideoStatusForPatient(patient._id);
   };
 
   const closeManageDialog = () => {
@@ -119,41 +124,62 @@ export default function HealthcarePatient() {
     setSelectedPatient({ ...selectedPatient, [field]: event.target.value });
   };
 
-  const toggleEditTreatmentInfo = () => {
+  const toggleEditTreatmentInfo = async (shouldSave = true) => {
     if (editTreatmentInfo) {
-      // If canceling, revert to the original data
-      handleFieldChange(
-        { target: { value: tempTreatmentInfo.diagnosis } },
-        "diagnosis"
-      );
-      handleFieldChange(
-        { target: { value: tempTreatmentInfo.currentTreatment } },
-        "treatment"
-      );
-      handleFieldChange(
-        { target: { value: tempTreatmentInfo.treatmentStartMonth } },
-        "treatmentStartMonth"
-      );
+      if (shouldSave) {
+        try {
+          await axios.put(`users/patients/treatment/${selectedPatient._id}`, {
+            diagnosis: selectedPatient.diagnosis,
+            currentTreatment: selectedPatient.currentTreatment,
+            numberOfTablets: selectedPatient.numberOfTablets,
+            diagnosisDate: selectedPatient.diagnosisDate,
+            treatmentStartDate: selectedPatient.treatmentStartDate,
+            treatmentDuration: selectedPatient.treatmentDuration,
+            careStatus: selectedPatient.careStatus,
+          });
+
+          // Optionally refresh patient data here to reflect the changes
+          fetchPatients();
+
+          setAlertInfo({
+            show: true,
+            type: "success",
+            message: "Treatment information updated successfully.",
+          });
+        } catch (error) {
+          console.error(
+            "Error saving treatment information",
+            error.response.data
+          );
+
+          setAlertInfo({
+            show: true,
+            type: "error",
+            message:
+              "Failed to update treatment information. Please try again.",
+          });
+        }
+      } else {
+        // If canceling, revert to the original data
+        setSelectedPatient((prevState) => ({
+          ...prevState,
+          ...tempTreatmentInfo,
+        }));
+      }
     } else {
       // If starting to edit, store the current data as a backup
       setTempTreatmentInfo({
         diagnosis: selectedPatient.diagnosis,
         currentTreatment: selectedPatient.currentTreatment,
-        treatmentStartMonth: selectedPatient.treatmentStartMonth,
+        numberOfTablets: selectedPatient.numberOfTablets,
+        diagnosisDate: selectedPatient.diagnosisDate,
+        treatmentStartDate: selectedPatient.treatmentStartDate,
+        treatmentDuration: selectedPatient.treatmentDuration,
+        careStatus: selectedPatient.careStatus,
       });
     }
-    setEditTreatmentInfo(!editTreatmentInfo);
-  };
 
-  const toggleEditNotes = () => {
-    if (editNotes) {
-      // If canceling, revert to the original data
-      handleFieldChange({ target: { value: tempNotes } }, "notes");
-    } else {
-      // If starting to edit, store the current data as a backup
-      setTempNotes(selectedPatient.notes);
-    }
-    setEditNotes(!editNotes);
+    setEditTreatmentInfo(!editTreatmentInfo);
   };
 
   // Add a function to handle date change
@@ -164,8 +190,27 @@ export default function HealthcarePatient() {
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      const dateString = date.toISOString().split("T")[0]; // format date to YYYY-MM-DD
-      return classes[videoStatus[dateString]] || "";
+      const dateString = format(date, "yyyy-MM-dd");
+      const treatmentStartDateString = selectedPatient?.treatmentStartDate
+        ? format(parseISO(selectedPatient.treatmentStartDate), "yyyy-MM-dd")
+        : null;
+
+      // Only proceed if we have a treatment start date and it's on or before the current date being rendered by the calendar
+      if (treatmentStartDateString && dateString >= treatmentStartDateString) {
+        const videoForDay = videoStatuses.find(
+          (video) => format(parseISO(video.date), "yyyy-MM-dd") === dateString
+        );
+
+        if (videoForDay) {
+          return classes.accepted; // Video submitted
+        } else {
+          const todayString = format(new Date(), "yyyy-MM-dd");
+
+          if (dateString < todayString) {
+            return classes.rejected; // Video missed
+          }
+        }
+      }
     }
   };
 
@@ -173,71 +218,80 @@ export default function HealthcarePatient() {
     <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
       <Box display="flex" alignItems="center" mr={2}>
         <Box sx={{ width: 16, height: 16, bgcolor: "#c8e6c9", mr: 1 }} />
-        <Typography variant="body2">Accepted Video</Typography>
+        <Typography variant="body2">Video Submitted</Typography>
       </Box>
       <Box display="flex" alignItems="center">
         <Box sx={{ width: 16, height: 16, bgcolor: "#ffcdd2", mr: 1 }} />
-        <Typography variant="body2">Rejected Video</Typography>
+        <Typography variant="body2">Video Missed</Typography>
       </Box>
     </Box>
   );
 
-  // Function to get the full label for a diagnosis value
-  const getDiagnosisLabel = (value) => {
-    const option = diagnosisOptions.find((option) =>
-      option.value.includes(value)
-    );
-    return option ? option.label : value;
+  const diagnosisOptions = {
+    SPPTB: "Smear positive pulmonary tuberculosis (SPPTB)",
+    SNTB: "Smear negative pulmonary tuberculosis (SNTB)",
+    EXPTB: "Extrapulmonary tuberculosis (EXPTB)",
+    LTBI: "Latent TB infection (LTBI)",
   };
 
-  // Function to get the full label for a treatment value
-  const getTreatmentLabel = (value) => {
-    const option = treatmentOptions.find((option) =>
-      option.value.includes(value)
-    );
-    return option ? option.label : value;
+  const treatmentOptions = {
+    "Akurit-4": "Akurit-4 (EHRZ Fixed dose combination)",
+    Akurit: "Akurit (HR Fixed dose combination)",
+    Pyridoxine: "Pyridoxine 10mg",
   };
 
-  const diagnosisOptions = [
-    {
-      value: "Smear positive pulmonary tuberculosis (SPPTB)",
-      label: "Smear positive pulmonary tuberculosis (SPPTB)",
-    },
-    {
-      value: "Smear negative pulmonary tuberculosis (SNTB)",
-      label: "Smear negative pulmonary tuberculosis (SNTB)",
-    },
-    {
-      value: "Extrapulmonary tuberculosis (EXPTB)",
-      label: "Extrapulmonary tuberculosis (EXPTB)",
-    },
-    {
-      value: "Latent TB infection (LTBI)",
-      label: "Latent TB infection (LTBI)",
-    },
-  ];
+  const tabletOptions = [2, 3, 4, 5];
 
-  const treatmentOptions = [
-    {
-      value: "Akurit-4 (EHRZ Fixed dose combination)",
-      label: "Akurit-4 (EHRZ Fixed dose combination)",
-    },
-    {
-      value: "Akurit (HR Fixed dose combination)",
-      label: "Akurit (HR Fixed dose combination)",
-    },
-    { value: "Pyridoxine 10mg", label: "Pyridoxine 10mg" },
-  ];
-
-  const gradeOptions = [
-    { value: 1, label: "Grade 1" },
-    { value: 2, label: "Grade 2" },
-    { value: 3, label: "Grade 3" },
-  ];
+  const statusOptions = {
+    "Continue VOTS": "Continue VOTS",
+    "Switch to DOTS": "Switch to DOTS",
+    "Appointment to see doctor": "Appointment to see doctor",
+  };
 
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
+  const formatDate = (dateString) => {
+    const date = parseISO(dateString);
+    if (isValid(date)) {
+      return format(date, "dd-MM-yyyy");
+    }
+    return "Invalid date";
+  };
+
+  const fetchSideEffectsForPatient = async (patientId) => {
+    try {
+      const response = await axios.get(`/sideEffects/patient/${patientId}`);
+      if (response.data) {
+        setSelectedPatient((prevState) => ({
+          ...prevState,
+          sideEffects: response.data,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching side effects", error);
+    }
+  };
+
+  const fetchVideoStatusForPatient = async (patientId) => {
+    try {
+      const response = await axios.get(`/videos/patientVideos/${patientId}`);
+      if (response.data) {
+        setVideoStatuses(response.data);
+      } else {
+        // If the API call succeeds but returns no data, clear the video statuses
+        setVideoStatuses([]);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        // If a 404 error is returned, indicating no videos found, clear the video statuses
+        setVideoStatuses([]);
+      } else {
+        console.error("Error fetching video statuses", error);
+      }
+    }
   };
 
   return (
@@ -306,6 +360,15 @@ export default function HealthcarePatient() {
                         />
                         <ListItemText
                           primary={`${patient.firstName} ${patient.lastName}`}
+                          secondary={
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="textSecondary"
+                            >
+                              Status: {patient.careStatus}
+                            </Typography>
+                          }
                         />
                         <Button
                           variant="contained"
@@ -396,6 +459,7 @@ export default function HealthcarePatient() {
               </Card>
             </Grid>
 
+            {/* Treatment Details */}
             <Grid item xs={12}>
               <Card sx={{ mb: 2 }}>
                 <CardContent>
@@ -425,19 +489,38 @@ export default function HealthcarePatient() {
                   {editTreatmentInfo ? (
                     <>
                       <FormControl fullWidth margin="normal">
+                        <InputLabel id="status-label">Status</InputLabel>
+                        <Select
+                          labelId="status-label"
+                          id="careStatus"
+                          value={selectedPatient.careStatus}
+                          label="Status"
+                          onChange={(event) =>
+                            handleFieldChange(event, "careStatus")
+                          }
+                        >
+                          {Object.keys(statusOptions).map((key) => (
+                            <MenuItem key={key} value={key}>
+                              {statusOptions[key]}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <FormControl fullWidth margin="normal">
                         <InputLabel id="diagnosis-label">Diagnosis</InputLabel>
                         <Select
                           labelId="diagnosis-label"
                           id="diagnosis"
-                          value={getDiagnosisLabel(selectedPatient.diagnosis)}
+                          value={selectedPatient.diagnosis || ""}
                           label="Diagnosis"
                           onChange={(event) =>
                             handleFieldChange(event, "diagnosis")
                           }
                         >
-                          {diagnosisOptions.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
+                          {Object.keys(diagnosisOptions).map((key) => (
+                            <MenuItem key={key} value={key}>
+                              {diagnosisOptions[key]}
                             </MenuItem>
                           ))}
                         </Select>
@@ -448,42 +531,72 @@ export default function HealthcarePatient() {
                         <Select
                           labelId="treatment-label"
                           id="currentTreatment"
-                          value={getTreatmentLabel(
-                            selectedPatient.currentTreatment
-                          )}
+                          value={selectedPatient.currentTreatment}
                           label="Treatment"
                           onChange={(event) =>
                             handleFieldChange(event, "currentTreatment")
                           }
                         >
-                          {treatmentOptions.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
+                          {Object.keys(treatmentOptions).map((key) => (
+                            <MenuItem key={key} value={key}>
+                              {treatmentOptions[key]}
                             </MenuItem>
                           ))}
                         </Select>
                       </FormControl>
+
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel id="tablets-label">
+                          Number of Tablets
+                        </InputLabel>
+                        <Select
+                          labelId="tablets-label"
+                          id="numberOfTablets"
+                          value={selectedPatient.numberOfTablets}
+                          label="Number of Tablets"
+                          onChange={(event) =>
+                            handleFieldChange(event, "numberOfTablets")
+                          }
+                        >
+                          {tabletOptions.map((option) => (
+                            <MenuItem key={option} value={option}>
+                              {option}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
                       <TextField
-                        label="Number of Tablets"
-                        type="number"
+                        type="date"
+                        label="Diagnosis Date"
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        InputProps={{ inputProps: { min: 2 } }}
-                        value={selectedPatient?.numberOfTablets}
+                        value={selectedPatient?.diagnosisDate}
                         onChange={(event) =>
-                          handleFieldChange(event, " numberOfTablets")
+                          handleFieldChange(event, "diagnosisDate")
                         }
                       />
                       <TextField
-                        type="month"
-                        label="Treatment Start Month"
+                        type="date"
+                        label="Treatment Start Date"
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        value={selectedPatient?.treatmentStartMonth}
+                        value={selectedPatient?.treatmentStartDate}
                         onChange={(event) =>
-                          handleFieldChange(event, "treatmentStartMonth")
+                          handleFieldChange(event, "treatmentStartDate")
+                        }
+                      />
+                      <TextField
+                        type="number"
+                        label="Treatment Duration (Month)"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        value={selectedPatient?.treatmentDuration}
+                        onChange={(event) =>
+                          handleFieldChange(event, "treatmentDuration")
                         }
                       />
                       {editTreatmentInfo && (
@@ -491,14 +604,14 @@ export default function HealthcarePatient() {
                           <Button
                             variant="contained"
                             color="primary"
-                            onClick={toggleEditTreatmentInfo}
+                            onClick={() => toggleEditTreatmentInfo()}
                             sx={{ mt: 2, mr: 2 }}
                           >
                             Save
                           </Button>
                           <Button
                             variant="outlined"
-                            onClick={toggleEditTreatmentInfo}
+                            onClick={() => toggleEditTreatmentInfo(false)}
                             sx={{ mt: 2 }}
                           >
                             Cancel
@@ -509,15 +622,20 @@ export default function HealthcarePatient() {
                   ) : (
                     <>
                       <Typography variant="body1">
-                        <b>Diagnosis:</b>{" "}
-                        {selectedPatient
-                          ? getDiagnosisLabel(selectedPatient.diagnosis)
-                          : "N/A"}
+                        <b>Status:</b>{" "}
+                        {selectedPatient ? selectedPatient.careStatus : "N/A"}
                       </Typography>
                       <Typography variant="body1">
+                        <b>Diagnosis:</b>{" "}
+                        {selectedPatient?.diagnosis
+                          ? diagnosisOptions[selectedPatient.diagnosis]
+                          : "N/A"}
+                      </Typography>
+
+                      <Typography variant="body1">
                         <b>Current Treatment:</b>{" "}
-                        {selectedPatient
-                          ? getTreatmentLabel(selectedPatient.currentTreatment)
+                        {selectedPatient?.currentTreatment
+                          ? treatmentOptions[selectedPatient.currentTreatment]
                           : "N/A"}
                       </Typography>
 
@@ -526,8 +644,16 @@ export default function HealthcarePatient() {
                         {selectedPatient?.numberOfTablets}
                       </Typography>
                       <Typography variant="body1">
-                        <b>Treatment Start Month:</b>{" "}
-                        {selectedPatient?.treatmentStartMonth}
+                        <b>Diagnosis Date:</b>{" "}
+                        {formatDate(selectedPatient?.diagnosisDate)}
+                      </Typography>
+                      <Typography variant="body1">
+                        <b>Treatment Start Date:</b>{" "}
+                        {formatDate(selectedPatient?.treatmentStartDate)}
+                      </Typography>
+                      <Typography variant="body1">
+                        <b>Treatment Duration:</b>{" "}
+                        {selectedPatient?.treatmentDuration}
                       </Typography>
                     </>
                   )}
@@ -535,6 +661,66 @@ export default function HealthcarePatient() {
               </Card>
             </Grid>
 
+            {/* Side effect history */}
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ bgcolor: "#e1f5fe", p: 2 }}>
+                    <Typography variant="h6" gutterBottom>
+                      <SideEffectIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
+                      Side Effect History
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 2 }} />
+                  {selectedPatient?.sideEffects &&
+                  selectedPatient.sideEffects.length > 0 ? (
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: "#0046c0" }}>
+                            <TableCell sx={{ color: "white" }}>
+                              Date and Time
+                            </TableCell>
+                            <TableCell sx={{ color: "white" }}>
+                              Side Effects
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {selectedPatient.sideEffects.map((effect, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                {format(
+                                  parseISO(effect.datetime),
+                                  "d MMMM yyyy, h:mm a"
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <ul>
+                                  {effect.sideEffects.map((e, idx) => (
+                                    <li key={idx}>
+                                      {e.effect === "Others (Please Describe)"
+                                        ? e.description // Display description for "Others (Please Describe)"
+                                        : `${e.effect} (Grade ${e.grade})`}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <Typography variant="body1" sx={{ mt: 2 }}>
+                      No side effect reported.
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Video status calendar */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
@@ -560,105 +746,19 @@ export default function HealthcarePatient() {
                 </CardContent>
               </Card>
             </Grid>
-
-            <Grid item xs={12}>
-  <Card>
-    <CardContent>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        bgcolor="#e1f5fe"
-        sx={{ p: 2 }}
-      >
-        <Typography variant="h6" gutterBottom>
-          <NoteIcon sx={{ verticalAlign: "middle", mr: 1 }} /> Notes
-        </Typography>
-        {!editNotes && (
-          <IconButton onClick={toggleEditNotes} size="small">
-            <EditIcon color="primary" />
-          </IconButton>
-        )}
-      </Box>
-      <Divider sx={{ mb: 2 }} />
-      {editNotes ? (
-        <>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="note-option-label">Note Option</InputLabel>
-            <Select
-              labelId="note-option-label"
-              id="note-option-select"
-              value={noteOption}
-              label="Note Option"
-              onChange={(event) => setNoteOption(event.target.value)}
-            >
-              <MenuItem value={"Continue VOTS"}>Continue VOTS</MenuItem>
-              <MenuItem value={"Switch to DOTS"}>Switch to DOTS</MenuItem>
-              <MenuItem value={"Completed treatment"}>Completed treatment</MenuItem>
-            </Select>
-          </FormControl>
-          <Box display="flex" justifyContent="flex-end">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                toggleEditNotes();
-                // Here, handle saving the note option and any additional notes
-              }}
-              sx={{ mt: 2, mr: 2 }}
-            >
-              Save
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={toggleEditNotes}
-              sx={{ mt: 2 }}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </>
-      ) : (
-        <Typography variant="body1">
-          {selectedPatient?.notes ? `Option: ${noteOption}, Notes: ${selectedPatient.notes}` : "No notes"}
-        </Typography>
-      )}
-    </CardContent>
-  </Card>
-</Grid>
-
-
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ bgcolor: "#e1f5fe", p: 2 }}>
-                    <Typography variant="h6" gutterBottom>
-                      <SideEffectIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
-                      Side Effect History
-                    </Typography>
-                  </Box>
-                  <Divider sx={{ mb: 2 }} />
-                  <List>
-                    {selectedPatient?.sideEffectsHistory?.map(
-                      (effect, index) => (
-                        <ListItem key={index}>
-                          <ListItemText
-                            primary={effect.date}
-                            secondary={`${effect.detail}, ${
-                              gradeOptions.find((g) => g.value === effect.grade)
-                                ?.label
-                            }`}
-                          />
-                        </ListItem>
-                      )
-                    )}
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
           </Grid>
         </DialogContent>
       </Dialog>
+      <CustomDialog
+        open={alertInfo.show}
+        onClose={handleCloseAlert}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
+          {alertInfo.message}
+        </Alert>
+      </CustomDialog>
     </ThemeProvider>
   );
 }

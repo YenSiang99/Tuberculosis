@@ -10,13 +10,17 @@ import {
   Typography,
   Avatar,
   Box,
+  Badge,
 } from "@mui/material";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import SettingsIcon from "@mui/icons-material/Settings";
+import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import axios from "../../components/axios";
 
 import { useAuth } from "../../context/AuthContext";
 
@@ -25,20 +29,9 @@ export default function PatientSidebar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const { setAuth } = useAuth();
-  const [user, setUser] = useState({ fullname: "User", profilePicture: "" });
+  const [patientData, setPatientData] = useState({});
 
-  useEffect(() => {
-    // Attempt to fetch user data from session storage or local storage
-    const userData =
-      JSON.parse(sessionStorage.getItem("userData")) ||
-      JSON.parse(localStorage.getItem("userData"));
-    if (userData) {
-      setUser({
-        fullname: userData.fullname,
-        profilePicture: userData.profilePicture,
-      });
-    }
-  }, []);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -55,7 +48,8 @@ export default function PatientSidebar() {
   const isSideEffect = location.pathname === "/patientsideeffect";
   const isAppointment = location.pathname === "/patientappointment";
   const isProfile = location.pathname === "/patientprofile";
-  // const isPasswordReset = location.pathname === '/patientpassword';
+  const isSettings = location.pathname === "/patientsettings";
+  const isNotifications = location.pathname === "/patientnotification";
 
   const handleLogout = () => {
     // Clear both localStorage and sessionStorage
@@ -68,6 +62,49 @@ export default function PatientSidebar() {
     // set application auth
     setAuth(false);
   };
+
+  const fetchPatientData = async () => {
+    try {
+      const response = await axios.get("/users/profile");
+      console.log("Patient data", response.data);
+      setPatientData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch patient data:", error);
+      if (error.response && error.response.data) {
+        console.error("Error details:", error.response.data);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchPatientData();
+  }, []);
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchPatientData();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, []);
+
+  const fetchUnreadNotificationsCount = async () => {
+    try {
+      const response = await axios.get("/notifications"); 
+      const unreadCount = response.data.filter(notification => notification.status === 'unread').length;
+      setUnreadNotificationsCount(unreadCount); 
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUnreadNotificationsCount();
+  }, []); 
 
   return (
     <Drawer
@@ -94,10 +131,10 @@ export default function PatientSidebar() {
         }}
       >
         <Avatar
-          src={user.profilePicture}
+          src={patientData.profilePicture}
           sx={{ width: 56, height: 56, marginBottom: 1 }}
         />
-        <Typography variant="h6">{user.fullname}</Typography>
+        <Typography variant="h6">{`${patientData.firstName} ${patientData.lastName}`}</Typography>
       </Box>
       <Divider />
       <List>
@@ -156,16 +193,36 @@ export default function PatientSidebar() {
           selected={isProfile}
         >
           <ListItemIcon>
-            <SettingsIcon />
+            <PersonIcon />
           </ListItemIcon>
           <ListItemText primary="Profile" />
         </ListItemButton>
 
-        {/* Password Reset
-        <ListItemButton key="PasswordReset" onClick={() => navigateTo('/patientpassword')} selected={isPasswordReset}>
-          <ListItemIcon><VpnKeyIcon /></ListItemIcon>
-          <ListItemText primary="Password Reset" />
-        </ListItemButton> */}
+        {/* Notifications */}
+        <ListItemButton
+          key="Notifications"
+          onClick={() => navigateTo("/patientnotification")}
+          selected={isNotifications}
+        >
+          <ListItemIcon>
+            <Badge badgeContent={unreadNotificationsCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </ListItemIcon>
+          <ListItemText primary="Notifications" />
+        </ListItemButton>
+
+        {/* Setting */}
+        <ListItemButton
+          key="Settings"
+          onClick={() => navigateTo("/patientsettings")}
+          selected={isSettings}
+        >
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          <ListItemText primary="Settings" />
+        </ListItemButton>
 
         {/* Logout */}
         <ListItemButton key="Logout" onClick={handleLogout}>

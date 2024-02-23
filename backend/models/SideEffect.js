@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const SideEffectSchema = new mongoose.Schema({
-  patientId: {
+  patient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,

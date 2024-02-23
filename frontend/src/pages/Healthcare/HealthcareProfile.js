@@ -1,120 +1,404 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ThemeProvider,
   Drawer,
   Box,
   Typography,
-  Button,
-  TextField,
-  FormGroup,
-  Divider,
   IconButton,
-  useMediaQuery,
-  Container,
   Paper,
-  Select,
+  Container,
+  Divider,
+  Grid,
+  TextField,
+  Button,
+  useMediaQuery,
+  Avatar,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
+  styled,
+  InputAdornment,
   MenuItem,
+  Card,
+  CardContent,
+  CircularProgress,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import MenuIcon from "@mui/icons-material/Menu";
-
 import theme from "../../components/reusable/Theme";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import CloseIcon from "@mui/icons-material/Close";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import EditIcon from "@mui/icons-material/Edit";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import { green, blue, red } from "@mui/material/colors";
+import axios from "../../components/axios";
 
-const useStyles = makeStyles((theme) => ({
-  card: {
-    backgroundColor: "#fff",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-  },
-  cardActions: {
-    justifyContent: "flex-end",
-    display: "flex",
-  },
-  button: {
-    color: "#fff",
-    "&:hover": {
-      backgroundColor: "#6386C3",
-    },
-  },
-  saveButton: {
-    color: "#fff",
-    backgroundColor: "#4CAF50",
-    "&:hover": {
-      backgroundColor: "#388E3C",
-    },
-  },
-  cancelButton: {
-    color: "#d32f2f",
-    borderColor: "#d32f2f",
-    "&:hover": {
-      backgroundColor: "#F9DDDD",
-    },
-  },
-  actionButton: {
-    flexGrow: 1, // This makes each button take equal space
-  },
-}));
-
-export default function HealthcareSetting() {
-  const classes = useStyles();
+export default function HealthcareProfile() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [healthcareData, setHealthcareData] = useState({});
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [alertInfo, setAlertInfo] = useState({
+    show: false,
+    type: "",
+    message: "",
+    nextAlert: null,
+  });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [errors, setErrors] = useState({
+    currentPasswordError: "",
+    newPasswordError: "",
+    confirmNewPasswordError: "",
+    emailError: "",
+  });
 
-  // Function to toggle drawer
+  const [videoStats, setVideoStats] = useState({
+    submitted: 0,
+    approved: 0,
+    rejected: 0,
+  });
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const capitalizeFirstLetter = (string) => {
+    if (string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    return string;
+  };
+
+  const [editMode, setEditMode] = useState({
+    personalInfo: false,
+  });
+
+  const [editableFields, setEditableFields] = useState({
+    email: healthcareData.email || "",
+    firstName: healthcareData.firstName || "",
+    lastName: healthcareData.lastName || "",
+    mcpId: healthcareData.mcpId || "",
+    group: healthcareData.group || "",
+  });
+
+  const toggleEditMode = (field) => {
+    setEditMode((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handleFieldChange = (field, value) => {
+    setEditableFields((fields) => ({ ...fields, [field]: value }));
+
+    if (field === "email") {
+      // Validate the email
+      if (!validateEmail(value)) {
+        // If email is not valid, set an error message
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          emailError: "Please enter a valid email address.",
+        }));
+      } else {
+        // If email is valid, clear any existing error message
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          emailError: "",
+        }));
+      }
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setAlertInfo({ show: false, type: "", message: "" });
+  };
+
+  const CustomDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+      boxShadow: "none",
+      overflow: "visible",
+    },
+  }));
+
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const [profile, setProfile] = useState({
-    firstName: "Mary",
-    lastName: "Doe",
-    role: "Doctor",
-    mcpId: "001",
-  });
-
-  const [personalInfoEditable, setPersonalInfoEditable] = useState(false);
-
-  const handleProfileChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+  const handleClickShowCurrentPassword = () => {
+    setShowCurrentPassword(!showCurrentPassword);
   };
 
-  const togglePersonalInfoEdit = () => {
-    setPersonalInfoEditable(!personalInfoEditable);
+  const handleClickShowNewPassword = () => {
+    setShowNewPassword(!showNewPassword);
   };
 
-  const ProfileView = ({ label, value }) => (
-    <Typography variant="body1" gutterBottom>
-      <strong>{splitCamelCaseToString(label)}:</strong> {value}
-    </Typography>
-  );
-  
+  const handleClickShowConfirmNewPassword = () => {
+    setShowConfirmNewPassword(!showConfirmNewPassword);
+  };
 
-  const splitCamelCaseToString = (s) => {
-    const knownAcronyms = ["MCP", "IC"];
-  
-    // Always return "MCP ID" for 'mcpId'
-    if (s === "mcpId") {
-      return "MCP ID";
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+  useEffect(() => {
+    fetchHealthcareData();
+  }, []);
+
+  const fetchHealthcareData = async () => {
+    try {
+      const response = await axios.get("/users/profile");
+      console.log("Healthcare data", response.data);
+      setHealthcareData(response.data);
+
+      setEditableFields({
+        email: response.data.email || "",
+        firstName: response.data.firstName || "",
+        lastName: response.data.lastName || "",
+        mcpId: response.data.mcpId || "",
+        group: response.data.group || "",
+      });
+    } catch (error) {
+      console.error("Failed to fetch healthcare data:", error.response.data);
     }
-  
-    return s
-      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-      .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2")
-      .split(" ")
-      .map((word) => {
-        if (knownAcronyms.includes(word.toUpperCase())) {
-          return word.toUpperCase();
-        } else {
-          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        }
-      })
-      .join(" ");
   };
-  
 
-  const handleCancelEdit = () => {
-    setPersonalInfoEditable(false);
+  useEffect(() => {
+    setEditableFields({
+      email: healthcareData.email || "",
+      firstName: healthcareData.firstName || "",
+      lastName: healthcareData.lastName || "",
+      mcpId: healthcareData.mcpId || "",
+      group: healthcareData.group || "",
+    });
+  }, [healthcareData]);
+
+  const handleOpenPasswordDialog = () => {
+    setPasswordDialogOpen(true);
   };
+
+  const handleClosePasswordDialog = () => {
+    setPasswordDialogOpen(false);
+  };
+
+  const handleChangePassword = async () => {
+    setErrors({
+      currentPasswordError: "",
+      newPasswordError: "",
+      confirmNewPasswordError: "",
+    });
+
+    if (!validatePassword(newPassword)) {
+      setErrors((prev) => ({
+        ...prev,
+        newPasswordError: "Password is too weak.",
+      }));
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setErrors((prev) => ({
+        ...prev,
+        confirmNewPasswordError: "New passwords do not match.",
+      }));
+      return;
+    }
+
+    try {
+      const response = await axios.post("/users/changePassword", {
+        currentPassword,
+        newPassword,
+      });
+      // Display a success message
+      setAlertInfo({
+        show: true,
+        type: "success",
+        message: "Password changed successfully.",
+      });
+      handleClosePasswordDialog();
+      // Reset password input fields
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } catch (error) {
+      // Display an error message to the user
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: error.response?.data?.message || "Failed to change password.",
+      });
+    }
+  };
+
+  const updateProfile = async (fieldsToUpdate) => {
+    try {
+      await axios.put("/users/profile", fieldsToUpdate);
+      fetchHealthcareData();
+      const updateEvent = new CustomEvent("profileUpdated");
+      window.dispatchEvent(updateEvent);
+      setAlertInfo({
+        show: true,
+        type: "success",
+        message: "Profile updated successfully.",
+      });
+      setEditMode((prev) => ({ ...prev, personalInfo: false })); // Exit edit mode
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          "An error occurred while updating the profile.",
+      });
+    }
+  };
+
+  const handleProfilePictureChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      console.log("No file selected.");
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setShowPreviewDialog(true);
+  };
+
+  const handleSaveNewProfilePicture = async () => {
+    if (!selectedFile) {
+      console.error("No file selected.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("profilePicture", selectedFile);
+
+    try {
+      const response = await axios.put(
+        `/users/uploadProfilePicture`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setAlertInfo({
+          show: true,
+          type: "success",
+          message: "Profile picture updated successfully.",
+        });
+        fetchHealthcareData();
+        setShowPreviewDialog(false);
+        window.dispatchEvent(new CustomEvent("profileUpdated"));
+      }
+    } catch (error) {
+      console.error("Failed to update profile picture:", error);
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message:
+          error.response?.data?.message || "Failed to update profile picture.",
+      });
+    }
+  };
+
+  const handleCancelProfilePictureChange = () => {
+    setShowPreviewDialog(false);
+    setPreviewUrl("");
+    setSelectedFile(null);
+  };
+
+  // Enhanced metric card component
+  const StatCard = ({ icon, title, value, color }) => (
+    <Card
+      elevation={3}
+      sx={{
+        ":hover": { boxShadow: 6 },
+        bgcolor: color,
+        color: "#fff",
+        transition: "0.3s",
+      }}
+    >
+      <CardContent
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+        }}
+      >
+        <Box sx={{ mb: 2 }}>{icon}</Box>
+        <Typography fontsize="1.1rem" sx={{ mb: 1 }}>
+          {title}
+        </Typography>
+        <Typography variant="h4">{value}</Typography>
+      </CardContent>
+    </Card>
+  );
+
+  const getCurrentMonthAndYear = () => {
+    const date = new Date();
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const currentMonth = monthNames[date.getMonth()];
+    const currentYear = date.getFullYear();
+    return `${currentMonth} ${currentYear}`;
+  };
+
+  useEffect(() => {
+    const fetchVideoStats = async () => {
+      try {
+        const { data } = await axios.get("/videos/stats", {
+          params: {
+            year: new Date().getFullYear(),
+            month: new Date().getMonth() + 1,
+          },
+        });
+        setVideoStats(data);
+      } catch (error) {
+        console.error("Failed to fetch video statistics:", error.response.data);
+      }
+    };
+
+    fetchVideoStats();
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -152,93 +436,463 @@ export default function HealthcareSetting() {
           backgroundColor: "background.default",
         }}
       >
-        <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Box sx={{ p: 3 }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Grid container spacing={3}>
+            {/* Healthcare Profile Section */}
+            <Grid item xs={12}>
+              <Paper
+                elevation={3}
+                sx={{ p: 3, display: "flex", alignItems: "center" }}
               >
-                Personal Information
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+                <Box sx={{ position: "relative", marginRight: 3 }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: "primary.main",
+                      width: 100,
+                      height: 100,
+                    }}
+                  >
+                    {healthcareData.profilePicture ? (
+                      <img
+                        src={healthcareData.profilePicture}
+                        alt="Profile"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <AccountCircleIcon sx={{ fontSize: 100 }} />
+                    )}
+                  </Avatar>
+                  <IconButton
+                    color="primary"
+                    component="label"
+                    sx={{
+                      position: "absolute",
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: "background.paper",
+                      "&:hover": {
+                        backgroundColor: "background.default",
+                      },
+                      borderRadius: "50%",
+                    }}
+                  >
+                    <input
+                      hidden
+                      accept="image/*"
+                      type="file"
+                      onChange={handleProfilePictureChange}
+                    />
+                    <PhotoCamera />
+                  </IconButton>
+                </Box>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {healthcareData.firstName} {healthcareData.lastName}
+                  </Typography>
 
-              {personalInfoEditable ? (
-                <FormGroup>
-                  {Object.entries(profile)
-                    .slice(0, 6)
-                    .map(([key, value]) => {
-                      if (key === "role") {
-                        return (
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "text.secondary", mb: 2, fontSize: "1rem" }}
+                  >
+                    {" "}
+                    Group:{" "}
+                    {capitalizeFirstLetter(healthcareData.group) || "Not Set"}
+                  </Typography>
+
+                  <Divider sx={{ my: 2 }} />
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={handleOpenPasswordDialog}
+                    sx={{ textTransform: "none" }}
+                  >
+                    Change Password
+                  </Button>
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* Personal Information */}
+            <Grid item xs={12}>
+              <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontWeight: "bold" }}
+                >
+                  Personal Information
+                </Typography>
+                {!editMode.personalInfo && (
+                  <IconButton
+                    size="small"
+                    sx={{ position: "absolute", top: 8, right: 8 }}
+                    onClick={() =>
+                      setEditMode({
+                        ...editMode,
+                        personalInfo: !editMode.personalInfo,
+                      })
+                    }
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
+                <Divider sx={{ mb: 2 }} />
+                <List dense>
+                  {/* First Name */}
+                  <ListItem>
+                    <ListItemText
+                      primary="First Name"
+                      secondary={
+                        editMode.personalInfo ? (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            value={editableFields.firstName}
+                            onChange={(e) =>
+                              handleFieldChange("firstName", e.target.value)
+                            }
+                            fullWidth
+                          />
+                        ) : (
+                          healthcareData.firstName || "N/A"
+                        )
+                      }
+                    />
+                  </ListItem>
+
+                  {/* Last Name */}
+                  <ListItem>
+                    <ListItemText
+                      primary="Last Name"
+                      secondary={
+                        editMode.personalInfo ? (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            value={editableFields.lastName}
+                            onChange={(e) =>
+                              handleFieldChange("lastName", e.target.value)
+                            }
+                            fullWidth
+                          />
+                        ) : (
+                          healthcareData.lastName || "N/A"
+                        )
+                      }
+                    />
+                  </ListItem>
+
+                  {/* Email */}
+                  <ListItem>
+                    <ListItemText
+                      primary="Email"
+                      secondary={
+                        editMode.personalInfo ? (
+                          <TextField
+                            error={!!errors.emailError}
+                            helperText={errors.emailError}
+                            variant="outlined"
+                            size="small"
+                            value={editableFields.email}
+                            onChange={(e) =>
+                              handleFieldChange("email", e.target.value)
+                            }
+                            fullWidth
+                          />
+                        ) : (
+                          healthcareData.email || "N/A"
+                        )
+                      }
+                    />
+                  </ListItem>
+
+                  {/* MCP ID */}
+                  <ListItem>
+                    <ListItemText
+                      primary="MCP ID"
+                      secondary={
+                        editMode.personalInfo ? (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            value={editableFields.mcpId}
+                            onChange={(e) =>
+                              handleFieldChange("mcpId", e.target.value)
+                            }
+                            fullWidth
+                          />
+                        ) : (
+                          healthcareData.mcpId || "N/A"
+                        )
+                      }
+                    />
+                  </ListItem>
+
+                  {/* Group */}
+                  <ListItem>
+                    <ListItemText
+                      primary="Group"
+                      secondary={
+                        editMode.personalInfo ? (
                           <TextField
                             select
-                            key={key}
-                            label={splitCamelCaseToString(key)}
-                            name={key}
-                            value={value}
-                            onChange={handleProfileChange}
-                            margin="normal"
+                            variant="outlined"
+                            size="small"
+                            value={editableFields.group}
+                            onChange={(e) =>
+                              handleFieldChange("group", e.target.value)
+                            }
                             fullWidth
                           >
-                            <MenuItem value="Doctor">Doctor</MenuItem>
-                            <MenuItem value="Nurse">Nurse</MenuItem>
-                            <MenuItem value="Medical Assistant">
+                            <MenuItem value="doctor">Doctor</MenuItem>
+                            <MenuItem value="nurse">Nurse</MenuItem>
+                            <MenuItem value="medical assistant">
                               Medical Assistant
                             </MenuItem>
                           </TextField>
-                        );
-                      } else {
-                        return (
-                          <TextField
-                            key={key}
-                            label={splitCamelCaseToString(key)}
-                            name={key}
-                            value={value}
-                            onChange={handleProfileChange}
-                            margin="normal"
-                            fullWidth
-                          />
-                        );
+                        ) : (
+                          capitalizeFirstLetter(healthcareData.group) || "N/A"
+                        )
                       }
-                    })}
-                </FormGroup>
-              ) : (
-                Object.entries(profile)
-                  .slice(0, 6)
-                  .map(([key, value]) => (
-                    <ProfileView
-                    key={key}
-                    label={key}
-                    value={value}
-                  />
-                  ))
-              )}
-              <Button
-                className={`${classes.actionButton} ${
-                  personalInfoEditable ? classes.saveButton : classes.button
-                }`}
-                color="primary"
-                variant="contained"
-                onClick={togglePersonalInfoEdit}
-                sx={{ mr: 2 }}
-              >
-                {personalInfoEditable ? "Save Changes" : "Edit"}
-              </Button>
-              {personalInfoEditable && (
-                <Button
-                  className={`${classes.actionButton} ${classes.cancelButton}`}
-                  variant="outlined"
-                  onClick={handleCancelEdit}
+                    />
+                  </ListItem>
+                </List>
+                {editMode.personalInfo && (
+                  <Box
+                    sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
+                  >
+                    <Button
+                      sx={{ mr: 1 }}
+                      variant="contained"
+                      onClick={() => {
+                        const fieldsToUpdate = {
+                          firstName: editableFields.firstName,
+                          lastName: editableFields.lastName,
+                          email: editableFields.email,
+                          mcpId: editableFields.mcpId,
+                          group: editableFields.group,
+                        };
+
+                        updateProfile(fieldsToUpdate);
+                        console.log(
+                          "Saving Personal Information...",
+                          fieldsToUpdate
+                        );
+                        setEditMode({ ...editMode, personalInfo: false });
+                      }}
+                      disabled={!!errors.emailError}
+                    >
+                      Save
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      onClick={() =>
+                        setEditMode({ ...editMode, personalInfo: false })
+                      }
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+
+            {/* Dashboard */}
+            <Grid item xs={12}>
+              <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontWeight: "bold" }}
                 >
-                  Cancel
-                </Button>
-              )}
-            </Box>
-          </Paper>
+                  Monthly Video Tracker
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="subtitle1" gutterBottom>
+                  {` ${getCurrentMonthAndYear()}`}
+                </Typography>
+                <Grid container spacing={2} justifyContent="center">
+                  {/* Enhanced Stat Cards */}
+                  <Grid item xs={12} sm={6} md={4}>
+                    <StatCard
+                      icon={<VideocamIcon fontSize="large" />}
+                      title="Total Submitted Videos"
+                      value={videoStats.total}
+                      color={blue[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <StatCard
+                      icon={<ThumbUpIcon fontSize="large" />}
+                      title="Approved Videos"
+                      value={videoStats.approved}
+                      color={green[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <StatCard
+                      icon={<ThumbDownIcon fontSize="large" />}
+                      title="Rejected Videos"
+                      value={videoStats.rejected}
+                      color={red[500]}
+                    />
+                  </Grid>
+
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
+      <Dialog open={passwordDialogOpen} onClose={handleClosePasswordDialog}>
+        <DialogTitle>
+          Change Password
+          <IconButton
+            aria-label="close"
+            onClick={handleClosePasswordDialog}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="current-password"
+            label="Current Password"
+            type={showCurrentPassword ? "text" : "password"}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            fullWidth
+            variant="outlined"
+            error={!!errors.currentPasswordError}
+            helperText={errors.currentPasswordError}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle current password visibility"
+                    onClick={handleClickShowCurrentPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            margin="dense"
+            id="new-password"
+            label="New Password"
+            type={showNewPassword ? "text" : "password"}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            fullWidth
+            variant="outlined"
+            error={!!errors.newPasswordError}
+            helperText={errors.newPasswordError}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle new password visibility"
+                    onClick={handleClickShowNewPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            margin="dense"
+            id="confirm-new-password"
+            label="Confirm New Password"
+            type={showConfirmNewPassword ? "text" : "password"}
+            value={confirmNewPassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
+            fullWidth
+            variant="outlined"
+            error={!!errors.confirmNewPasswordError}
+            helperText={errors.confirmNewPasswordError}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle confirm new password visibility"
+                    onClick={handleClickShowConfirmNewPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {showConfirmNewPassword ? (
+                      <VisibilityOff />
+                    ) : (
+                      <Visibility />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePasswordDialog}>Cancel</Button>
+          <Button onClick={handleChangePassword}>Update</Button>
+        </DialogActions>
+      </Dialog>
+      <CustomDialog
+        open={alertInfo.show}
+        onClose={handleCloseAlert}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
+          {alertInfo.message}
+        </Alert>
+      </CustomDialog>
+      <Dialog
+        open={showPreviewDialog}
+        onClose={handleCancelProfilePictureChange}
+      >
+        <DialogTitle>Change Profile Picture</DialogTitle>
+        <DialogContent>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{ maxWidth: "100%", maxHeight: 400 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelProfilePictureChange}>Cancel</Button>
+          <Button onClick={handleSaveNewProfilePicture} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }

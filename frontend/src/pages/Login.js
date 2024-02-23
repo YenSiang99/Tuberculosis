@@ -57,11 +57,6 @@ export default function Login() {
     toggleRoleSelectDialog();
   };
 
-  // Handle role selection
-  const handleRoleChange = (event) => {
-    setUserRole(event.target.value);
-  };
-
   // Toggle role selection dialog
   const toggleRoleSelectDialog = () => {
     setOpenRoleSelect(!openRoleSelect);

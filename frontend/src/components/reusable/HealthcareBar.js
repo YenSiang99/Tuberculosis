@@ -10,20 +10,25 @@ import {
   Typography,
   Avatar,
   Box,
+  Badge,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import SettingsIcon from "@mui/icons-material/Settings";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useAuth } from "../../context/AuthContext";
+import axios from "../../components/axios";
 
 export default function HealthcareSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuth } = useAuth();
+  const [healthcareData, setHealthcareData] = useState({});
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
 
   const [user, setUser] = useState({ fullname: "User", profilePicture: "" });
   useEffect(() => {
@@ -49,7 +54,7 @@ export default function HealthcareSidebar() {
   const isReviewSideEffect = location.pathname === "/healthcaresideeffect";
   const isAppointment = location.pathname === "/healthcareappointment";
   const isProfile = location.pathname === "/healthcareprofile";
-  const isPasswordReset = location.pathname === "/healthcarepassword";
+  const isNotifications = location.pathname === "/healthcarenotifications";
 
   const handleLogout = () => {
     // Clear both localStorage and sessionStorage
@@ -62,6 +67,50 @@ export default function HealthcareSidebar() {
     // set application auth
     setAuth(false);
   };
+
+  const fetchHealthcareData = async () => {
+    try {
+      const response = await axios.get("/users/profile");
+      console.log("Healthcare data", response.data);
+      setHealthcareData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch healthcare data:", error);
+      if (error.response && error.response.data) {
+        console.error("Error details:", error.response.data);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchHealthcareData();
+  }, []);
+  
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchHealthcareData();
+    };
+  
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+  
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
+  }, []);
+
+  const fetchUnreadNotificationsCount = async () => {
+    try {
+      const response = await axios.get("/notifications"); 
+      const unreadCount = response.data.filter(notification => notification.status === 'unread').length;
+      setUnreadNotificationsCount(unreadCount); 
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUnreadNotificationsCount();
+  }, []); 
 
   return (
     <Drawer
@@ -87,11 +136,11 @@ export default function HealthcareSidebar() {
           padding: 2,
         }}
       >
-        <Avatar
-          src={user.profilePicture}
+         <Avatar
+          src={healthcareData.profilePicture}
           sx={{ width: 56, height: 56, marginBottom: 1 }}
         />
-        <Typography variant="h6">{user.fullname}</Typography>
+<Typography variant="h6">{`${healthcareData.firstName} ${healthcareData.lastName}`}</Typography>
       </Box>
       <Divider />
       <List>
@@ -155,17 +204,19 @@ export default function HealthcareSidebar() {
           <ListItemText primary="Profile" />
         </ListItemButton>
 
-        {/* Password Reset */}
-        {/* <ListItemButton
-          key="PasswordReset"
-          onClick={() => navigateTo("/healthcarepassword")}
-          selected={isPasswordReset}
+        {/* Notifications */}
+        <ListItemButton
+          key="Notifications"
+          onClick={() => navigateTo("/healthcarenotification")}
+          selected={isNotifications}
         >
           <ListItemIcon>
-            <VpnKeyIcon />
+            <Badge badgeContent={unreadNotificationsCount} color="error">
+              <NotificationsIcon />
+            </Badge>
           </ListItemIcon>
-          <ListItemText primary="Password Reset" />
-        </ListItemButton> */}
+          <ListItemText primary="Notifications" />
+        </ListItemButton>
 
         {/* Logout */}
         <ListItemButton key="Logout" onClick={handleLogout}>

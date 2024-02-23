@@ -245,7 +245,7 @@ export default function PatientAppointment() {
         show: true,
         type: "error",
         message:
-          "Please select a future date that falls on a Monday, Wednesday, or Friday.",
+          "No available slots.",
       });
       return;
     }

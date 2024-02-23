@@ -9,6 +9,7 @@ const path = require('path');
 // Environment package
 require('dotenv').config();
 
+
 const cors = require('cors');
 const authRoutes = require('./routes/auth/authRoutes');
 const userRoutes = require('./routes/users/userRoutes');
@@ -16,7 +17,7 @@ const videoRoutes = require('./routes/video/videoRoutes');
 const sideEffectRoutes = require('./routes/sideEffect/sideEffectRoutes');
 const appointmentRoutes = require('./routes/appointment/appointmentRoutes');
 const progressTrackerRoutes = require('./routes/progressTracker/progressTrackerRoutes');
-
+const notificationRoutes = require('./routes/notification/notificationRoutes');
 
 const profilesDir = path.join(__dirname, 'media/profiles/');
 if (!fs.existsSync(profilesDir)) {
@@ -31,6 +32,8 @@ if (!fs.existsSync(videosDir)) {
 const app = express();
 const port = 3001;
 
+require('./scheduler');
+
 mongoose.connect('mongodb://127.0.0.1:27017/tb_project');
 app.use(express.json());
 app.use(cors());
@@ -42,8 +45,7 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/sideEffects', sideEffectRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/progressTracker', progressTrackerRoutes);
-
-
+app.use('/api/notifications', notificationRoutes);
 
 // media files
 app.use('/media', express.static(path.join(__dirname, 'media')));

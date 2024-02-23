@@ -14,12 +14,16 @@ import {
   IconButton,
   useMediaQuery,
   Container,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import theme from "../../components/reusable/Theme";
 import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
-import axios from "../../components/axios"; 
+import axios from "../../components/axios";
 
 const InputLabelStyled = styled("label")(({ theme }) => ({
   display: "block",
@@ -49,8 +53,8 @@ const getStatusColor = (status) => {
   const statusColorMap = {
     "pending upload for today": "#FFF59D", // Light Yellow
     "pending approval": "#BBDEFB", // Light Blue
-    "approved": "#C8E6C9", // Light Green
-    "rejected": "#FFCDD2", // Light Red
+    approved: "#C8E6C9", // Light Green
+    rejected: "#FFCDD2", // Light Red
   };
 
   return statusColorMap[status] || "#e0e0e0"; // Default color if status is not recognized
@@ -58,7 +62,7 @@ const getStatusColor = (status) => {
 
 export default function PatientVideo() {
   const [videoData, setVideoData] = useState({
-    status: 'pending upload for today',
+    status: "pending upload for today",
   });
   const [videoFile, setVideoFile] = useState(null);
   const [videoURL, setVideoURL] = useState("");
@@ -68,20 +72,28 @@ export default function PatientVideo() {
     show: false,
     type: "",
     message: "",
-  });                                                                                                                
+  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+
+  const handleToggleConfirmDialog = () => {
+    setOpenConfirmDialog(!openConfirmDialog);
+  };
+
+  const promptDeleteVideo = () => {
+    handleToggleConfirmDialog();
+  };
 
   const getDailyUserVideo = async () => {
     try {
       const response = await axios.get("/videos/getDailyUserVideo");
-      console.log(response.data)
-      if (response.data){
-        setVideoData(response.data)
+      console.log(response.data);
+      if (response.data) {
+        setVideoData(response.data);
         setVideoURL(response.data.videoUrl);
         setVideoUploaded(true);
       }
-      
     } catch (error) {
       console.error("Error fetching or creating video:", error);
       // Optionally set an alert or handle the error in the UI
@@ -95,7 +107,7 @@ export default function PatientVideo() {
 
   useEffect(() => {
     // Call the getOrCreateVideo API to check or create a video for the day
-    console.log('use effect hook called...')
+    console.log("use effect hook called...");
     getDailyUserVideo();
   }, []);
 
@@ -169,28 +181,50 @@ export default function PatientVideo() {
     }
   };
 
-  const handleDeleteVideo = () => {
-    setVideoFile(null);
-    setVideoURL("");
-    setUploadProgress(0);
-    setVideoUploaded(false);
-    setAlertInfo({
-      show: true,
-      type: "success",
-      message: "Video has been deleted.",
-    });
+  const handleDeleteVideo = async () => {
+    if (!videoData || !videoData._id) {
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "No video selected for deletion.",
+      });
+      return;
+    }
+
+    try {
+      await axios.delete(`/videos/deleteVideo/${videoData._id}`);
+      // Successfully deleted video
+      setVideoFile(null);
+      setVideoURL("");
+      setUploadProgress(0);
+      setVideoUploaded(false);
+      setVideoData({ status: "pending upload for today" }); // Reset video data
+      setAlertInfo({
+        show: true,
+        type: "success",
+        message: "Video deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Error deleting video:", error);
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Failed to delete video.",
+      });
+    }
+    setOpenConfirmDialog(false);
   };
 
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
   };
 
-  const capitalizeWords = (str) => {
-    return str
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
+  function capitalizeWords(input) {
+    if (!input) return '';
+  
+    return input.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -231,14 +265,14 @@ export default function PatientVideo() {
             sx={{
               mt: 4,
               p: 3,
-              backgroundColor: getStatusColor(videoData?.status), 
+              backgroundColor: getStatusColor(videoData?.status),
               borderRadius: "4px",
             }}
           >
             <Typography
               variant="h6"
               component="div"
-              sx={{fontWeight: "bold",}}
+              sx={{ fontWeight: "bold" }}
             >
               Status: {videoData ? capitalizeWords(videoData.status) : null}
             </Typography>
@@ -309,10 +343,12 @@ export default function PatientVideo() {
                   <Button
                     variant="contained"
                     color="error"
-                    onClick={handleDeleteVideo}
+                    onClick={promptDeleteVideo}
                     sx={{ mt: 2 }}
-                    disabled={videoData?.status === "approved" || videoData?.status === "rejected"}
-
+                    disabled={
+                      videoData?.status === "approved" ||
+                      videoData?.status === "rejected"
+                    }
                   >
                     Delete Video
                   </Button>
@@ -347,6 +383,27 @@ export default function PatientVideo() {
                 <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
                   {alertInfo.message}
                 </Alert>
+              </CustomDialog>
+              <CustomDialog
+                open={openConfirmDialog}
+                onClose={handleToggleConfirmDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                  {"Delete Video"}
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                    Are you sure you want to delete this video?
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleToggleConfirmDialog}>Cancel</Button>
+                  <Button onClick={handleDeleteVideo} autoFocus color="error">
+                    Delete
+                  </Button>
+                </DialogActions>
               </CustomDialog>
             </Box>
           </Paper>

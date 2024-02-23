@@ -1,48 +1,87 @@
 // controllers/appointmentController.js
 const Appointment = require('../../models/Appointment');
+const User = require('../../models/User');
+const Notification = require('../../models/Notification'); 
+
+const moment = require('moment-timezone');
+
 const { eachDayOfInterval, startOfMonth, endOfMonth, getDay, formatISO, startOfDay  } = require('date-fns');
 
 // Create
 exports.createAppointment = async (req, res) => {
-  const { startDateTime, endDateTime } = req.body; // Expecting startDate and endDate in the request
-  const patient = req.user.userId;
+  const { startDateTime, endDateTime } = req.body;
+  const patientId = req.user.userId;
 
   try {
     const newAppointment = new Appointment({
-      patient,
+      patient: patientId,
       startDateTime: new Date(startDateTime),
       endDateTime: new Date(endDateTime),
     });
     await newAppointment.save();
+
+    const patient = await User.findById(patientId);
+    const healthcareStaff = await User.find({ roles: 'healthcare' });
+    // Format startDateTime in UTC or a specific timezone, e.g., 'Asia/Kuala_Lumpur'
+    const formattedStartDateTime = moment(startDateTime).tz('UTC').format('YYYY-MM-DD hh:mm A'); // Adjust timezone as needed
+
+    healthcareStaff.forEach(async (staff) => {
+      const notification = new Notification({
+        recipient: staff._id,
+        message: `${patient.firstName} ${patient.lastName} has made an appointment for ${formattedStartDateTime}.`,
+        targetUrl: "/healthcareappointment"
+      });
+      await notification.save();
+    });
+
     res.status(201).json(newAppointment);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-
 // Update
 exports.updateAppointment = async (req, res) => {
-  const { appointmentId } = req.params; 
-  const { status } = req.body; 
-  const healthcare = req.user.userId; 
+  const { appointmentId } = req.params;
+  const { status } = req.body;
+  const healthcareId = req.user.userId;
 
   try {
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
+
     if (appointment.status !== 'awaiting approval') {
       return res.status(400).json({ message: 'Appointment is not in an approvable state' });
     }
-    appointment.healthcare = healthcare;
+
     appointment.status = status;
+    appointment.healthcare = healthcareId; // Assuming this means the healthcare provider is taking action on the appointment
     await appointment.save();
+
+    // Send notification to the patient about the status update
+    const patient = await User.findById(appointment.patient);
+    const healthcareProvider = await User.findById(healthcareId);
+    const formattedStartDateTime = moment(appointment.startDateTime).tz('UTC').format('YYYY-MM-DD hh:mm A');
+
+    let message = `Your appointment scheduled for ${formattedStartDateTime} has been ${status} by ${healthcareProvider.firstName} ${healthcareProvider.lastName}.`;
+
+    const notification = new Notification({
+      recipient: appointment.patient,
+      message: message,
+      targetUrl: "/patientappointment" // Adjust this URL to where patients view their appointments
+    });
+    await notification.save();
+
     res.json(appointment);
   } catch (error) {
+    console.error("Error in updating appointment:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // Read
 // Available Slots
@@ -173,26 +212,49 @@ exports.readHealthcareAppointments = async (req, res) => {
 exports.deleteAppointment = async (req, res) => {
   const { appointmentId } = req.params;
   const userId = req.user.userId;
+  
   try {
     const appointment = await Appointment.findById(appointmentId);
+    const user = await User.findById(userId);
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // Check if the user is the patient who booked the appointment or the healthcare provider assigned to it
-    // Assumes appointment.patient and appointment.healthcare are storing user IDs
-    // Adjust field names as per your Appointment model
-    // if (appointment.patient.toString() !== userId && (!appointment.healthcare || appointment.healthcare.toString() !== userId)) {
-    //   return res.status(403).json({ message: 'You are not authorized to delete this appointment' });
-    // }
+    // Assuming roles are set correctly in your User model
+    const isPatient = user.roles.includes('patient');
+    let notificationMessage = '';
+    let targetUrl = '';
 
-    // Authorized to delete the appointment
+    if (isPatient) {
+      // If a patient is deleting the appointment, notify healthcare staff
+      notificationMessage = `Patient ${user.firstName} ${user.lastName} has cancelled the appointment.`;
+      targetUrl = "/healthcareappointment"; 
+      // Assuming you have a mechanism to fetch all healthcare staff IDs
+      const healthcareStaff = await User.find({ roles: 'healthcare' });
+      healthcareStaff.forEach(async (staff) => {
+        const notification = new Notification({
+          recipient: staff._id,
+          message: notificationMessage,
+          targetUrl
+        });
+        await notification.save();
+      });
+    } else {
+      // If healthcare staff is deleting the appointment, notify the patient
+      notificationMessage = `Your appointment has been cancelled by healthcare stuff.`;
+      targetUrl = "/patientappointment"; 
+      const notification = new Notification({
+        recipient: appointment.patient,
+        message: notificationMessage,
+        targetUrl
+      });
+      await notification.save();
+    }
+
     await Appointment.deleteOne({ _id: appointmentId });
     res.json({ message: 'Appointment deleted successfully' });
-
-    // Note: No need to explicitly call fetchAvailableSlots and fetchPatientAppointments here
-    // as those actions would be triggered from the client-side upon successful deletion.
   } catch (error) {
+    console.error("Error in deleting appointment:", error);
     res.status(500).json({ message: error.message });
   }
 };

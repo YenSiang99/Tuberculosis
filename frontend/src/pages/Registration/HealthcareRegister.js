@@ -368,7 +368,7 @@ export default function HealthcareRegister() {
               variant="contained"
               fullWidth
               sx={{ mt: 3, mb: 2 }}
-              disabled={!isFormValid()}
+              // disabled={!isFormValid()}
             >
               Register
             </Button>

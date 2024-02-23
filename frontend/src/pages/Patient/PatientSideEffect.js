@@ -107,7 +107,6 @@ const SideEffectHistory = ({ history }) => {
 };
 
 export default function PatientSideEffectReport() {
-  const [patientId, setPatientId] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [selectedSideEffects, setSelectedSideEffects] = useState([]);
   const [sideEffectDetails, setSideEffectDetails] = useState({});
@@ -123,16 +122,6 @@ export default function PatientSideEffectReport() {
   const historyRef = useRef(null);
   const [sideEffectHistory, setSideEffectHistory] = useState([]);
   const [openGradeInfo, setOpenGradeInfo] = useState(false);
-
-  useEffect(() => {
-    // Attempt to fetch user data from session storage or local storage
-    const userData =
-      JSON.parse(sessionStorage.getItem("userData")) ||
-      JSON.parse(localStorage.getItem("userData"));
-    if (userData && userData.userId) {
-      setPatientId(userData.userId);
-    }
-  }, []);
 
   const handleCloseAlert = () => {
     if (alertInfo.nextAlert) {
@@ -204,23 +193,20 @@ export default function PatientSideEffectReport() {
   };
 
   const fetchSideEffectHistory = async () => {
-    if (patientId) {
       try {
-        const response = await axios.get(`/sideEffects/${patientId}`);
+        const response = await axios.get(`/sideEffects/patient`);
         setSideEffectHistory(response.data); // Update the side effect history state
       } catch (error) {
         console.error(
           "Error fetching side effect history:",
           error.response?.data || error.message
         );
-      }
     }
   };
 
   useEffect(() => {
-    // Fetch side effect history on component mount
     fetchSideEffectHistory();
-  }, [patientId]);
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -239,7 +225,6 @@ export default function PatientSideEffectReport() {
 
     // Construct the payload with the formatted side effects and use selectedDateTime for date and time
     const payload = {
-      patientId,
       datetime: selectedDateTime.toISOString(), // Convert to ISO string if not already
       sideEffects: formattedSideEffects,
     };

@@ -48,7 +48,7 @@ exports.registerPatient = async (req, res) => {
     const {
       email, password, firstName, lastName, gender, phoneNumber, country,
       passportNumber, nricNumber, age, diagnosis, currentTreatment,
-      numberOfTablets, diagnosisDate, treatmentStartMonth, profilePicture
+      numberOfTablets, diagnosisDate, treatmentStartDate, treatmentDuration, profilePicture
     } = req.body;
     const profilePicturePath = req.file ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}` : "";
 
@@ -69,8 +69,13 @@ exports.registerPatient = async (req, res) => {
       currentTreatment,
       numberOfTablets,
       diagnosisDate,
-      treatmentStartMonth,
-      profilePicture: profilePicturePath
+      treatmentStartDate,
+      treatmentDuration,
+      profilePicture: profilePicturePath,
+      careStatus: 'Continue VOTS',
+      videoUploadAlert: true ,
+      reminderTime: new Date().setHours(22, 0, 0, 0),
+      reminderFrequency: 60 ,  
     };
 
     // Add passportNumber or nricNumber based on the country

@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ThemeProvider,
@@ -48,7 +48,7 @@ export default function PatientRegister() {
   });
   const [diagnosis, setDiagnosis] = useState("");
   const [treatment, setTreatment] = useState("");
-  const [treatmentStartMonth, setTreatmentStartMonth] = useState("");
+  const [treatmentStartDate, setTreatmentStartDate] = useState("");
   const [numberOfTablets, setNumberOfTablets] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [passwordError, setPasswordError] = useState({
@@ -62,6 +62,7 @@ export default function PatientRegister() {
     valid: true,
     message: "",
   });
+  const [treatmentDuration, setTreatmentDuration] = useState("");
 
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
@@ -141,9 +142,10 @@ export default function PatientRegister() {
     formData.append("country", country);
     formData.append("age", age);
     formData.append("diagnosis", diagnosis);
-    formData.append("currentTreatment", treatment); 
-    formData.append("diagnosisDate", diagnosisDate); 
-    formData.append("treatmentStartMonth", treatmentStartMonth);
+    formData.append("currentTreatment", treatment);
+    formData.append("diagnosisDate", diagnosisDate);
+    formData.append("treatmentStartDate", treatmentStartDate);
+    formData.append("treatmentDuration", treatmentDuration);
     formData.append("numberOfTablets", numberOfTablets);
 
     // Conditionally add NRIC or Passport Number based on the country
@@ -212,32 +214,28 @@ export default function PatientRegister() {
   };
 
   const validateDiagnosisDate = () => {
-    if (!diagnosisDate || !treatmentStartMonth) {
+    if (!diagnosisDate || !treatmentStartDate) {
       setDiagnosisDateError({ valid: true, message: "" });
       return;
     }
-  
+
     const diagnosisDateObj = new Date(diagnosisDate);
-    const treatmentStartYear = parseInt(treatmentStartMonth.substring(0, 4));
-    const treatmentStartMonthIndex = parseInt(treatmentStartMonth.substring(5)) - 1; // Subtract 1 because months are 0-indexed in JavaScript dates
-  
-    // Get the last day of the treatment start month
-    const lastDayOfTreatmentStartMonth = new Date(treatmentStartYear, treatmentStartMonthIndex + 1, 0);
-  
-    if (diagnosisDateObj > lastDayOfTreatmentStartMonth) {
+    const treatmentStartDateObj = new Date(treatmentStartDate);
+
+    if (diagnosisDateObj > treatmentStartDateObj) {
       setDiagnosisDateError({
         valid: false,
-        message: "Diagnosis date must be within the same month or earlier than the treatment start month.",
+        message:
+          "Diagnosis date must be earlier than the treatment start date.",
       });
     } else {
       setDiagnosisDateError({ valid: true, message: "" });
     }
   };
-  
 
   useEffect(() => {
     validateDiagnosisDate();
-  }, [diagnosisDate, treatmentStartMonth]); 
+  }, [diagnosisDate, treatmentStartDate]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -652,15 +650,36 @@ export default function PatientRegister() {
                   margin="normal"
                   required
                   fullWidth
-                  id="treatmentStartMonth"
-                  label="Treatment Start Month"
-                  name="treatmentStartMonth"
-                  type="month"
+                  id="treatmentStartDate"
+                  label="Treatment Start Date"
+                  name="treatmentStartDate"
+                  type="date"
                   InputLabelProps={{ shrink: true }}
+                  value={treatmentStartDate}
+                  onChange={(e) => {
+                    setTreatmentStartDate(e.target.value);
+                    validateDiagnosisDate();
+                  }}
+                  error={!diagnosisDateError.valid}
+                  helperText={
+                    diagnosisDateError.valid ? "" : diagnosisDateError.message
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="treatmentDuration"
+                  label="Treatment Duration (Months)"
+                  name="treatmentDuration"
+                  type="number"
                   autoComplete="off"
-                  value={treatmentStartMonth}
-                  onChange={(e) => setTreatmentStartMonth(e.target.value)}
-                  sx={{ mt: 2, width: "100%", minWidth: 400 }}
+                  value={treatmentDuration}
+                  onChange={(e) => setTreatmentDuration(e.target.value)}
+                  InputProps={{ inputProps: { min: 1 } }} // Ensure only positive values
                 />
               </Grid>
             </Grid>
@@ -670,7 +689,7 @@ export default function PatientRegister() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={!isFormValid()}
+              // disabled={!isFormValid()}
             >
               Register
             </Button>

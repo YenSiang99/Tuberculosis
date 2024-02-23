@@ -13,6 +13,16 @@ const router = express.Router();
 
 router.get('/', authenticate, authorize('admin'),usersController.getUsers);
 router.get('/patients', authenticate, authorize('healthcare'), usersController.getPatients);
+router.get('/profile', authenticate, usersController.getUserProfile);
 router.post('/uploadProfilePicture/:userId', authenticate, uploadProfile, usersController.uploadProfilePicture);
+router.post('/changePassword', authenticate, usersController.changePassword);
+router.put('/profile', authenticate, usersController.updateProfile);
+router.put('/uploadProfilePicture', authenticate, uploadProfile, usersController.updateProfilePicture);
+router.put('/patients/treatment/:patientId', authenticate, usersController.updatePatientTreatmentInfo);
+router.post('/forgotPassword', usersController.forgotPassword);
+router.post('/resetPassword', usersController.resetPassword);
+router.patch('/settings', authenticate, usersController.updateSettings);
+router.get('/settings', authenticate, usersController.getSettings);
+
 
 module.exports = router;

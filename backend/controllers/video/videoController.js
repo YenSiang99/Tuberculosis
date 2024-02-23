@@ -1,7 +1,7 @@
 // controllers/videoController.js
 const Video = require('../../models/Video');
 const User = require('../../models/User');
-
+const Notification = require('../../models/Notification'); 
 
 exports.getVideo = async (req, res) => {
   try {
@@ -71,8 +71,8 @@ exports.getUsersTable = async (req, res) => {
 exports.updateVideoStatus = async (req, res) => {
   try {
     const videoId = req.params.videoId;
-    const { status } = req.body;
-    const userId = req.user.userId;
+    const { status } = req.body; // status could be 'approved' or 'rejected'
+    const userId = req.user.userId; // The healthcare staff's user ID
 
     const video = await Video.findById(videoId);
     if (!video) {
@@ -80,14 +80,31 @@ exports.updateVideoStatus = async (req, res) => {
     }
 
     video.status = status;
-    video.lastActionBy = userId;
+    video.lastActionBy = userId; 
     await video.save();
+
+    // Find the patient to whom the video belongs
+    const patient = await User.findById(video.patient);
+    if (patient) {
+      const patientName = patient.firstName + " " + patient.lastName;
+      const message = `Your video uploaded on ${video.date.toDateString()} has been ${status}.`;
+
+      // Create and send a notification to the patient
+      const notification = new Notification({
+        recipient: patient._id,
+        message: message,
+        targetUrl: "/patientvideo" 
+      });
+      await notification.save();
+    }
 
     res.status(200).send(video);
   } catch (error) {
-    res.status(500).send('Error updating video status: ' + error.message);
+    console.error('Error updating video status: ', error);
+    res.status(500).send(`Error updating video status: ${error.message}`);
   }
 };
+
 
 exports.getDailyUserVideo = async (req, res) => {
   try {
@@ -144,6 +161,21 @@ exports.uploadVideo = async (req, res) => {
       video.videoUrl = `${process.env.BASE_URL}/media/videos/${req.file.filename}`;
       video.status = 'pending approval';
       await video.save();
+
+      const patient = await User.findById(userId);
+      const patientName = patient ? `${patient.firstName} ${patient.lastName}` : "A patient";
+      const healthcareStaff = await User.find({ roles: 'healthcare' }); // Adjust based on your schema
+
+      // Send notification to each healthcare staff
+      healthcareStaff.forEach(async (staff) => {
+        const notification = new Notification({
+          recipient: staff._id,
+          message: `${patientName} has uploaded a new video for review.`,
+          targetUrl: `/healthcarevideo` 
+        });
+        await notification.save();
+      });
+
       res.status(200).json(video);
     } else {
       // If no file is provided in the request
@@ -215,11 +247,89 @@ exports.uploadVideoForDates = async (req, res) => {
   }
 };
 
+exports.deleteVideo = async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+    const userId = req.user.userId; // Assuming your authentication middleware adds the user ID to the request object
 
+    // Find the video and verify the user has rights to delete it
+    const video = await Video.findById(videoId);
+    if (!video) {
+      return res.status(404).send('Video not found');
+    }
+    if (video.patient.toString() !== userId) {
+      // Assuming the video document has a 'patient' field holding the user ID
+      return res.status(403).send('Not authorized to delete this video');
+    }
 
+    // Delete the video
+    await Video.findByIdAndDelete(videoId);
+    res.status(200).send('Video deleted successfully');
+  } catch (error) {
+    res.status(500).send('Error deleting video: ' + error.message);
+  }
+};
 
+exports.getVideosByPatientId = async (req, res) => {
+  try {
+    const patientId = req.params.patientId;  
 
+    const { startDate, endDate } = req.query;
 
+    let queryConditions = { patient: patientId };
 
+    if (startDate && endDate) {
+      queryConditions.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
 
+    const videos = await Video.find(queryConditions).sort({ date: -1 }); // Sorting by date in descending order
+
+    if (videos.length === 0) {
+      return res.status(404).json({ message: "No videos found for the specified patient." });
+    }
+
+    res.json(videos);
+  } catch (error) {
+    res.status(500).send('Error retrieving videos: ' + error.message);
+  }
+};
+
+exports.getVideoStats = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const stats = await Video.aggregate([
+      {
+        $match: {
+          date: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    let total = 0;
+    const formattedStats = stats.reduce((acc, curr) => {
+      acc[curr._id] = curr.count;
+      total += curr.count; // Sum up counts for the total
+      return acc;
+    }, {});
+
+    // Include total in the response
+    const response = {
+      ...formattedStats,
+      total
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).send('Error retrieving video statistics: ' + error.message);
+  }
+};
 

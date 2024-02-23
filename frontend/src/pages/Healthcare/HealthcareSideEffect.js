@@ -20,10 +20,15 @@ import {
   DialogContent,
   Divider,
   Avatar,
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import NoteIcon from "@mui/icons-material/Note";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
 import theme from "../../components/reusable/Theme";
@@ -33,7 +38,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
-import { parseISO, format } from 'date-fns';
+import { format, isValid, parseISO } from "date-fns";
 import axios from "../../components/axios";
 
 const useStyles = makeStyles((theme) => ({
@@ -43,60 +48,79 @@ const useStyles = makeStyles((theme) => ({
   highlightRed: {
     color: "red",
   },
+  accepted: {
+    backgroundColor: "#c8e6c9",
+    color: "black",
+  },
+  rejected: {
+    backgroundColor: "#ffcdd2",
+    color: "black",
+  },
 }));
 
 export default function HealthcareSideEffect() {
   const classes = useStyles();
   const [dateState, setDateState] = useState(new Date());
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [patients, setPatients] = useState([]);
-  const videoStatus = {
-    "2024-01-01": "accepted",
-    "2024-01-02": "rejected",
-    // ... other dates
-  };
   const [selectedPatient, setSelectedPatient] = useState(null);
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [sideEffects, setSideEffects] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [videoStatuses, setVideoStatuses] = useState([]);
 
-  const getToken = () => {
-    // Try to get the token from sessionStorage
-    let token = sessionStorage.getItem("token");
-
-    // If not found in sessionStorage, try localStorage
-    if (!token) {
-      token = localStorage.getItem("token");
+  const fetchSideEffects = async () => {
+    try {
+      const response = await axios.get("/sideEffects/getAllSideEffects");
+      // Explicitly convert dates to ISO strings before comparing.
+      const sortedSideEffects = response.data.sort((a, b) => {
+        const dateA = new Date(a.datetime).toISOString();
+        const dateB = new Date(b.datetime).toISOString();
+        return dateB.localeCompare(dateA);
+      });
+      setSideEffects(sortedSideEffects);
+    } catch (error) {
+      console.error("Failed to fetch side effects", error);
     }
+  };
+  
 
-    return token;
+  useEffect(() => {
+    fetchSideEffects();
+  }, []);
+
+
+
+  const fetchPatients = async () => {
+    try {
+      const response = await axios.get("/users/patients");
+      setPatients(response.data);
+      console.log(patients);
+    } catch (error) {
+      console.error("Error fetching patients", error);
+    }
   };
 
   useEffect(() => {
-    const fetchSideEffects = async () => {
-      try {
-        const response = await axios.get("/sideEffects/getAllSideEffects");
-        // Sort side effects by date in descending order
-        const sortedSideEffects = response.data.sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
-        );
-        setSideEffects(sortedSideEffects);
-        console.log(sideEffects);
-      } catch (error) {
-        console.error("Failed to fetch side effects", error);
-      }
-    };
-
-    fetchSideEffects();
+    fetchPatients();
   }, []);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const openPatientProfile = async (patient) => {
-    console.log("Patient :", patient);
+  const openPatientProfile = (patient) => {
+    console.log("Patient", patient);
     setSelectedPatient(patient);
+    setVideoStatuses([]);
+    const patientId = patient._id; 
+    if (patientId) {
+      fetchSideEffectsForPatient(patientId);
+      fetchVideoStatusForPatient(patientId);
+    } else {
+      console.error("Patient ID is undefined",patient._id);
+    }
   };
+  
 
   const closePatientProfile = () => {
     setSelectedPatient(null);
@@ -110,8 +134,27 @@ export default function HealthcareSideEffect() {
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      const dateString = date.toISOString().split("T")[0]; // format date to YYYY-MM-DD
-      return classes[videoStatus[dateString]] || "";
+      const dateString = format(date, "yyyy-MM-dd");
+      const treatmentStartDateString = selectedPatient?.treatmentStartDate
+        ? format(parseISO(selectedPatient.treatmentStartDate), "yyyy-MM-dd")
+        : null;
+
+      // Only proceed if we have a treatment start date and it's on or before the current date being rendered by the calendar
+      if (treatmentStartDateString && dateString >= treatmentStartDateString) {
+        const videoForDay = videoStatuses.find(
+          (video) => format(parseISO(video.date), "yyyy-MM-dd") === dateString
+        );
+
+        if (videoForDay) {
+          return classes.accepted; // Video submitted
+        } else {
+          const todayString = format(new Date(), "yyyy-MM-dd");
+
+          if (dateString < todayString) {
+            return classes.rejected; // Video missed
+          }
+        }
+      }
     }
   };
 
@@ -119,20 +162,78 @@ export default function HealthcareSideEffect() {
     <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
       <Box display="flex" alignItems="center" mr={2}>
         <Box sx={{ width: 16, height: 16, bgcolor: "#c8e6c9", mr: 1 }} />
-        <Typography variant="body2">Accepted Video</Typography>
+        <Typography variant="body2">Video Submitted</Typography>
       </Box>
       <Box display="flex" alignItems="center">
         <Box sx={{ width: 16, height: 16, bgcolor: "#ffcdd2", mr: 1 }} />
-        <Typography variant="body2">Rejected Video</Typography>
+        <Typography variant="body2">Video Missed</Typography>
       </Box>
     </Box>
   );
 
-  const gradeOptions = [
-    { value: 1, label: "Grade 1" },
-    { value: 2, label: "Grade 2" },
-    { value: 3, label: "Grade 3" },
-  ];
+  const diagnosisOptions = {
+    SPPTB: "Smear positive pulmonary tuberculosis (SPPTB)",
+    SNTB: "Smear negative pulmonary tuberculosis (SNTB)",
+    EXPTB: "Extrapulmonary tuberculosis (EXPTB)",
+    LTBI: "Latent TB infection (LTBI)",
+  };
+
+  const treatmentOptions = {
+    "Akurit-4": "Akurit-4 (EHRZ Fixed dose combination)",
+    Akurit: "Akurit (HR Fixed dose combination)",
+    Pyridoxine: "Pyridoxine 10mg",
+  };
+
+  const capitalizeFirstLetter = (string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
+  const formatDate = (dateString) => {
+    const date = parseISO(dateString);
+    if (isValid(date)) {
+      return format(date, "dd-MM-yyyy");
+    }
+    return "Invalid date";
+  };
+
+  const fetchSideEffectsForPatient = async (patientId) => {
+    try {
+      const response = await axios.get(`/sideEffects/patient/${patientId}`);
+      if (response.data) {
+        setSelectedPatient((prevState) => ({
+          ...prevState,
+          sideEffects: response.data,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching side effects", error);
+    }
+  };
+
+  const fetchVideoStatusForPatient = async (patientId) => {
+    try {
+      const response = await axios.get(`/videos/patientVideos/${patientId}`);
+      if (response.data) {
+        setVideoStatuses(response.data);
+      } else {
+        setVideoStatuses([]);
+      }
+    } catch (error) {
+      console.error("Error fetching video statuses for patient ID:", patientId, error);
+      setVideoStatuses([]);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Selected Patient updated", selectedPatient);
+  }, [selectedPatient]);
+  
+  useEffect(() => {
+    console.log("Video statuses updated", videoStatuses);
+  }, [videoStatuses]);
+  
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -190,15 +291,15 @@ export default function HealthcareSideEffect() {
                     <CardContent>
                       <ListItem alignItems="flex-start">
                         <Avatar
-                          alt={sideEffect.patientId?.firstName}
-                          src={sideEffect.patientId?.profilePicture}
+                          alt={sideEffect.patient?.firstName}
+                          src={sideEffect.patient?.profilePicture}
                           sx={{ mr: 2 }}
                         />
                         <ListItemText
                           primary={
                             <Typography className={classes.boldText}>
-                              {sideEffect.patientId?.firstName}{" "}
-                              {sideEffect.patientId?.lastName}
+                              {sideEffect.patient?.firstName}{" "}
+                              {sideEffect.patient?.lastName}
                             </Typography>
                           }
                           secondary={
@@ -208,7 +309,10 @@ export default function HealthcareSideEffect() {
                                 variant="body2"
                                 color="textPrimary"
                               >
-{format(parseISO(sideEffect.datetime), "d MMMM yyyy, h:mm a")}
+                                {format(
+                                  parseISO(sideEffect.datetime),
+                                  "d MMMM yyyy, h:mm a"
+                                )}
                               </Typography>
                               <br />
                               {"Side Effects: "}
@@ -244,9 +348,7 @@ export default function HealthcareSideEffect() {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() =>
-                            openPatientProfile(sideEffect.patientId)
-                          }
+                          onClick={() => openPatientProfile(sideEffect.patient)}
                           sx={{ mt: 2 }}
                         >
                           View profile
@@ -276,7 +378,7 @@ export default function HealthcareSideEffect() {
             alignItems: "center",
           }}
         >
-          Patient Profile
+          Manage Patient
           <IconButton
             aria-label="close"
             onClick={closePatientProfile}
@@ -305,7 +407,13 @@ export default function HealthcareSideEffect() {
                     <b>Last Name:</b> {selectedPatient?.lastName}
                   </Typography>
                   <Typography variant="body1">
-                    <b>Gender:</b> {selectedPatient?.gender}
+                    <b>Gender:</b>{" "}
+                    {selectedPatient
+                      ? capitalizeFirstLetter(selectedPatient.gender)
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body1">
+                    <b>Age:</b> {selectedPatient?.age}
                   </Typography>
                   <Typography variant="body1">
                     <b>Country:</b> {selectedPatient?.country}
@@ -316,12 +424,9 @@ export default function HealthcareSideEffect() {
                         ? "IC Number:"
                         : "Passport Number:"}
                     </b>{" "}
-                    {selectedPatient?.nationality === "Malaysian"
-                      ? selectedPatient?.icNumber
+                    {selectedPatient?.country === "Malaysia"
+                      ? selectedPatient?.nricNumber
                       : selectedPatient?.passportNumber}
-                  </Typography>
-                  <Typography variant="body1">
-                    <b>Age:</b> {selectedPatient?.age}
                   </Typography>
                   <Typography variant="body1">
                     <b>Phone Number:</b> {selectedPatient?.phoneNumber}
@@ -330,7 +435,7 @@ export default function HealthcareSideEffect() {
               </Card>
             </Grid>
 
-            {/* Treatment Information */}
+            {/* Treatment Details */}
             <Grid item xs={12}>
               <Card sx={{ mb: 2 }}>
                 <CardContent>
@@ -349,23 +454,104 @@ export default function HealthcareSideEffect() {
                     </Typography>
                   </Box>
                   <Divider sx={{ mb: 2 }} />
+
                   <Typography variant="body1">
-                    <b>Diagnosis:</b> {selectedPatient?.diagnosis}
+                    <b>Status:</b>{" "}
+                    {selectedPatient ? selectedPatient.careStatus : "N/A"}
                   </Typography>
                   <Typography variant="body1">
-                    <b>Treatment:</b> {selectedPatient?.treatment}
+                    <b>Diagnosis:</b>{" "}
+                    {selectedPatient?.diagnosis
+                      ? diagnosisOptions[selectedPatient.diagnosis]
+                      : "N/A"}
                   </Typography>
+
+                  <Typography variant="body1">
+                    <b>Current Treatment:</b>{" "}
+                    {selectedPatient?.currentTreatment
+                      ? treatmentOptions[selectedPatient.currentTreatment]
+                      : "N/A"}
+                  </Typography>
+
                   <Typography variant="body1">
                     <b>Number Of Tablets:</b> {selectedPatient?.numberOfTablets}
                   </Typography>
                   <Typography variant="body1">
-                    <b>Treatment Start Month:</b>{" "}
-                    {selectedPatient?.treatmentStartMonth}
+                    <b>Diagnosis Date:</b>{" "}
+                    {formatDate(selectedPatient?.diagnosisDate)}
+                  </Typography>
+                  <Typography variant="body1">
+                    <b>Treatment Start Date:</b>{" "}
+                    {formatDate(selectedPatient?.treatmentStartDate)}
+                  </Typography>
+                  <Typography variant="body1">
+                    <b>Treatment Duration:</b>{" "}
+                    {selectedPatient?.treatmentDuration}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
 
+            {/* Side effect history */}
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ bgcolor: "#e1f5fe", p: 2 }}>
+                    <Typography variant="h6" gutterBottom>
+                      <SideEffectIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
+                      Side Effect History
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ mb: 2 }} />
+                  {selectedPatient?.sideEffects &&
+                  selectedPatient.sideEffects.length > 0 ? (
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: "#0046c0" }}>
+                            <TableCell sx={{ color: "white" }}>
+                              Date and Time
+                            </TableCell>
+                            <TableCell sx={{ color: "white" }}>
+                              Side Effects
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {selectedPatient.sideEffects.map((effect, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                {format(
+                                  parseISO(effect.datetime),
+                                  "d MMMM yyyy, h:mm a"
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <ul>
+                                  {effect.sideEffects.map((e, idx) => (
+                                    <li key={idx}>
+                                      {e.effect === "Others (Please Describe)"
+                                        ? e.description // Display description for "Others (Please Describe)"
+                                        : `${e.effect} (Grade ${e.grade})`}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <Typography variant="body1" sx={{ mt: 2 }}>
+                      No side effect reported.
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Video status calendar */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
@@ -388,56 +574,6 @@ export default function HealthcareSideEffect() {
                     tileClassName={tileClassName}
                   />
                   <CalendarLegend />
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Notes */}
-            <Grid item xs={12}>
-              <Card sx={{ mb: 2 }}>
-                <CardContent>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    bgcolor="#e1f5fe"
-                    sx={{ p: 2 }}
-                  >
-                    <Typography variant="h6" gutterBottom>
-                      <NoteIcon sx={{ verticalAlign: "middle", mr: 1 }} /> Notes
-                    </Typography>
-                  </Box>
-                  <Divider sx={{ mb: 2 }} />
-                  <Typography variant="body1">
-                    {selectedPatient?.notes}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Side Effect History */}
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ bgcolor: "#e1f5fe", p: 2 }}>
-                    <Typography variant="h6" gutterBottom>
-                      <SideEffectIcon sx={{ verticalAlign: "middle", mr: 1 }} />{" "}
-                      Side Effect History
-                    </Typography>
-                  </Box>
-                  <Divider sx={{ mb: 2 }} />
-                  {/* <List>
-  {selectedPatient?.sideEffectsHistory?.map((effect, index) => (
-    <ListItem key={index}>
-      <ListItemText
-        primary={effect.date}
-        secondary={
-          effect.detail === "Others (Please Describe)" ? effect.detail : `${effect.detail}, ${gradeOptions.find((g) => g.value === effect.grade)?.label}`
-        }
-      />
-    </ListItem>
-  ))}
-</List> */}
                 </CardContent>
               </Card>
             </Grid>

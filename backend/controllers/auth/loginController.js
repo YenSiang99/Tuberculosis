@@ -2,6 +2,8 @@
 const User = require('../../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Notification = require('../../models/Notification'); 
+const Video = require('../../models/Video'); 
 
 exports.login = async (req, res) => {
   try {
@@ -20,22 +22,47 @@ exports.login = async (req, res) => {
     }
 
     // If email and password are correct, generate a token
-    const token = jwt.sign(
-      { 
+    const token = jwt.sign({
         userId: user._id,
-        firstName : user.firstName,
-        lastName : user.lastName,
-        fullname : user.firstName + ' ' + user.lastName, 
-        roles : user.roles,
-        group : user.group,
-        profilePicture : user.profilePicture,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullname: user.firstName + ' ' + user.lastName, 
+        roles: user.roles,
+        group: user.group,
+        profilePicture: user.profilePicture,
       },
       'yourSecretKey', // Replace with your secret key
       { expiresIn: '1h' }
     );
 
+    if (user.roles.includes('patient')) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset hours to start of the day
+
+      const videoUploaded = await Video.findOne({
+        patient: user._id,
+        date: { $gte: today }
+      });
+
+      // Check if a notification for uploading a video was already sent today
+      const notificationSentToday = await Notification.findOne({
+        recipient: user._id,
+        message: "Don't forget to upload your daily video!",
+        timestamp: { $gte: today } // Check if it was created today
+      });
+
+      // Only create a new notification if a video hasn't been uploaded and no notification has been sent today
+      if (!videoUploaded && !notificationSentToday) {
+        const notification = new Notification({
+          recipient: user._id,
+          message: "Don't forget to upload your daily video!",
+          targetUrl: "/patientvideo"
+        });
+        await notification.save();
+      }
+    }
+
     // Send the token to the client
-    // console.log("User roles:", user.roles); // Debugging log
     res.json({ token, roles: user.roles });
     
   } catch (error) {
