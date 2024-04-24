@@ -253,7 +253,7 @@ export default function HealthcarePatient() {
                 <CardContent>
                   {/* Directly display the video player if a video URL is available for the selected patient */}
                   {selectedPatient?.videoUrl && (
-                    <video width="40%" height="60%" controls>
+                    <video width="50%" height="70%" controls>
                       <source src={selectedPatient.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>

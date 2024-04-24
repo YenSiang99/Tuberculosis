@@ -26,7 +26,7 @@ import {
   MenuItem,
   Card,
   CardContent,
-  CircularProgress,
+  Table, TableHead, TableRow,TableCell, TableBody
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import theme from "../../components/reusable/Theme";
@@ -38,9 +38,11 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import EditIcon from "@mui/icons-material/Edit";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
-import { green, blue, red } from "@mui/material/colors";
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { green, blue, red, orange} from "@mui/material/colors";
 import axios from "../../components/axios";
 
 export default function HealthcareProfile() {
@@ -63,6 +65,11 @@ export default function HealthcareProfile() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [isMissedVideosDialogOpen, setIsMissedVideosDialogOpen] = useState(false);
+  const [missedVideosData, setMissedVideosData] = useState({
+    totalMissedVideos: 0,
+    patientMissedVideosDetails: [],
+  });
   const [errors, setErrors] = useState({
     currentPasswordError: "",
     newPasswordError: "",
@@ -334,32 +341,27 @@ export default function HealthcareProfile() {
   };
 
   // Enhanced metric card component
-  const StatCard = ({ icon, title, value, color }) => (
-    <Card
-      elevation={3}
-      sx={{
-        ":hover": { boxShadow: 6 },
-        bgcolor: color,
-        color: "#fff",
-        transition: "0.3s",
-      }}
-    >
-      <CardContent
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-        }}
-      >
-        <Box sx={{ mb: 2 }}>{icon}</Box>
-        <Typography fontsize="1.1rem" sx={{ mb: 1 }}>
-          {title}
-        </Typography>
-        <Typography variant="h4">{value}</Typography>
-      </CardContent>
-    </Card>
-  );
+  const StatCard = ({ icon, title, value, color, actionIcon }) => {
+    return (
+      <Card elevation={3} sx={{ bgcolor: color, color: '#fff', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            {icon}
+            <Typography fontSize="1.1rem" sx={{ my: 1 }}>
+              {title}
+            </Typography>
+            <Typography variant="h4">{value}</Typography>
+          </Box>
+        </CardContent>
+        {actionIcon && (
+          <Box sx={{ position: 'absolute', top: 0, right: 0, p: 1 }}>
+            {actionIcon}
+          </Box>
+        )}
+      </Card>
+    );
+  };
+  
 
   const getCurrentMonthAndYear = () => {
     const date = new Date();
@@ -398,6 +400,25 @@ export default function HealthcareProfile() {
     };
 
     fetchVideoStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchMissedVideosData = async () => {
+      try {
+        const response = await axios.get('/videos/totalMissedVideos', {
+          params: {
+            year: new Date().getFullYear(),
+            month: new Date().getMonth() + 1, // Adjust month to 1-indexed
+          },
+        });
+        setMissedVideosData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch missed videos data:", error);
+        // Handle error appropriately
+      }
+    };
+  
+    fetchMissedVideosData();
   }, []);
 
   return (
@@ -720,9 +741,9 @@ export default function HealthcareProfile() {
                 <Typography variant="subtitle1" gutterBottom>
                   {` ${getCurrentMonthAndYear()}`}
                 </Typography>
-                <Grid container spacing={2} justifyContent="center">
+                <Grid container spacing={2} justifyContent="center" >
                   {/* Enhanced Stat Cards */}
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       icon={<VideocamIcon fontSize="large" />}
                       title="Total Submitted Videos"
@@ -730,7 +751,7 @@ export default function HealthcareProfile() {
                       color={blue[500]}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       icon={<ThumbUpIcon fontSize="large" />}
                       title="Approved Videos"
@@ -738,7 +759,7 @@ export default function HealthcareProfile() {
                       color={green[500]}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <StatCard
                       icon={<ThumbDownIcon fontSize="large" />}
                       title="Rejected Videos"
@@ -746,6 +767,25 @@ export default function HealthcareProfile() {
                       color={red[500]}
                     />
                   </Grid>
+
+                  <Grid item xs={12} sm={6} md={3} >
+  <StatCard
+    icon={<ReportProblemIcon fontSize="large" />}
+    title="Total Missed Videos"
+    value={missedVideosData.totalMissedVideos}
+    color={orange[800]}
+    actionIcon={
+      <IconButton
+        onClick={() => setIsMissedVideosDialogOpen(true)}
+        size="small"
+        sx={{  position: 'absolute', top: 8, right: 8, color: 'rgba(255, 255, 255, 0.8)' }}
+      >
+        <MoreVertIcon />
+      </IconButton>
+    }
+  />
+</Grid>
+
 
                 </Grid>
               </Paper>
@@ -893,6 +933,46 @@ export default function HealthcareProfile() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={isMissedVideosDialogOpen} onClose={() => setIsMissedVideosDialogOpen(false)} maxWidth="sm" fullWidth>
+  <DialogTitle sx={{ m: 0, p: 2 }}>
+    Missed Videos Details
+    <IconButton
+      aria-label="close"
+      onClick={() => setIsMissedVideosDialogOpen(false)}
+      sx={{
+        position: 'absolute',
+        right: 8,
+        top: 8,
+        color: (theme) => theme.palette.grey[500],
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  <DialogContent dividers>
+    <Table>
+      <TableHead sx={{ backgroundColor: theme.palette.primary.main }}>
+        <TableRow>
+          <TableCell sx={{ color: theme.palette.primary.contrastText }}>Patient Name</TableCell>
+          <TableCell sx={{ color: theme.palette.primary.contrastText }} align="left">Missed Videos</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {missedVideosData.patientMissedVideosDetails.map((detail) => (
+          <TableRow key={detail.patientId}>
+            <TableCell component="th" scope="row">
+              {detail.patientName}
+            </TableCell>
+            <TableCell align="left">{detail.missedVideos}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </DialogContent>
+</Dialog>
+
+
+
     </ThemeProvider>
   );
 }

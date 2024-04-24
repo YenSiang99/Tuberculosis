@@ -126,11 +126,11 @@ export default function PatientProfile() {
         }));
       }
       setEditableFields((fields) => ({ ...fields, [field]: value }));
-      return; 
+      return;
     }
 
     if (field === "country") {
-      console.log("Updating country to:", value); 
+      console.log("Updating country to:", value);
 
       const isMalaysia = value === "Malaysia";
       setIsMalaysian(isMalaysia);
@@ -143,7 +143,7 @@ export default function PatientProfile() {
           age: ageCalculated.toString(),
         }));
       }
-    } 
+    }
 
     if (field === "nricNumber" && isMalaysian) {
       const ageCalculated = calculateAgeFromNric(value);
@@ -152,8 +152,7 @@ export default function PatientProfile() {
         [field]: value,
         age: ageCalculated.toString(),
       }));
-    }
-    else {
+    } else {
       setEditableFields((fields) => ({ ...fields, [field]: value }));
     }
   };
@@ -452,6 +451,13 @@ export default function PatientProfile() {
 
   const tabletOptions = [2, 3, 4, 5];
 
+  const hasTreatmentEnded = () => {
+    if (!patientData.treatmentEndDate) return false;
+    const treatmentEndDate = new Date(patientData.treatmentEndDate);
+    const today = new Date();
+    return treatmentEndDate < today;
+  };
+
   return (
     <ThemeProvider theme={theme}>
       {matchesSM && (
@@ -555,7 +561,10 @@ export default function PatientProfile() {
                     sx={{ color: "text.secondary", mb: 2, fontSize: "1rem" }}
                   >
                     {" "}
-                    Status: {patientData.careStatus || "Not Set"}
+                    Status:{" "}
+                    {hasTreatmentEnded()
+                      ? "Treatment Ended"
+                      : patientData.careStatus || "Not Set"}
                   </Typography>
 
                   <Divider sx={{ my: 2 }} />

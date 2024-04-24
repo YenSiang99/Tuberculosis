@@ -68,6 +68,9 @@ export default function HealthcarePatient() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [patients, setPatients] = useState([]);
   const [videoStatuses, setVideoStatuses] = useState([]);
+  const [inactivePatients, setInactivePatients] = useState([]);
+  const [activePatients, setActivePatients] = useState([]);
+
   const [alertInfo, setAlertInfo] = useState({
     show: false,
     type: "",
@@ -86,19 +89,30 @@ export default function HealthcarePatient() {
     },
   }));
 
-  const fetchPatients = async () => {
+  const fetchAndCategorizePatients = async () => {
     try {
       const response = await axios.get("/users/patients");
-      setPatients(response.data);
-      console.log(patients);
+      const updatedPatients = response.data.map((patient) => ({
+        ...patient,
+        // Determine if the patient's treatment is considered ended either by date or by specific care statuses
+        isTreatmentEnded: new Date(patient.treatmentEndDate) < new Date() || 
+                           ["Switch to DOTS", "Appointment to see doctor"].includes(patient.careStatus),
+      }));
+  
+      // Categorize patients based on the modified isTreatmentEnded flag
+      const activePatients = updatedPatients.filter((patient) => !patient.isTreatmentEnded);
+      const inactivePatients = updatedPatients.filter((patient) => patient.isTreatmentEnded);
+  
+      // Update state to reflect categorized patients
+      setActivePatients(activePatients);
+      setInactivePatients(inactivePatients);
     } catch (error) {
       console.error("Error fetching patients", error);
-      // Handle error (e.g., show an error message)
     }
   };
-
+  
   useEffect(() => {
-    fetchPatients();
+    fetchAndCategorizePatients();
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -121,65 +135,70 @@ export default function HealthcarePatient() {
   };
 
   const handleFieldChange = (event, field) => {
-    setSelectedPatient({ ...selectedPatient, [field]: event.target.value });
+    if (selectedPatient) {
+      // Guard against null
+      setSelectedPatient({ ...selectedPatient, [field]: event.target.value });
+    }
   };
 
   const toggleEditTreatmentInfo = async (shouldSave = true) => {
-    if (editTreatmentInfo) {
-      if (shouldSave) {
-        try {
-          await axios.put(`users/patients/treatment/${selectedPatient._id}`, {
-            diagnosis: selectedPatient.diagnosis,
-            currentTreatment: selectedPatient.currentTreatment,
-            numberOfTablets: selectedPatient.numberOfTablets,
-            diagnosisDate: selectedPatient.diagnosisDate,
-            treatmentStartDate: selectedPatient.treatmentStartDate,
-            treatmentDuration: selectedPatient.treatmentDuration,
-            careStatus: selectedPatient.careStatus,
-          });
+    if (selectedPatient) {
+      if (editTreatmentInfo) {
+        if (shouldSave) {
+          try {
+            await axios.put(`users/patients/treatment/${selectedPatient._id}`, {
+              diagnosis: selectedPatient.diagnosis,
+              currentTreatment: selectedPatient.currentTreatment,
+              numberOfTablets: selectedPatient.numberOfTablets,
+              diagnosisDate: selectedPatient.diagnosisDate,
+              treatmentStartDate: selectedPatient.treatmentStartDate,
+              treatmentDuration: selectedPatient.treatmentDuration,
+              careStatus: selectedPatient.careStatus,
+            });
 
-          // Optionally refresh patient data here to reflect the changes
-          fetchPatients();
+            // Optionally refresh patient data here to reflect the changes
+            fetchAndCategorizePatients();
 
-          setAlertInfo({
-            show: true,
-            type: "success",
-            message: "Treatment information updated successfully.",
-          });
-        } catch (error) {
-          console.error(
-            "Error saving treatment information",
-            error.response.data
-          );
+            setAlertInfo({
+              show: true,
+              type: "success",
+              message: "Treatment information updated successfully.",
+            });
+          } catch (error) {
+            console.error(
+              "Error saving treatment information",
+              error.response.data
+            );
 
-          setAlertInfo({
-            show: true,
-            type: "error",
-            message:
-              "Failed to update treatment information. Please try again.",
-          });
+            setAlertInfo({
+              show: true,
+              type: "error",
+              message:
+                "Failed to update treatment information. Please try again.",
+            });
+          }
+        } else {
+          // If canceling, revert to the original data
+          setSelectedPatient((prevState) => ({
+            ...prevState,
+            ...tempTreatmentInfo,
+          }));
         }
       } else {
-        // If canceling, revert to the original data
-        setSelectedPatient((prevState) => ({
-          ...prevState,
-          ...tempTreatmentInfo,
-        }));
+        // If starting to edit, store the current data as a backup
+        setTempTreatmentInfo({
+          diagnosis: selectedPatient.diagnosis,
+          currentTreatment: selectedPatient.currentTreatment,
+          numberOfTablets: selectedPatient.numberOfTablets,
+          diagnosisDate: selectedPatient.diagnosisDate,
+          treatmentStartDate: selectedPatient.treatmentStartDate,
+          treatmentDuration: selectedPatient.treatmentDuration,
+          careStatus: selectedPatient.careStatus,
+        });
       }
-    } else {
-      // If starting to edit, store the current data as a backup
-      setTempTreatmentInfo({
-        diagnosis: selectedPatient.diagnosis,
-        currentTreatment: selectedPatient.currentTreatment,
-        numberOfTablets: selectedPatient.numberOfTablets,
-        diagnosisDate: selectedPatient.diagnosisDate,
-        treatmentStartDate: selectedPatient.treatmentStartDate,
-        treatmentDuration: selectedPatient.treatmentDuration,
-        careStatus: selectedPatient.careStatus,
-      });
-    }
 
-    setEditTreatmentInfo(!editTreatmentInfo);
+      setEditTreatmentInfo(!editTreatmentInfo);
+    }
   };
 
   // Add a function to handle date change
@@ -294,6 +313,13 @@ export default function HealthcarePatient() {
     }
   };
 
+  const hasTreatmentEnded = (patient) => {
+    if (!patient || !patient.treatmentEndDate) return false;
+    const treatmentEndDate = new Date(patient.treatmentEndDate);
+    const today = new Date();
+    return treatmentEndDate < today;
+  };
+
   return (
     <ThemeProvider theme={theme}>
       {matchesSM && (
@@ -346,7 +372,7 @@ export default function HealthcarePatient() {
               </Typography>
 
               <List>
-                {patients.map((patient) => (
+                {activePatients.map((patient) => (
                   <Card
                     key={patient.id}
                     sx={{ mb: 2, bgcolor: "neutral.light" }}
@@ -366,7 +392,10 @@ export default function HealthcarePatient() {
                               variant="body2"
                               color="textSecondary"
                             >
-                              Status: {patient.careStatus}
+                              Status:{" "}
+                              {patient.isTreatmentEnded
+                                ? "Treatment Ended"
+                                : patient.careStatus}
                             </Typography>
                           }
                         />
@@ -382,6 +411,63 @@ export default function HealthcarePatient() {
                   </Card>
                 ))}
               </List>
+            </Box>
+          </Paper>
+        </Container>
+
+        <Container>
+          <Paper
+            elevation={3}
+            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+          >
+                        <Box sx={{ p: 3 }}>
+            <Typography
+              variant="h5"
+              gutterBottom
+              component="div"
+              sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+            >
+              Inactive Patients
+            </Typography>
+            <List>
+            {inactivePatients.map((patient) => (
+  <Card key={patient.id} sx={{ mb: 2, bgcolor: "neutral.light" }}>
+    <CardContent>
+      <ListItem>
+        <Avatar
+          src={patient.profilePicture}
+          alt={`${patient.firstName} ${patient.lastName}`}
+          sx={{ mr: 2 }}
+        />
+        <ListItemText
+          primary={`${patient.firstName} ${patient.lastName}`}
+          secondary={
+            <Typography
+              component="span"
+              variant="body2"
+              color="textSecondary"
+            >
+              Status: {
+                ["Switch to DOTS", "Appointment to see doctor"].includes(patient.careStatus) 
+                ? patient.careStatus 
+                : "Treatment Ended"
+              }
+            </Typography>
+          }
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => openManageDialog(patient)}
+        >
+          View Profile
+        </Button>
+      </ListItem>
+    </CardContent>
+  </Card>
+))}
+
+            </List>
             </Box>
           </Paper>
         </Container>
@@ -402,7 +488,7 @@ export default function HealthcarePatient() {
             alignItems: "center",
           }}
         >
-          Manage Patient
+          Patient Details
           <IconButton
             aria-label="close"
             onClick={closeManageDialog}
@@ -473,31 +559,37 @@ export default function HealthcarePatient() {
                     <Typography variant="h6" gutterBottom>
                       <LocalHospitalIcon
                         sx={{ verticalAlign: "middle", mr: 1 }}
-                      />{" "}
+                      />
                       Treatment Information
                     </Typography>
-                    {!editTreatmentInfo && (
-                      <IconButton
-                        onClick={toggleEditTreatmentInfo}
-                        size="small"
-                      >
-                        <EditIcon color="primary" />
-                      </IconButton>
-                    )}
+                    {!editTreatmentInfo &&
+                      !hasTreatmentEnded(selectedPatient) && (
+                        <IconButton
+                          onClick={() => toggleEditTreatmentInfo()}
+                          size="small"
+                        >
+                          <EditIcon color="primary" />
+                        </IconButton>
+                      )}
                   </Box>
                   <Divider sx={{ mb: 2 }} />
                   {editTreatmentInfo ? (
                     <>
-                      <FormControl fullWidth margin="normal">
+                      <FormControl
+                        fullWidth
+                        margin="normal"
+                        disabled={hasTreatmentEnded(selectedPatient)}
+                      >
                         <InputLabel id="status-label">Status</InputLabel>
                         <Select
                           labelId="status-label"
                           id="careStatus"
-                          value={selectedPatient.careStatus}
+                          value={selectedPatient?.careStatus || ""}
                           label="Status"
                           onChange={(event) =>
                             handleFieldChange(event, "careStatus")
                           }
+                          disabled={hasTreatmentEnded(selectedPatient)}
                         >
                           {Object.keys(statusOptions).map((key) => (
                             <MenuItem key={key} value={key}>
@@ -512,7 +604,7 @@ export default function HealthcarePatient() {
                         <Select
                           labelId="diagnosis-label"
                           id="diagnosis"
-                          value={selectedPatient.diagnosis || ""}
+                          value={selectedPatient?.diagnosis || ""}
                           label="Diagnosis"
                           onChange={(event) =>
                             handleFieldChange(event, "diagnosis")
@@ -531,7 +623,7 @@ export default function HealthcarePatient() {
                         <Select
                           labelId="treatment-label"
                           id="currentTreatment"
-                          value={selectedPatient.currentTreatment}
+                          value={selectedPatient?.currentTreatment}
                           label="Treatment"
                           onChange={(event) =>
                             handleFieldChange(event, "currentTreatment")
@@ -552,7 +644,7 @@ export default function HealthcarePatient() {
                         <Select
                           labelId="tablets-label"
                           id="numberOfTablets"
-                          value={selectedPatient.numberOfTablets}
+                          value={selectedPatient?.numberOfTablets}
                           label="Number of Tablets"
                           onChange={(event) =>
                             handleFieldChange(event, "numberOfTablets")
@@ -599,31 +691,34 @@ export default function HealthcarePatient() {
                           handleFieldChange(event, "treatmentDuration")
                         }
                       />
-                      {editTreatmentInfo && (
-                        <Box display="flex" justifyContent="flex-end">
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => toggleEditTreatmentInfo()}
-                            sx={{ mt: 2, mr: 2 }}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            onClick={() => toggleEditTreatmentInfo(false)}
-                            sx={{ mt: 2 }}
-                          >
-                            Cancel
-                          </Button>
-                        </Box>
-                      )}
+                      {editTreatmentInfo &&
+                        !hasTreatmentEnded(selectedPatient) && (
+                          <Box display="flex" justifyContent="flex-end">
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => toggleEditTreatmentInfo()}
+                              sx={{ mt: 2, mr: 2 }}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              onClick={() => toggleEditTreatmentInfo(false)}
+                              sx={{ mt: 2 }}
+                            >
+                              Cancel
+                            </Button>
+                          </Box>
+                        )}
                     </>
                   ) : (
                     <>
                       <Typography variant="body1">
                         <b>Status:</b>{" "}
-                        {selectedPatient ? selectedPatient.careStatus : "N/A"}
+                        {hasTreatmentEnded(selectedPatient)
+                          ? "Treatment Ended"
+                          : selectedPatient?.careStatus}
                       </Typography>
                       <Typography variant="body1">
                         <b>Diagnosis:</b>{" "}

@@ -33,7 +33,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import DataViewer from "../../components/reusable/DataViewer";
 import axios from "../../components/axios";
-import '../../App.css';
+import '../../css/customCalendarStyles.css';
 
 
 import { formatDate, formatTimeSlot } from "../../utils/dateUtils";
@@ -180,7 +180,6 @@ export default function HealthcareAppointment() {
     <div>
       <strong >{event.fullName}</strong>
       <div style={{ fontSize: '0.8rem' }}>{event.timeslot}</div>
-
     </div>
   );
 
@@ -399,7 +398,6 @@ export default function HealthcareAppointment() {
                 components={{
                   toolbar: CustomToolbar,
                   event: CustomEvent,
-                  // event: EventComponent,
                 }}
                 eventPropGetter={eventStyleGetter}
               />
