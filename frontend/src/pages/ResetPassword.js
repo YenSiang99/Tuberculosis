@@ -19,7 +19,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import theme from "../components/reusable/Theme";
 import BgImage from "../images/cover.jpeg";
-import logo from "../images/logo.png";
+// import logo from "./logo.png";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "../components/axios";
 
@@ -128,7 +128,7 @@ export default function ResetPasswrd() {
               }}
             >
               <img
-                src={logo}
+                src="./logo.png"
                 alt="Logo"
                 style={{ height: "70px", marginRight: theme.spacing(2) }}
               />

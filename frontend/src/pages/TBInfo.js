@@ -25,7 +25,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import theme from "../components/reusable/Theme";
 import BgImage from "../images/cover.jpeg";
-import logo from "../images/logo.png";
+// import logo from "./logo.png";
 import { useNavigate } from "react-router-dom";
 import infographic from "../images/TBInfographic.png";
 import infographic2 from "../images/TBInfographic2.png";
@@ -571,7 +571,7 @@ export default function Public() {
               }}
             >
               <img
-                src={logo}
+                src="./logo.png"
                 alt="Logo"
                 style={{ height: "70px", marginRight: theme.spacing(2) }}
               />
