@@ -24,8 +24,7 @@ import {
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import theme from "../components/reusable/Theme";
-import BgImage from "../images/cover.jpeg";
-// import logo from "../images/logo.png";
+import BgImage from "../assets/cover.jpeg";
 
 import axios from "../components/axios";
 import { useNavigate, Link } from "react-router-dom";

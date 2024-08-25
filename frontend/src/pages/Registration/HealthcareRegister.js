@@ -20,7 +20,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import theme from "../../components/reusable/Theme";
-import BgImage from "../../images/cover.jpeg";
+import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
 
 export default function HealthcareRegister() {

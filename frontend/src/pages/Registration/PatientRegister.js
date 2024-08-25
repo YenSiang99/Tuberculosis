@@ -24,7 +24,7 @@ import PhoneInput from "react-phone-input-2";
 import { CountryDropdown } from "react-country-region-selector";
 import "react-phone-input-2/lib/material.css";
 import theme from "../../components/reusable/Theme";
-import BgImage from "../../images/cover.jpeg";
+import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
 
 export default function PatientRegister() {

@@ -14,23 +14,30 @@ import {
   CardContent,
   Paper,
   List,
-  ListItem,
   ListItemText,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   styled,
   Button,
+  Dialog, 
+  DialogContent, 
+  DialogActions, 
+  Slide
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import theme from "../components/reusable/Theme";
-import BgImage from "../images/cover.jpeg";
-// import logo from "./logo.png";
 import { useNavigate } from "react-router-dom";
-import infographic from "../images/TBInfographic.png";
-import infographic2 from "../images/TBInfographic2.png";
-import video from "../images/video.mp4";
-import demoMedicineVideo from "../images/Presentation1.mp4";
+
+// assets
+import theme from "../components/reusable/Theme";
+import BgImage from "../assets/cover.jpeg";
+
+// import infographics
+import infographic1 from "../infographics/Infographic_1.png";
+
+
+// import videos
+import demoMedicineVideo from "../videos/Presentation1.mp4";
 
 const drawerWidth = 240;
 
@@ -38,6 +45,31 @@ export default function Public() {
   const [activeSection, setActiveSection] = useState("About TB");
   const navigate = useNavigate();
 
+  // View infographic hooks
+  const [open, setOpen] = useState(false);
+  const [currentInfographic, setCurrentInfographic] = useState(null);
+
+  // Modal handling functions
+  const handleClickOpen = (infographic) => {
+    setCurrentInfographic(infographic);
+    setOpen(true);
+  };
+  
+  const handleClose = () => {
+    setOpen(false);
+  };
+  
+  // This function can determine the path based on infographic id or name
+  const getInfographicSrc = (folder, file) => {
+    if(file){
+      return require(`../infographics/${folder}/${file}`);
+    } else {
+      return require(`../infographics/${folder}`);
+    }
+  };
+
+
+  // Style code
   const StyledAccordion = styled(Accordion)(({ theme }) => ({
     margin: "0.5rem 0",
     border: `1px solid ${theme.palette.divider}`,
@@ -73,7 +105,34 @@ export default function Public() {
     borderTop: "1px solid rgba(0, 0, 0, .125)",
   }));
 
+
+  // Component
   const AboutTBContent = () => {
+
+    const [value, setValue] = useState(0);
+
+    const handleChange = (event, newValue) => {
+      setValue(newValue);
+    };
+
+    const infographics = [
+      {
+        name: 'Infographic_1.png',
+        type: 'single', 
+      },
+      {
+        name: 'Infographic_2',
+        type: 'multi',
+        pages: ['Page1.png', 'Page2.png', 'Page3.png', 'Page4.png']
+      },
+      {
+        name: 'Infographic_4',
+        type: 'multi',
+        pages: ['Page1.png', 'Page2.png']
+      }
+    ];
+    
+
     return (
       <Box>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
@@ -90,29 +149,20 @@ export default function Public() {
             Infographics
           </Typography>
           <Grid container spacing={2}>
-            {/* Infographic Card 1 */}
-            <Grid item xs={12} md={6}>
-              <Card>
+            {infographics.map((infographic, index) => (
+              <Grid item xs={12} md={6} key={index}>
+                <Card onClick={() => handleClickOpen(infographic)}>
                 <CardContent>
                   <img
-                    src={infographic}
+                    src={infographic.type === 'multi' ? getInfographicSrc(infographic.name, infographic.pages[0]) : getInfographicSrc(infographic.name)}
                     style={{ width: "100%", height: "auto" }}
+                    alt={`Infographic ${index + 1}`}
                   />
                 </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Infographic Card 2 */}
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <img
-                    src={infographic2}
-                    style={{ width: "100%", height: "auto" }}
-                  />
-                </CardContent>
-              </Card>
-            </Grid>
+                </Card>
+                
+              </Grid>
+            ))}
           </Grid>
         </Box>
 
@@ -250,53 +300,37 @@ export default function Public() {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardMedia
-                  component="video"
-                  controls
-                  src={video}
-                  title="What is Tuberculosis?"
+                  component="iframe"
+                  src="https://drive.google.com/file/d/1-8GPpy16eowM2e0K9_e665oceZPkNYBm/preview"
+                  title="Understanding the Basics of Tuberculosis"
                   style={{ height: 300 }}
                 />
                 <CardContent>
                   <Typography variant="subtitle1" gutterBottom>
-                    What is Tuberculosis?
+                    Understanding the Basics of Tuberculosis
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Video 2 */}
             <Grid item xs={12} md={6}>
               <Card>
                 <CardMedia
                   component="iframe"
-                  src="https://www.youtube.com/embed/wA_fObLY6GE"
-                  title="Five things to know about Tuberculosis "
+                  src="https://drive.google.com/file/d/1ZVMwGYad30XSEbY_QWXupF0pQWrYX1xq/preview"
+                  title="Fighting Tuberculosis: Innovation and Research"
                   style={{ height: 300 }}
                 />
                 <CardContent>
                   <Typography variant="subtitle1" gutterBottom>
-                    Five things to know about Tuberculosis
+                    Fighting Tuberculosis: Innovation and Research
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Video 3 */}
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardMedia
-                  component="iframe"
-                  src="https://www.youtube.com/embed/IGZLkRN76Dc"
-                  title="How the body reacts to TB?"
-                  style={{ height: 300 }}
-                />
-                <CardContent>
-                  <Typography variant="subtitle1" gutterBottom>
-                    - How the body reacts to TB?
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+           
+                 
           </Grid>
         </Box>
 
@@ -312,8 +346,6 @@ export default function Public() {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
           MyTBCompanion
         </Typography>
-
-        {/* Videos */}
 
         {/* FAQ Section */}
         <Box my={4}>
@@ -519,6 +551,48 @@ export default function Public() {
     );
   };
 
+  const InfographicModalContent = ({ infographic }) => {
+    const [activeStep, setActiveStep] = useState(0);
+  
+    if (!infographic) return null;
+  
+    const isMultiPage = infographic.type === 'multi';
+    const maxSteps = isMultiPage ? infographic.pages.length : 1;
+  
+    const handleNext = () => {
+      setActiveStep((prevActiveStep) => (prevActiveStep + 1) % maxSteps);
+    };
+  
+    const handleBack = () => {
+      setActiveStep((prevActiveStep) => (prevActiveStep - 1 + maxSteps) % maxSteps);
+    };
+  
+    return (
+      <DialogContent>
+        {isMultiPage ? (
+          <Box>
+            <img
+              src={getInfographicSrc(infographic.name, infographic.pages[activeStep])}
+              style={{ width: "100%", height: "auto" }}
+              alt={`Page ${activeStep + 1}`}
+            />
+            <Box sx={{ display: 'flex', flexDirection: 'row', mt: 2, justifyContent: 'space-between' }}>
+              <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+                {'Back'}
+              </Button>
+              <Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1}>
+                {'Next'}
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <img src={getInfographicSrc(infographic.name)} style={{ width: "100%", height: "auto" }} alt="Infographic" />
+        )}
+      </DialogContent>
+    );
+  };
+
+  // Page layout code
   const sections = {
     "About TB": <AboutTBContent />,
     "About MyTBCompanion": <AboutMyTBCompanion />,
@@ -649,6 +723,13 @@ export default function Public() {
             </Container>
           </Box>
         </Box>
+
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+          <InfographicModalContent infographic={currentInfographic} />
+          <DialogActions>
+            <Button onClick={handleClose}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </ThemeProvider>
   );

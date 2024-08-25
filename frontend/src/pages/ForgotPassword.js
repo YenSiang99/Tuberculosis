@@ -15,8 +15,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import theme from "../components/reusable/Theme";
-import BgImage from "../images/cover.jpeg";
-// import logo from "./logo.png";
+import BgImage from "../assets/cover.jpeg";
 import { useNavigate } from "react-router-dom";
 import axios from "../components/axios";
 
