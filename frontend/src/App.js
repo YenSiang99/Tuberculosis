@@ -6,9 +6,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Public pages
 import Login from "./pages/Login";
-import TBInfo from "./pages/TBInfo";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+
+import TBInfo from "./pages/TBInfo";
+import GamesPage from './pages/GamesPage';
+
+import AboutTBCompanionPage from './pages/AboutTBCompanionPage';
+import AboutTBPage from './pages/AboutTBPage';
+
+
 
 // Register pages
 import PatientRegister from "./pages/Registration/PatientRegister";
@@ -38,6 +45,8 @@ import HealthcareNotification from "./pages/Healthcare/HealthcareNotification";
 import AdminFAQ from "./pages/Administration/AdminFAQ";
 import AdminUser from "./pages/Administration/AdminUser";
 
+
+
 function App() {
   return (
     <Router>
@@ -45,9 +54,10 @@ function App() {
         <Routes>
           {/* Public paths */}
           <Route path="/" element={<Login />} />
-          <Route path="/tb-info" element={<TBInfo />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+
+          <Route path="/tb-info" element={<TBInfo />}/>
 
           {/* Register paths */}
           <Route path="/register/patient" element={<PatientRegister />} />
@@ -72,6 +82,8 @@ function App() {
           <Route path="/healthcareprofile" element={<ProtectedRoute><HealthcareProfile /></ProtectedRoute>} />
           <Route path="/healthcarepassword" element={<ProtectedRoute><HealthcarePassword /></ProtectedRoute>} />
           <Route path="/healthcarenotification" element={<ProtectedRoute><HealthcareNotification /></ProtectedRoute>} />
+
+
 
           {/* Admin paths */}
           <Route path="/adminfaq" element={<AdminFAQ />} />
