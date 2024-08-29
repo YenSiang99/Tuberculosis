@@ -49,6 +49,8 @@ import HealthcareNotification from "./pages/Healthcare/HealthcareNotification";
 import AdminFAQ from "./pages/Administration/AdminFAQ";
 import AdminUser from "./pages/Administration/AdminUser";
 
+import TestPage from './pages/TestPage';
+
 
 
 function App() {
@@ -73,6 +75,8 @@ function App() {
             <Route path="games/true-false" element={<TrueFalsePage />} />
             <Route path="about" element={<AboutTBCompanionPage />} />
           </Route>
+
+          <Route path="/test" element={<TestPage />}></Route>
 
           {/* Register paths */}
           <Route path="/register/patient" element={<PatientRegister />} />

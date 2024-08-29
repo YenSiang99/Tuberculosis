@@ -32,13 +32,18 @@ const InfographicsPage = () => {
   ];
 
   const [currentInfographicIndex, setCurrentInfographicIndex] = useState(0);
-
-  const handleNextInfographic = () => {
-    setCurrentInfographicIndex((prevIndex) => (prevIndex + 1) % infographics.length);
-  };
+  const totalInfographics = infographics.length;
 
   const handlePreviousInfographic = () => {
-    setCurrentInfographicIndex((prevIndex) => (prevIndex - 1 + infographics.length) % infographics.length);
+    if (currentInfographicIndex > 0) {
+      setCurrentInfographicIndex(currentInfographicIndex - 1);
+    }
+  };
+
+  const handleNextInfographic = () => {
+    if (currentInfographicIndex < totalInfographics - 1) {
+      setCurrentInfographicIndex(currentInfographicIndex + 1);
+    }
   };
 
   const getInfographicSrc = (folder, file) => {
@@ -58,13 +63,28 @@ const InfographicsPage = () => {
       >
         Infographics
       </Typography>
-      <Grid container spacing={2} justifyContent="center" alignItems="center">
-        <Grid item xs={1} container justifyContent="center">
-          <Button onClick={handlePreviousInfographic} variant="contained" fullWidth>
-            Previous
-          </Button>
+      <Grid
+        container spacing={2} justifyContent="center" alignItems="center"
+      >
+        <Grid item container justifyContent="space-between" xs={12} sx={{ mt: 2 }}>
+          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+            {currentInfographicIndex > 0 && (
+              <Button onClick={handlePreviousInfographic}>
+                Previous
+              </Button>
+            )}
+          </Box>
+          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+            {currentInfographicIndex < totalInfographics - 1 && (
+              <Button onClick={handleNextInfographic}>
+                Next
+              </Button>
+            )}
+          </Box>
         </Grid>
-        <Grid item container justifyContent="center" xs={10}>
+      </Grid>
+      <Grid container spacing={2} justifyContent="center" alignItems="center">
+        <Grid item container justifyContent="center" xs={12}>
           <Card>
             <CardContent>
               {infographics[currentInfographicIndex].type === 'multi' ? (
@@ -90,12 +110,8 @@ const InfographicsPage = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={1} container justifyContent="center">
-          <Button onClick={handleNextInfographic} variant="contained" fullWidth>
-            Next
-          </Button>
-        </Grid>
       </Grid>
+
     </Box>
   );
 };
