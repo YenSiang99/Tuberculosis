@@ -1,62 +1,25 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  ThemeProvider,
-  AppBar,
-  Toolbar,
-  Drawer,
-  ListItemButton,
-  ListItemText,
-  Button,
-  Container,
-  Paper,
-  Typography,
-  Collapse,
-  List,
-  ListItemIcon
-} from '@mui/material';
+import { Box, ThemeProvider, AppBar, Toolbar, Drawer, ListItemButton, ListItemText, Button, Container, Paper, Typography, Collapse, List, ListItemIcon } from '@mui/material';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
-import GamesIcon from '@mui/icons-material/Games';  // Icon for the games section
-import { useNavigate } from 'react-router-dom';
+import InfoIcon from '@mui/icons-material/Info';
+import GamesIcon from '@mui/icons-material/Games';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import theme from '../components/reusable/Theme';
-import GamesPage from './GamesPage';
 import BgImage from '../assets/cover.jpeg';
-import AboutTBPage from './AboutTBPage';
-import AboutTBCompanionPage from './AboutTBCompanionPage';
-import WordSearchPage from './Games/WordSearchPage';
-import QuizPage from './Games/QuizPage';
-import InteractiveStoryPage from './Games/InteractiveStoryPage';
-import FillInBlanksPage from './Games/FillInBlanksPage';
-import TrueFalsePage from './Games/TrueFalsePage';
 
 const TBInfo = () => {
-  const [activeSection, setActiveSection] = useState('WordSearch');
   const [openGames, setOpenGames] = useState(true);
+  const [openAboutTB, setOpenAboutTB] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleClick = () => {
+  const handleGamesClick = () => {
     setOpenGames(!openGames);
-    setActiveSection('Games'); // Show general GamesPage when clicking on "Games"
   };
 
-  const sections = {
-    'About TB': <AboutTBPage />,
-    'About MyTBCompanion': <AboutTBCompanionPage />,
-    'Games': <GamesPage setActiveSection={setActiveSection} />,
-    'WordSearch': <WordSearchPage />,
-    'QuizPage': <QuizPage />,
-    'InteractiveStory': <InteractiveStoryPage />,
-    'FillBlanks': <FillInBlanksPage />,
-    'TrueFalse': <TrueFalsePage />
-  };
-
-  const gamesList = {
-    'Word Search Game': 'WordSearch',
-    'Quiz': 'QuizPage',
-    'Interactive Story': 'InteractiveStory',
-    'Fill in the Blanks': 'FillBlanks',
-    'True or False': 'TrueFalse'
+  const handleAboutTBClick = () => {
+    setOpenAboutTB(!openAboutTB);
   };
 
   const drawerWidth = 240;
@@ -75,9 +38,7 @@ const TBInfo = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
-      >
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <AppBar position="fixed" color="transparent" elevation={0} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'white', borderBottom: '1px solid #ddd', display: 'flex' }}>
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -96,12 +57,42 @@ const TBInfo = () => {
         <Box sx={{ display: 'flex', flexGrow: 1 }}>
           <Drawer variant="permanent" sx={drawerStyle}>
             <List>
-              {Object.keys(sections).filter(section => !Object.values(gamesList).includes(section)).map((section) => (
-                <ListItemButton key={section} onClick={() => setActiveSection(section)} sx={{ bgcolor: activeSection === section ? '#0046c0' : 'transparent', color: activeSection === section ? 'white' : 'inherit', '&:hover': { bgcolor: '#e3f2fd', color: 'black' }, '&.Mui-selected': { bgcolor: '#0046c0', color: 'white', '&:hover': { bgcolor: '#e3f2fd', color: 'black' } } }}>
-                  <ListItemText primary={section} />
-                </ListItemButton>
-              ))}
-              <ListItemButton onClick={handleClick}>
+              {/* About TB Section */}
+              <ListItemButton onClick={handleAboutTBClick}>
+                <ListItemIcon>
+                  <InfoIcon />
+                </ListItemIcon>
+                <ListItemText primary="About TB" />
+                {openAboutTB ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+              <Collapse in={openAboutTB} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/infographics')}
+                    selected={location.pathname === '/tb-info/infographics'}
+                  >
+                    <ListItemText primary="Infographics" />
+                  </ListItemButton>
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/videos')}
+                    selected={location.pathname === '/tb-info/videos'}
+                  >
+                    <ListItemText primary="Videos" />
+                  </ListItemButton>
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/faqs')}
+                    selected={location.pathname === '/tb-info/faqs'}
+                  >
+                    <ListItemText primary="FAQs" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+
+              {/* Games Section */}
+              <ListItemButton onClick={handleGamesClick}>
                 <ListItemIcon>
                   <GamesIcon />
                 </ListItemIcon>
@@ -110,19 +101,67 @@ const TBInfo = () => {
               </ListItemButton>
               <Collapse in={openGames} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                  {Object.entries(gamesList).map(([game, key]) => (
-                    <ListItemButton key={key} sx={{ pl: 4 }} onClick={() => setActiveSection(key)}>
-                      <ListItemText primary={game} />
-                    </ListItemButton>
-                  ))}
+                  <ListItemButton 
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/games/word-search')}
+                    selected={location.pathname === '/tb-info/games/word-search'}
+                  >
+                    <ListItemText primary="Word Search" />
+                  </ListItemButton>
+                  <ListItemButton 
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/games/quiz')}
+                    selected={location.pathname === '/tb-info/games/quiz'}
+                  >
+                    <ListItemText primary="Quiz" />
+                  </ListItemButton>
+                  <ListItemButton 
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/games/interactive-story')}
+                    selected={location.pathname === '/tb-info/games/interactive-story'}
+                  >
+                    <ListItemText primary="Interactive Story" />
+                  </ListItemButton>
+                  <ListItemButton 
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/games/fill-in-blanks')}
+                    selected={location.pathname === '/tb-info/games/fill-in-blanks'}
+                  >
+                    <ListItemText primary="Fill in the Blanks" />
+                  </ListItemButton>
+                  <ListItemButton 
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate('/tb-info/games/true-false')}
+                    selected={location.pathname === '/tb-info/games/true-false'}
+                  >
+                    <ListItemText primary="True or False" />
+                  </ListItemButton>
                 </List>
               </Collapse>
+
+              {/* About MyTBCompanion */}
+              <ListItemButton
+                onClick={() => navigate('/tb-info/about')}
+                sx={{
+                  bgcolor: location.pathname === '/tb-info/about' ? '#0046c0' : 'transparent',
+                  color: location.pathname === '/tb-info/about' ? 'white' : 'inherit',
+                  '&:hover': { bgcolor: '#e3f2fd', color: 'black' },
+                  '&.Mui-selected': {
+                    bgcolor: '#0046c0',
+                    color: 'white',
+                    '&:hover': { bgcolor: '#e3f2fd', color: 'black' }
+                  }
+                }}
+                selected={location.pathname === '/tb-info/about'}
+              >
+                <ListItemText primary="About MyTBCompanion" />
+              </ListItemButton>
             </List>
           </Drawer>
           <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <Container>
               <Paper style={{ padding: theme.spacing(2), marginTop: theme.spacing(8) }}>
-                {sections[activeSection]}
+                <Outlet />
               </Paper>
             </Container>
           </Box>

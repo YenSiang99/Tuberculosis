@@ -6,16 +6,20 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Public pages
 import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/PasswordRecovery/ForgotPassword";
+import ResetPassword from "./pages/PasswordRecovery/ResetPassword";
 
+// TBInfo Pages
 import TBInfo from "./pages/TBInfo";
-import GamesPage from './pages/GamesPage';
-
+import InfographicsPage from './pages/TBInfo/InfographicsPage';
+import VideosPage from './pages/TBInfo/VideosPage';
+import FAQsPage from './pages/TBInfo/FAQsPage';
+import WordSearchPage from './pages/Games/WordSearchPage';
+import QuizPage from './pages/Games/QuizPage';
+import InteractiveStoryPage from './pages/Games/InteractiveStoryPage';
+import FillInBlanksPage from './pages/Games/FillInBlanksPage';
+import TrueFalsePage from './pages/Games/TrueFalsePage';
 import AboutTBCompanionPage from './pages/AboutTBCompanionPage';
-import AboutTBPage from './pages/AboutTBPage';
-
-
 
 // Register pages
 import PatientRegister from "./pages/Registration/PatientRegister";
@@ -57,7 +61,18 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route path="/tb-info" element={<TBInfo />}/>
+           {/* TB Info Nested Paths */}
+           <Route path="/tb-info" element={<TBInfo />}>
+            <Route path="infographics" element={<InfographicsPage />} />
+            <Route path="videos" element={<VideosPage />} />
+            <Route path="faqs" element={<FAQsPage />} />
+            <Route path="games/word-search" element={<WordSearchPage />} />
+            <Route path="games/quiz" element={<QuizPage />} />
+            <Route path="games/interactive-story" element={<InteractiveStoryPage />} />
+            <Route path="games/fill-in-blanks" element={<FillInBlanksPage />} />
+            <Route path="games/true-false" element={<TrueFalsePage />} />
+            <Route path="about" element={<AboutTBCompanionPage />} />
+          </Route>
 
           {/* Register paths */}
           <Route path="/register/patient" element={<PatientRegister />} />

@@ -48,7 +48,7 @@ export default function Login() {
   const { setAuth } = useAuth();
   // Navigate to TB information page
   const handleMoreInfo = () => {
-    navigate("/tb-info");
+    navigate("/tb-info/infographics");
   };
 
   // Handle registration button click

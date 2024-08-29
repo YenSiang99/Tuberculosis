@@ -17,11 +17,11 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import theme from "../components/reusable/Theme";
-import BgImage from "../assets/cover.jpeg";
+import theme from "../../components/reusable/Theme";
+import BgImage from "../../assets/cover.jpeg";
 // import logo from "./logo.png";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import axios from "../components/axios";
+import axios from "../../components/axios";
 
 export default function ResetPasswrd() {
   const navigate = useNavigate();

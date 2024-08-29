@@ -173,13 +173,6 @@ const WordSearchPage = () => {
       }
     }
   };
-  
-  
-  
-  
-  
-  
-  
 
   const isCellSelected = (x, y) => {
     return selectedCells.some(cell => cell.x === x && cell.y === y);

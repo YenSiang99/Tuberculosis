@@ -14,10 +14,10 @@ import {
   Dialog,
   CircularProgress,
 } from "@mui/material";
-import theme from "../components/reusable/Theme";
-import BgImage from "../assets/cover.jpeg";
+import theme from "../../components/reusable/Theme";
+import BgImage from "../../assets/cover.jpeg";
 import { useNavigate } from "react-router-dom";
-import axios from "../components/axios";
+import axios from "../../components/axios";
 
 export default function ForgotPasswrd() {
   const navigate = useNavigate();
