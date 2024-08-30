@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Grid, Card, CardContent, Button, Typography } from '@mui/material';
+import { Box, Grid, Card, CardContent, Button, Typography,Container } from '@mui/material';
 import theme from "../../components/reusable/Theme";
 
 const InfographicsPage = () => {
@@ -55,64 +55,59 @@ const InfographicsPage = () => {
   };
 
   return (
-    <Box my={4}>
+    <Container sx={{padding: 0 , margin: 0 }}>
       <Typography
         variant="h6"
         gutterBottom
-        sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
+        sx={{ fontWeight: "bold",  color: theme.palette.primary.light }}
       >
         Infographics
       </Typography>
-      <Grid
-        container spacing={2} justifyContent="center" alignItems="center"
-      >
-        <Grid item container justifyContent="space-between" xs={12} sx={{ mt: 2 }}>
-          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+      <Grid container justifyContent="center" alignItems="center">
+        {/* Previous and next button */}
+        <Grid item container justifyContent="space-between" xs={12}>
+          <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
             {currentInfographicIndex > 0 && (
-              <Button onClick={handlePreviousInfographic}>
+              <Button variant="contained" onClick={handlePreviousInfographic}>
                 Previous
               </Button>
             )}
-          </Box>
-          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+          </Grid>
+          <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
             {currentInfographicIndex < totalInfographics - 1 && (
-              <Button onClick={handleNextInfographic}>
+              <Button variant="contained" onClick={handleNextInfographic}>
                 Next
               </Button>
             )}
-          </Box>
+          </Grid>
         </Grid>
-      </Grid>
-      <Grid container spacing={2} justifyContent="center" alignItems="center">
-        <Grid item container justifyContent="center" xs={12}>
-          <Card>
-            <CardContent>
-              {infographics[currentInfographicIndex].type === 'multi' ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  {infographics[currentInfographicIndex].pages.map((page, index) => (
+        {/*  */}
+        <Grid item container>
+          { infographics[currentInfographicIndex].type === 'multi' ? (
+              <Grid item container  spacing={2} >
+                {infographics[currentInfographicIndex].pages.map((page, index) => (
+                  <Grid item xs={12} sm={6} md={6} lg={6} key={index}>
                     <img
                       key={index}
                       src={getInfographicSrc(infographics[currentInfographicIndex].name, page)}
-                      style={{ width: "48%", height: "auto", marginLeft: index === 0 ? 0 : "2%" }}
                       alt={`Page ${index + 1}`}
+                      style={{ width: '100%', height: 'auto' }}
                     />
-                  ))}
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <img
-                    src={getInfographicSrc(infographics[currentInfographicIndex].name)}
-                    style={{ width: "100%", height: "100%" }}
-                    alt={`Infographic ${currentInfographicIndex + 1}`}
-                  />
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+                  </Grid>
+                ))}
+              </Grid >
+          ) : (
+            <Grid item >
+              <img
+                src={getInfographicSrc(infographics[currentInfographicIndex].name)}
+                style={{ width: "100%", height: "auto" }}
+                alt={`Infographic ${currentInfographicIndex + 1}`}
+              />
+            </Grid>
+          )}
         </Grid>
       </Grid>
-
-    </Box>
+    </Container>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Grid, Card, CardMedia } from '@mui/material';
+import { Container, Typography, Button, Grid, Card, CardMedia } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const InteractiveStoryPage = () => {
   // Function to generate image URLs based on the content
@@ -80,48 +81,86 @@ const InteractiveStoryPage = () => {
   const [currentStepId, setCurrentStepId] = useState(storyData.steps[0].stepId);
   const currentStep = storyData.steps.find(step => step.stepId === currentStepId) || storyData.ends.find(end => end.endId === currentStepId);
   const isEnd = currentStepId.startsWith('end');
+  const theme = useTheme();
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>{storyData.title}</Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardMedia
-              component="img"
-              height="300"
-              image={generateImageUrl(currentStep.content)}
-              alt="Dynamic story image"
-            />
-          </Card>
+    <Container sx={{padding: 0 , margin: 0 }}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ fontWeight: "bold",  color: theme.palette.primary.light }}
+      >
+        Interactive Story
+      </Typography>
+      <Grid 
+        container
+        spacing={1} 
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+
+        }} 
+      >
+        {/* Tutle and photo */}
+        <Grid item  container direction='column' xs={12} sm={12} md={6} lg={6}> 
+          <Grid item>
+            <Typography variant="h4" >{storyData.title}</Typography>
+          </Grid>
+          <Grid item>
+            <Card>
+              <CardMedia
+                component="img"
+                height="300"
+                image={generateImageUrl(currentStep.content)}
+                alt="Dynamic story image"
+                sx={{
+                  width:'100%',
+                  height:'auto'
+                }}
+              />
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="h6"  sx={{ mb: 2 }}>
-            {currentStep.content}
-          </Typography>
+        {/* Question and answer */}
+        <Grid item container direction='column' 
+          sx={{
+            justifyContent: "center",
+            alignItems:'center',
+          }}  
+          xs={12} sm={12} md={6} lg={6}
+          spacing={2}
+        > 
+          {/* Question */}
+          <Grid item>
+              <Typography variant="h6"  >
+                {currentStep.content}
+              </Typography>
+          </Grid>
+          {/* Answers */}
           {!isEnd && currentStep.options.map((option, index) => (
-            <Button
-              key={index}
-              variant="outlined"
-              sx={{ m: 1 }}
-              onClick={() => setCurrentStepId(option.nextStep)}
-            >
-              {option.optionText}
-            </Button>
+            <Grid item>
+              <Button
+                key={index}
+                variant="outlined"
+                onClick={() => setCurrentStepId(option.nextStep)}
+              >
+                {option.optionText}
+              </Button>
+            </Grid>
           ))}
           {isEnd && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setCurrentStepId(storyData.steps[0].stepId)}
-              sx={{ mt: 2 }}
-            >
-              Restart Story
-            </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setCurrentStepId(storyData.steps[0].stepId)}
+                sx={{ mt: 2 }}
+              >
+                Restart Story
+              </Button>
           )}
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 

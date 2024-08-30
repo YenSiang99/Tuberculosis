@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Radio, RadioGroup, FormControlLabel, Grid } from '@mui/material';
+import { 
+  Container,
+  Box, 
+  Typography, 
+  Button, 
+  Radio, 
+  RadioGroup, 
+  FormControlLabel, 
+  Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
+
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const QuizPage = () => {
   const questions = [
@@ -54,7 +71,9 @@ const QuizPage = () => {
       ]
     }
   ];
+  const totalQuestions = questions.length;
   
+  const test = true;
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timer, setTimer] = useState(10);
@@ -63,25 +82,17 @@ const QuizPage = () => {
   const [feedback, setFeedback] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
 
-  useEffect(() => {
-    if (timer > 0 && feedback === null) {
-      const countdown = setTimeout(() => setTimer(timer - 1), 1000);
-      return () => clearTimeout(countdown);
-    }
-    if (timer === 0 && feedback === null) {
-      handleNoAnswer();
-    }
-  }, [timer, feedback]);
+  const [open, setOpen] = React.useState(false);
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  useEffect(() => {
-    if (feedback && nextQuestionTimer > 0) {
-      const countdown = setTimeout(() => setNextQuestionTimer(nextQuestionTimer - 1), 1000);
-      return () => clearTimeout(countdown);
-    }
-    if (nextQuestionTimer === 0 && feedback !== null) {
-      goToNextQuestion();
-    }
-  }, [nextQuestionTimer, feedback]);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleOptionClick = (option) => {
     setFeedback(option.isCorrect ? 'correct' : 'wrong');
@@ -99,9 +110,8 @@ const QuizPage = () => {
     setNextQuestionTimer(5); // Start the countdown to the next question
   };
 
-  
-
   const goToNextQuestion = () => {
+    console.log('Hello this is go to next question')
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setTimer(10);
@@ -112,24 +122,73 @@ const QuizPage = () => {
     }
   };
 
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+
+  useEffect(() => {
+    if(!test){
+      if (timer > 0 && feedback === null) {
+        const countdown = setTimeout(() => setTimer(timer - 1), 1000);
+        return () => clearTimeout(countdown);
+      }
+      if (timer === 0 && feedback === null) {
+        handleNoAnswer();
+      }
+    }
+  }, [timer, feedback]);
+
+  useEffect(() => {
+    if(!test){
+      if (feedback && nextQuestionTimer > 0) {
+        const countdown = setTimeout(() => setNextQuestionTimer(nextQuestionTimer - 1), 1000);
+        return () => clearTimeout(countdown);
+      }
+      if (nextQuestionTimer === 0 && feedback !== null) {
+        goToNextQuestion();
+      }
+    }
+  }, [nextQuestionTimer, feedback]);
+
 
   const colors = ['#7f0000', '#002984', '#827717', '#1b5e20']; // Dark Red, Dark Blue, Dark Yellow, Dark Green
 
   return (
-    <Box sx={{ p: 4, textAlign: 'center', height: '100vh', position: 'relative' }}>
+    <Container sx={{padding: 0 , margin: 0 }}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ fontWeight: "bold",  color: theme.palette.primary.light }}
+      >
+        Quiz Time!
+      </Typography>
       {!showSummary ? (
-        <>
-          <Typography variant="h4" sx={{ mb: 2, fontSize: '2rem' }}>
-            {questions[currentQuestionIndex].questionText}
-          </Typography>
-          
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            Time left: {timer} seconds
-          </Typography>
-
-          <Grid container spacing={2} justifyContent="center">
+        <Grid container justifyContent="center" alignItems="center" textAlign='center' spacing={1}>
+          {/* Title */}
+          <Grid item  xs={12} sm={12} md={12} lg={12}>
+            <Typography  variant="h4" >
+              {questions[currentQuestionIndex].questionText}
+            </Typography>
+          </Grid>
+          {/* Time */}
+          <Grid item  xs={12} sm={12} md={12} lg={12}>
+            <Typography variant="h7" >
+              Time left: {timer} seconds
+            </Typography>
+          </Grid>
+          {/* Answer Selection */}
+          <Grid item container spacing={1} >
             {questions[currentQuestionIndex].options.map((option, index) => (
-              <Grid item xs={6} key={option.id}>
+              <Grid item xs={12} sm={12} md={6} lg={6} key={option.id}>
                 <Button
                   variant="contained"
                   onClick={() => handleOptionClick(option)}
@@ -149,6 +208,30 @@ const QuizPage = () => {
               </Grid>
             ))}
           </Grid>
+          {/* Next and Previous button */}
+          <Grid item container justifyContent="space-between" alignItems="center" direction="row" >
+            <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
+              {currentQuestionIndex > 0 && (
+                  <Button
+                  variant="contained"
+                  onClick={handlePreviousQuestion}
+                >
+                  previous
+                </Button>
+              )}
+            </Grid>
+            <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
+              {currentQuestionIndex < totalQuestions - 1 && (
+                    <Button
+                    variant="contained"
+                    onClick={goToNextQuestion}
+                    sx={{flexGrow: 0, display: 'flex',}}
+                  >
+                  Next
+                </Button>
+              )}
+            </Grid>
+          </Grid>
           {feedback && (
             <>
               <Typography
@@ -167,9 +250,9 @@ const QuizPage = () => {
               )}
             </>
           )}
-        </>
+        </Grid>
       ) : (
-        <Box>
+        <Box sx={{ my: 2 }}>
           <Typography variant="h3" gutterBottom>
             Your Score: {score} / {questions.length}
           </Typography>
@@ -196,7 +279,7 @@ const QuizPage = () => {
           ))}
         </Box>
       )}
-    </Box>
+    </Container>
   );
 };
 

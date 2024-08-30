@@ -220,18 +220,19 @@ const TBInfo = () => {
               {drawer}
             </Drawer>
           </Box>
-
           <Box
             component="main"
-            sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+            sx={{ flexGrow: 1, bgcolor: 'background.default',  backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           >
+            <Toolbar />
             <Container>
-              <Paper style={{ padding: theme.spacing(2), marginTop: theme.spacing(8) }}>
+              <Paper style={{ padding: theme.spacing(2) }}>
                 <Outlet />
               </Paper>
             </Container>
           </Box>
         </Box>
+        
       </Box>
     </ThemeProvider>
   );

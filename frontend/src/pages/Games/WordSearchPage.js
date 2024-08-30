@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Button } from '@mui/material';
+import { 
+  Box, 
+  Grid, 
+  Typography, 
+  Button , 
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText ,
+  DialogTitle ,
+  useMediaQuery 
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const WordSearchPage = () => {
   const wordsToFind = ['TUBERCULOSIS', 'BACTERIA', 'LUNGS', 'SYMPTOMS', 'COUGH', 'FEVER', 'NIGHT SWEATS', 'FATIGUE', 'DIAGNOSIS', 'TREATMENT'];
   const gridSize = 15;
 
+  const theme = useTheme();
+
   const [grid, setGrid] = useState([]);
   const [selectedCells, setSelectedCells] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
 
-  useEffect(() => {
-    const emptyGrid = generateEmptyGrid(gridSize);
-    const gridWithWords = placeWordsInGrid(emptyGrid, wordsToFind);
-    setGrid(gridWithWords);
-  }, []);
+
+  const [open, setOpenInstructionDialog] = React.useState(false);
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const generateEmptyGrid = (size) => {
     const emptyGrid = [];
@@ -184,69 +197,130 @@ const WordSearchPage = () => {
     );
   };
 
+  const handleCloseInstructionDialog = () => {
+    setOpenInstructionDialog(false);
+  };
+
+  useEffect(() => {
+    const emptyGrid = generateEmptyGrid(gridSize);
+    const gridWithWords = placeWordsInGrid(emptyGrid, wordsToFind);
+    setGrid(gridWithWords);
+    setOpenInstructionDialog(true);
+  }, []);
+
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 4 }}>
-        Find the TB-related Words!
-      </Typography>
-      <Grid container spacing={1} justifyContent="center">
-        {grid.map((row, rowIndex) => (
-          <Grid key={rowIndex} container item xs={12} justifyContent="center">
-            {row.map((letter, colIndex) => (
-              <Grid
-              key={colIndex}
-              item
-              sx={{
-                width: 40,
-                height: 40,
-                border: '1px solid #ccc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                backgroundColor: isCellPartOfFoundWord(rowIndex, colIndex)
-                  ? '#a3d2ca' // Green when word is found
-                  : (isCellSelected(rowIndex, colIndex) 
-                    ? 'red' 
-                    : 'white'),
-              }}
-              onClick={() => handleCellClick(letter, rowIndex, colIndex)}
-            >
-              <Typography variant="h6">{letter}</Typography>
-            </Grid>
+    <Container sx={{padding: 0 , margin: 0 }}>
+      <Box sx={{ my: 2}}>
+        <Typography variant="h4"  >
+          Find the TB-related Words!
+        </Typography>
+      </Box>
+      <Grid container>
+        <Grid item sm={12} md={3} sx={{display: { xs: 'none', md: 'inline' }}}  >
+          <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>Words to Find:</Typography>
+          <ul style={{  paddingLeft: '1rem', fontSize: 'inherit' }}>
+            {wordsToFind.map((word, index) => (
+              <li
+                  key={index}
+                  style={{
+                  textDecoration: foundWords.some(foundWord => foundWord.word === word) ? 'line-through' : 'none',
+                  color: foundWords.some(foundWord => foundWord.word === word) ? 'green' : 'inherit',
+                  }}
+              >
+                  {word}
+              </li>
+            ))}
+          </ul>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setSelectedCells([]);
+              setFoundWords([]);
+              const gridWithWords = placeWordsInGrid(generateEmptyGrid(gridSize), wordsToFind);
+              setGrid(gridWithWords);
+            }}
+          >
+            Reset Game
+          </Button>
+        </Grid>
+        <Grid item xs={12} sx={{display: { xs: 'inline', md: 'none' }} }  >
+          <Grid 
+            container
+            direction="row"
+            columnSpacing = {{xs : 1 }}
+            sx={{justifyContent: "space-evenly"}}  
+          >
+            {wordsToFind.map((word, index) => (
+              <Grid item key={index} sx= {{textDecoration: foundWords.some(foundWord => foundWord.word === word) ? 'line-through' : 'none',color: foundWords.some(foundWord => foundWord.word === word) ? 'green' : 'inherit',}}>
+                {word}
+              </Grid>
             ))}
           </Grid>
-        ))}
-      </Grid>
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">Words to Find:</Typography>
-        <ul>
-            {wordsToFind.map((word, index) => (
-            <li
-                key={index}
-                style={{
-                textDecoration: foundWords.some(foundWord => foundWord.word === word) ? 'line-through' : 'none',
-                color: foundWords.some(foundWord => foundWord.word === word) ? 'green' : 'inherit',
+        </Grid>
+        <Grid item sm={12} md={9}  sx={{ width : '100%', backgroundColor : 'red'}} >
+          {grid.map((row, rowIndex) => (
+            <Grid container item xs={12} justifyContent="center" wrap="nowrap" sx={{  minWidth : '275px',  width : '100%' }}>
+              {row.map((letter, colIndex) => (
+                <Grid
+                key={colIndex}
+                item
+                sx={{
+                  width : '100%',
+                  border: '1px solid #ccc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: isCellPartOfFoundWord(rowIndex, colIndex)
+                    ? '#a3d2ca' // Green when word is found
+                    : (isCellSelected(rowIndex, colIndex) 
+                      ? 'red' 
+                      : 'white'),
                 }}
-            >
-                {word}
-            </li>
-            ))}
-        </ul>
-        </Box>
-      <Button
-        variant="contained"
-        sx={{ mt: 4 }}
-        onClick={() => {
-          setSelectedCells([]);
-          setFoundWords([]);
-          const gridWithWords = placeWordsInGrid(generateEmptyGrid(gridSize), wordsToFind);
-          setGrid(gridWithWords);
-        }}
+                onClick={() => handleCellClick(letter, rowIndex, colIndex)}
+              >
+                <Typography variant="h6">{letter}</Typography>
+              </Grid>
+                ))
+              }
+          </Grid>
+          ))}
+        </Grid>
+     
+        
+       
+      </Grid>
+      <Dialog
+        fullScreen={fullScreen}
+        open={open}
+        onClose={handleCloseInstructionDialog}
+        aria-labelledby="responsive-dialog-title"
       >
-        Reset Game
-      </Button>
-    </Box>
+        <DialogTitle id="responsive-dialog-title">
+          {"How To Play?"}
+        </DialogTitle>
+        <DialogContent>
+        <DialogContentText>
+          1. The objective of the game is to find all the hidden words in the grid.
+          <br />
+          2. Words can be hidden horizontally, vertically, or diagonally.
+          <br />
+          3. Click or tap letters in the grid to select them.
+          <br />
+          4. You can deselect a letter by clicking or tapping on it again.
+          <br />
+          5. When you correctly find a word, the selected letters will turn green, and the word will be crossed out in the word list.
+          <br />
+          6. Keep searching until all words are found! Good luck!
+        </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseInstructionDialog} autoFocus>
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 

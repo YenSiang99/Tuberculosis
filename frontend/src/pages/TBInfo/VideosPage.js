@@ -1,10 +1,10 @@
 import React from 'react';
-import { Box, Typography, Grid, Card, CardContent, CardMedia } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, CardMedia } from '@mui/material';
 import theme from "../../components/reusable/Theme";
 
 const VideosPage = () => {
   return (
-    <Box my={4}>
+    <Container  sx={{padding: 0 , margin: 0 }}>
       <Typography
         variant="h6"
         gutterBottom
@@ -44,7 +44,7 @@ const VideosPage = () => {
           </Card>
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 

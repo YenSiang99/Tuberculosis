@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, styled } from '@mui/material';
+import {  Typography, Accordion, AccordionSummary, AccordionDetails, styled ,Container } from '@mui/material';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import theme from "../../components/reusable/Theme";
 
@@ -41,7 +41,7 @@ const FAQsPage = () => {
   }));
 
   return (
-    <Box my={4}>
+    <Container sx={{padding: 0 , margin: 0 }}>
       <Typography
         variant="h6"
         gutterBottom
@@ -152,7 +152,7 @@ const FAQsPage = () => {
           </Typography>
         </StyledAccordionDetails>
       </StyledAccordion>
-    </Box>
+    </Container>
   );
 };
 
