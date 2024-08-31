@@ -19,7 +19,9 @@ import {
 import { useTheme } from '@mui/material/styles';
 
 const QuizPage = () => {
-  const questions = [
+  const test = true;
+
+  const [questions, setQuestions] = useState([
     {
       id: 1,
       questionText: "What is Tuberculosis?",
@@ -28,7 +30,8 @@ const QuizPage = () => {
         { id: "q1o2", optionText: "A viral infection", isCorrect: false },
         { id: "q1o3", optionText: "A fungal infection", isCorrect: false },
         { id: "q1o4", optionText: "None of the above", isCorrect: false }
-      ]
+      ],
+      selectedOption: null,
     },
     {
       id: 2,
@@ -38,7 +41,8 @@ const QuizPage = () => {
         { id: "q2o2", optionText: "Through the air when an infected person coughs or sneezes", isCorrect: true },
         { id: "q2o3", optionText: "Through insect bites", isCorrect: false },
         { id: "q2o4", optionText: "By touching infected surfaces", isCorrect: false }
-      ]
+      ],
+      selectedOption: null,
     },
     {
       id: 3,
@@ -48,7 +52,8 @@ const QuizPage = () => {
         { id: "q3o2", optionText: "Heart", isCorrect: false },
         { id: "q3o3", optionText: "Lungs", isCorrect: true },
         { id: "q3o4", optionText: "Kidneys", isCorrect: false }
-      ]
+      ],
+      selectedOption: null,
     },
     {
       id: 4,
@@ -58,7 +63,8 @@ const QuizPage = () => {
         { id: "q4o2", optionText: "2 months", isCorrect: false },
         { id: "q4o3", optionText: "6 to 9 months", isCorrect: true },
         { id: "q4o4", optionText: "1 year", isCorrect: false }
-      ]
+      ],
+      selectedOption: null,
     },
     {
       id: 5,
@@ -68,41 +74,45 @@ const QuizPage = () => {
         { id: "q5o2", optionText: "Hepatitis B vaccine", isCorrect: false },
         { id: "q5o3", optionText: "MMR vaccine", isCorrect: false },
         { id: "q5o4", optionText: "Polio vaccine", isCorrect: false }
-      ]
+      ],
+      selectedOption: null,
     }
-  ];
-  const totalQuestions = questions.length;
-  
-  const test = true;
-
+  ]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timer, setTimer] = useState(10);
-  const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
   const [score, setScore] = useState(0);
-  const [feedback, setFeedback] = useState(null);
+  // Timer variables
+  const [questionTimer, setQuestionTimer] = useState(10);
+  const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
+  // Asnwer Feedback for each question and summary
+  const [answerFeedback, setFeedback] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
 
-  const [open, setOpen] = React.useState(false);
+  const [openInstructionDialog, setOpenInstructionDialog] = useState(false);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option,questionId) => {
+    // Set user selection option
+    setQuestions(prevQuestions =>
+      prevQuestions.map(question =>
+        question.id === questionId
+          ? { ...question, selectedOption: option.id }
+          : question
+      )
+    );
+    // Let user know if they selected the right or wrong answer
     setFeedback(option.isCorrect ? 'correct' : 'wrong');
     if (option.isCorrect) setScore(score + 1);
     if (currentQuestionIndex < questions.length - 1) {
-      setTimer(0);
+      if(test){
+        goToNextQuestion()
+      }
+      setQuestionTimer(0);
       setNextQuestionTimer(5);
     } else {
       setShowSummary(true);
     }
+
   };
 
   const handleNoAnswer = () => {
@@ -114,7 +124,7 @@ const QuizPage = () => {
     console.log('Hello this is go to next question')
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setTimer(10);
+      setQuestionTimer(10);
       setFeedback(null);
       setNextQuestionTimer(0);
     } else {
@@ -128,36 +138,39 @@ const QuizPage = () => {
     }
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    }
+  const handleCloseInstructionDialog = () => {
+    setOpenInstructionDialog(false);
   };
 
-
+  // State to countdown question timer
   useEffect(() => {
     if(!test){
-      if (timer > 0 && feedback === null) {
-        const countdown = setTimeout(() => setTimer(timer - 1), 1000);
+      if (questionTimer > 0 && answerFeedback === null) {
+        const countdown = setTimeout(() => setQuestionTimer(questionTimer - 1), 1000);
         return () => clearTimeout(countdown);
       }
-      if (timer === 0 && feedback === null) {
+      if (questionTimer === 0 && answerFeedback === null) {
         handleNoAnswer();
       }
     }
-  }, [timer, feedback]);
+  }, [questionTimer, answerFeedback]);
 
+  // State to countdown next question timer
   useEffect(() => {
     if(!test){
-      if (feedback && nextQuestionTimer > 0) {
+      if (answerFeedback && nextQuestionTimer > 0) {
         const countdown = setTimeout(() => setNextQuestionTimer(nextQuestionTimer - 1), 1000);
         return () => clearTimeout(countdown);
       }
-      if (nextQuestionTimer === 0 && feedback !== null) {
+      if (nextQuestionTimer === 0 && answerFeedback !== null) {
         goToNextQuestion();
       }
     }
-  }, [nextQuestionTimer, feedback]);
+  }, [nextQuestionTimer, answerFeedback]);
+
+  useEffect(() => {
+    setOpenInstructionDialog(true);
+  }, []);
 
 
   const colors = ['#7f0000', '#002984', '#827717', '#1b5e20']; // Dark Red, Dark Blue, Dark Yellow, Dark Green
@@ -179,20 +192,40 @@ const QuizPage = () => {
               {questions[currentQuestionIndex].questionText}
             </Typography>
           </Grid>
-          {/* Time */}
+          {/* Time Countdown for question */}
           <Grid item  xs={12} sm={12} md={12} lg={12}>
             <Typography variant="h7" >
-              Time left: {timer} seconds
+              Time left: {questionTimer} seconds
             </Typography>
           </Grid>
+          {/* Time Countdown interval to next question*/}
+          {answerFeedback && (
+            <Grid item  xs={12} sm={12} md={12} lg={12}>
+              <Typography
+                variant="h6"
+                sx={{  color: answerFeedback === 'correct' ? 'green' : 'red' }}
+              >
+                {answerFeedback === 'correct' ? 'Correct!' : 'Wrong!'}
+              </Typography>
+              {nextQuestionTimer > 0 && (
+                <Typography
+                  variant="caption"
+                >
+                  Next question in: {nextQuestionTimer} seconds
+                </Typography>
+              )}
+            </Grid>
+            ) 
+          }
+
           {/* Answer Selection */}
           <Grid item container spacing={1} >
             {questions[currentQuestionIndex].options.map((option, index) => (
               <Grid item xs={12} sm={12} md={6} lg={6} key={option.id}>
                 <Button
                   variant="contained"
-                  onClick={() => handleOptionClick(option)}
-                  disabled={feedback !== null}
+                  onClick={() => handleOptionClick(option, questions[currentQuestionIndex].id)}
+                  disabled={answerFeedback !== null}
                   sx={{
                     backgroundColor: colors[index],
                     color: '#fff',
@@ -209,49 +242,35 @@ const QuizPage = () => {
             ))}
           </Grid>
           {/* Next and Previous button */}
-          <Grid item container justifyContent="space-between" alignItems="center" direction="row" >
-            <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
-              {currentQuestionIndex > 0 && (
-                  <Button
-                  variant="contained"
-                  onClick={handlePreviousQuestion}
-                >
-                  previous
-                </Button>
-              )}
-            </Grid>
-            <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
-              {currentQuestionIndex < totalQuestions - 1 && (
+          {test && (
+            <Grid item container justifyContent="space-between" alignItems="center" direction="row" >
+              <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
+                {currentQuestionIndex > 0 && (
                     <Button
                     variant="contained"
-                    onClick={goToNextQuestion}
-                    sx={{flexGrow: 0, display: 'flex',}}
+                    onClick={handlePreviousQuestion}
                   >
-                  Next
-                </Button>
-              )}
+                    previous
+                  </Button>
+                )}
+              </Grid>
+              <Grid item  sx={{flexGrow: 0, display: 'flex',alignItems: 'center'}}>
+                {currentQuestionIndex < questions.length - 1 && (
+                      <Button
+                      variant="contained"
+                      onClick={goToNextQuestion}
+                      sx={{flexGrow: 0, display: 'flex',}}
+                    >
+                    Next
+                  </Button>
+                )}
+              </Grid>
             </Grid>
-          </Grid>
-          {feedback && (
-            <>
-              <Typography
-                variant="h6"
-                sx={{ mt: 2, color: feedback === 'correct' ? 'green' : 'red' }}
-              >
-                {feedback === 'correct' ? 'Correct!' : 'Wrong!'}
-              </Typography>
-              {nextQuestionTimer > 0 && (
-                <Typography
-                  variant="caption"
-                  sx={{ mt: 2 }}
-                >
-                  Next question in: {nextQuestionTimer} seconds
-                </Typography>
-              )}
-            </>
-          )}
+            ) 
+          }
         </Grid>
       ) : (
+        // Summary page
         <Box sx={{ my: 2 }}>
           <Typography variant="h3" gutterBottom>
             Your Score: {score} / {questions.length}
@@ -265,20 +284,75 @@ const QuizPage = () => {
                 {question.questionText}
               </Typography>
               <RadioGroup>
-                {question.options.map((option) => (
-                  <FormControlLabel
-                    key={option.id}
-                    value={option.optionText}
-                    control={<Radio checked={option.isCorrect} />}
-                    label={option.optionText}
-                    disabled
-                  />
-                ))}
+                {question.options.map((option) => {
+                  const isUserSelection = question.selectedOption === option.id;
+                  const isCorrect = option.isCorrect;
+                  return (
+                    <FormControlLabel
+                      key={option.id}
+                      value={option.optionText}
+                      control={<Radio checked={isUserSelection} />}
+                      label={
+                        <span
+                          style={{
+                            color: isCorrect ? 'green' : isUserSelection ? 'red' : 'black',
+                            fontWeight: isUserSelection ? 'bold' : 'normal'
+                          }}
+                        >
+                          {option.optionText}
+                          {isUserSelection && !isCorrect && ' (Your Choice)'}
+                          {isCorrect && ' (Correct)'}
+                        </span>
+                      }
+                      sx={{
+                        '& .MuiFormControlLabel-label': {
+                          color: isUserSelection
+                            ? isCorrect
+                              ? 'green'
+                              : 'red'
+                            : isCorrect
+                            ? 'green'
+                            : 'black'
+                        }
+                      }}
+                    />
+                  );
+                })}
               </RadioGroup>
             </Box>
           ))}
         </Box>
       )}
+      <Dialog
+        fullScreen={fullScreen}
+        open={openInstructionDialog}
+        onClose={handleCloseInstructionDialog}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">
+          {"Quiz Game: How To Play?"}
+        </DialogTitle>
+        <DialogContent>
+        <DialogContentText>
+          1. The objective of the quiz is to answer all the questions correctly.
+          <br />
+          2. Each question will have 4 possible answers. You need to select the correct one.
+          <br />
+          3. You have a total of 10 seconds to answer each question.
+          <br />
+          4. If the timer runs out before you answer, the question will be marked as incorrect.
+          <br />
+          5. There will be a 5-second interval between each question to prepare for the next one.
+          <br />
+          6. Keep answering until all questions are completed! Good luck!
+        </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseInstructionDialog} autoFocus>
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

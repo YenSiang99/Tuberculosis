@@ -25,7 +25,7 @@ const WordSearchPage = () => {
   const [foundWords, setFoundWords] = useState([]);
 
 
-  const [open, setOpenInstructionDialog] = React.useState(false);
+  const [open, setOpenInstructionDialog] = useState(false);
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const generateEmptyGrid = (size) => {
@@ -257,7 +257,7 @@ const WordSearchPage = () => {
             ))}
           </Grid>
         </Grid>
-        <Grid item sm={12} md={9}  sx={{ width : '100%', backgroundColor : 'red'}} >
+        <Grid item sm={12} md={9}  sx={{ width : '100%'}} >
           {grid.map((row, rowIndex) => (
             <Grid container item xs={12} justifyContent="center" wrap="nowrap" sx={{  minWidth : '275px',  width : '100%' }}>
               {row.map((letter, colIndex) => (
@@ -297,7 +297,7 @@ const WordSearchPage = () => {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          {"How To Play?"}
+          {"Word Search: How To Play?"}
         </DialogTitle>
         <DialogContent>
         <DialogContentText>
