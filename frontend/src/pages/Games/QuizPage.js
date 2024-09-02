@@ -18,7 +18,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 
 const QuizPage = () => {
-  const test = true;
+  const test = false;
 
   const [questions, setQuestions] = useState([
     {
@@ -155,7 +155,7 @@ const QuizPage = () => {
 
   // State to countdown question timer
   useEffect(() => {
-    if (!test) {
+    if (!test && !openInstructionDialog) {
       if (questionTimer > 0 && answerFeedback === null) {
         const countdown = setTimeout(
           () => setQuestionTimer(questionTimer - 1),
@@ -167,11 +167,11 @@ const QuizPage = () => {
         handleNoAnswer();
       }
     }
-  }, [questionTimer, answerFeedback]);
+  }, [questionTimer, answerFeedback, openInstructionDialog]);
 
   // State to countdown next question timer
   useEffect(() => {
-    if (!test) {
+    if (!test && !openInstructionDialog) {
       if (answerFeedback && nextQuestionTimer > 0) {
         const countdown = setTimeout(
           () => setNextQuestionTimer(nextQuestionTimer - 1),
@@ -183,7 +183,7 @@ const QuizPage = () => {
         goToNextQuestion();
       }
     }
-  }, [nextQuestionTimer, answerFeedback]);
+  }, [nextQuestionTimer, answerFeedback, openInstructionDialog]);
 
   const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"]; // Dark Red, Dark Blue, Dark Yellow, Dark Green
 
@@ -358,7 +358,7 @@ const QuizPage = () => {
         </Box>
       )}
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"

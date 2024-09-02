@@ -16,16 +16,16 @@ import { useTheme } from "@mui/material/styles";
 
 const WordSearchPage = () => {
   const wordsToFind = [
-    "TUBERCULOSIS",
+    // "TUBERCULOSIS",
     "BACTERIA",
     "LUNGS",
-    "SYMPTOMS",
+    // "SYMPTOMS",
     "COUGH",
     "FEVER",
     "NIGHT SWEATS",
-    "FATIGUE",
-    "DIAGNOSIS",
-    "TREATMENT",
+    // "FATIGUE",
+    // "DIAGNOSIS",
+    // "TREATMENT",
   ];
   const gridSize = 15;
 
@@ -35,10 +35,11 @@ const WordSearchPage = () => {
   const [selectedCells, setSelectedCells] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
 
-  const [gameTimer, setGameTimer] = useState(1);
+  const totalTime = 90;
+  const [gameTimer, setGameTimer] = useState(totalTime);
   const [showResult, setShowResult] = useState(false);
 
-  const [open, setOpenInstructionDialog] = useState(false);
+  const [openInstructionDialog, setOpenInstructionDialog] = useState(false);
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const generateEmptyGrid = (size) => {
@@ -120,6 +121,169 @@ const WordSearchPage = () => {
     return true;
   };
 
+  const handleHorizontalCheck = (newSelectedCells, x, y) => {
+    let wordFound = false;
+
+    const rowCells = newSelectedCells
+      .filter((cell) => cell.x === x)
+      .sort((a, b) => a.y - b.y);
+
+    if (rowCells.length > 0) {
+      for (let start = 0; start < rowCells.length; start++) {
+        let formedWord = "";
+        let wordCells = [];
+
+        for (let end = start; end < rowCells.length; end++) {
+          if (end > start && rowCells[end].y !== rowCells[end - 1].y + 1) {
+            break;
+          }
+
+          formedWord += rowCells[end].letter;
+          wordCells.push(rowCells[end]);
+
+          if (wordsToFind.includes(formedWord)) {
+            setFoundWords((prevFoundWords) => {
+              const updatedFoundWords = [
+                ...prevFoundWords,
+                { word: formedWord, cells: wordCells },
+              ];
+
+              // Remove the cells that formed the word from selectedCells
+              const updatedSelectedCells = newSelectedCells.filter(
+                (cell) =>
+                  !updatedFoundWords.some((foundWord) =>
+                    foundWord.cells.some(
+                      (foundCell) =>
+                        foundCell.x === cell.x && foundCell.y === cell.y
+                    )
+                  )
+              );
+              setSelectedCells(updatedSelectedCells);
+
+              return updatedFoundWords;
+            });
+            wordFound = true;
+            break;
+          }
+        }
+
+        if (wordFound) break;
+      }
+    }
+
+    return wordFound;
+  };
+
+  const handleVerticalCheck = (newSelectedCells, x, y) => {
+    let wordFound = false;
+
+    const colCells = newSelectedCells
+      .filter((cell) => cell.y === y)
+      .sort((a, b) => a.x - b.x); // Sort by x coordinate to ensure vertical alignment
+
+    if (colCells.length > 0) {
+      for (let start = 0; start < colCells.length; start++) {
+        let formedWord = "";
+        let wordCells = [];
+
+        for (let end = start; end < colCells.length; end++) {
+          if (end > start && colCells[end].x !== colCells[end - 1].x + 1) {
+            break;
+          }
+
+          formedWord += colCells[end].letter;
+          wordCells.push(colCells[end]);
+
+          if (wordsToFind.includes(formedWord)) {
+            setFoundWords((prevFoundWords) => {
+              const updatedFoundWords = [
+                ...prevFoundWords,
+                { word: formedWord, cells: wordCells },
+              ];
+
+              // Remove the cells that formed the word from selectedCells
+              const updatedSelectedCells = newSelectedCells.filter(
+                (cell) =>
+                  !updatedFoundWords.some((foundWord) =>
+                    foundWord.cells.some(
+                      (foundCell) =>
+                        foundCell.x === cell.x && foundCell.y === cell.y
+                    )
+                  )
+              );
+              setSelectedCells(updatedSelectedCells);
+
+              return updatedFoundWords;
+            });
+            wordFound = true;
+            break;
+          }
+        }
+
+        if (wordFound) break;
+      }
+    }
+
+    return wordFound;
+  };
+
+  const handleDiagonalTLBRCheck = (newSelectedCells, x, y) => {
+    let wordFound = false;
+
+    const diagonalCells = newSelectedCells
+      .filter((cell) => cell.x - cell.y === x - y) // Ensure the diagonal alignment
+      .sort((a, b) => a.x - b.x); // Sort by x (and by y implicitly) to ensure the top-left to bottom-right direction
+
+    if (diagonalCells.length > 0) {
+      for (let start = 0; start < diagonalCells.length; start++) {
+        let formedWord = "";
+        let wordCells = [];
+
+        for (let end = start; end < diagonalCells.length; end++) {
+          if (
+            end > start &&
+            (diagonalCells[end].x !== diagonalCells[end - 1].x + 1 ||
+              diagonalCells[end].y !== diagonalCells[end - 1].y + 1)
+          ) {
+            break;
+          }
+
+          formedWord += diagonalCells[end].letter;
+          wordCells.push(diagonalCells[end]);
+
+          if (wordsToFind.includes(formedWord)) {
+            setFoundWords((prevFoundWords) => {
+              const updatedFoundWords = [
+                ...prevFoundWords,
+                { word: formedWord, cells: wordCells },
+              ];
+
+              // Remove the cells that formed the word from selectedCells
+              const updatedSelectedCells = newSelectedCells.filter(
+                (cell) =>
+                  !updatedFoundWords.some((foundWord) =>
+                    foundWord.cells.some(
+                      (foundCell) =>
+                        foundCell.x === cell.x && foundCell.y === cell.y
+                    )
+                  )
+              );
+              setSelectedCells(updatedSelectedCells);
+
+              return updatedFoundWords;
+            });
+            wordFound = true;
+            break;
+          }
+        }
+
+        if (wordFound) break;
+      }
+    }
+
+    return wordFound;
+  };
+
   const handleCellClick = (letter, x, y) => {
     const existingIndex = selectedCells.findIndex(
       (cell) => cell.x === x && cell.y === y
@@ -135,99 +299,11 @@ const WordSearchPage = () => {
       const newSelectedCells = [...selectedCells, { letter, x, y }];
       setSelectedCells(newSelectedCells);
 
-      let wordFound = false;
-
-      // Check for horizontal words
-      for (let i = 0; i < gridSize; i++) {
-        const rowLetters = newSelectedCells
-          .filter((cell) => cell.x === i)
-          .sort((a, b) => a.y - b.y)
-          .map((cell) => cell.letter)
-          .join("");
-        const foundWord = wordsToFind.find((word) => word === rowLetters);
-        if (foundWord) {
-          const wordCells = newSelectedCells.filter((cell) => cell.x === i);
-          setFoundWords([...foundWords, { word: foundWord, cells: wordCells }]);
-          wordFound = true;
-          break;
-        }
-      }
-
-      // Check for vertical words
-      if (!wordFound) {
-        for (let j = 0; j < gridSize; j++) {
-          const colLetters = newSelectedCells
-            .filter((cell) => cell.y === j)
-            .sort((a, b) => a.x - b.x)
-            .map((cell) => cell.letter)
-            .join("");
-          const foundWord = wordsToFind.find((word) => word === colLetters);
-          if (foundWord) {
-            const wordCells = newSelectedCells.filter((cell) => cell.y === j);
-            setFoundWords([
-              ...foundWords,
-              { word: foundWord, cells: wordCells },
-            ]);
-            wordFound = true;
-            break;
-          }
-        }
-      }
-
-      // Check for top-left to bottom-right diagonal words
-      if (!wordFound) {
-        for (let d = 0; d < gridSize * 2 - 1; d++) {
-          const diagLetters = newSelectedCells
-            .filter((cell) => cell.x - cell.y === d - gridSize)
-            .sort((a, b) => a.x - b.x)
-            .map((cell) => cell.letter)
-            .join("");
-          const foundWord = wordsToFind.find((word) => word === diagLetters);
-          if (foundWord) {
-            const wordCells = newSelectedCells.filter(
-              (cell) => cell.x - cell.y === d - gridSize
-            );
-            setFoundWords([
-              ...foundWords,
-              { word: foundWord, cells: wordCells },
-            ]);
-            wordFound = true;
-            break;
-          }
-        }
-      }
-
-      // Check for top-right to bottom-left diagonal words
-      if (!wordFound) {
-        for (let d = 0; d < gridSize * 2 - 1; d++) {
-          const diagLetters = newSelectedCells
-            .filter((cell) => cell.x + cell.y === d)
-            .sort((a, b) => a.x - b.x)
-            .map((cell) => cell.letter)
-            .join("");
-          const foundWord = wordsToFind.find((word) => word === diagLetters);
-          if (foundWord) {
-            const wordCells = newSelectedCells.filter(
-              (cell) => cell.x + cell.y === d
-            );
-            setFoundWords([
-              ...foundWords,
-              { word: foundWord, cells: wordCells },
-            ]);
-            wordFound = true;
-            break;
-          }
-        }
-      }
-
-      // Remove only the cells that formed the found word, keep others
-      if (wordFound) {
-        const remainingCells = newSelectedCells.filter(
-          (cell) =>
-            !foundWords.some((foundWord) => foundWord.cells.includes(cell))
-        );
-        setSelectedCells(remainingCells);
-      }
+      // Check for horizontal, vertical, and diagonal words
+      let wordFound =
+        handleHorizontalCheck(newSelectedCells, x, y) ||
+        handleVerticalCheck(newSelectedCells, x, y) ||
+        handleDiagonalTLBRCheck(newSelectedCells, x, y);
     }
   };
 
@@ -262,22 +338,37 @@ const WordSearchPage = () => {
   };
 
   useEffect(() => {
-    if (gameTimer > 0) {
-      const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
-      return () => clearTimeout(countdown);
-    }
-    if (gameTimer === 0) {
-      // Show results of game
+    if (foundWords.length === wordsToFind.length) {
+      // console.log("Accuracy:", calculateAccuracyRate());
+      // console.log("Score:", foundWords.length + " " + wordsToFind.length);
+      // console.log("Time taken:", totalTime - gameTimer);
+      // console.log("Longest word found:", getLongestWordFound());
       handleShowResults();
     }
-  }, [gameTimer]);
+  }, [foundWords]);
+
+  useEffect(() => {
+    if (!openInstructionDialog) {
+      if (gameTimer > 0) {
+        const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
+        return () => clearTimeout(countdown);
+      }
+      if (gameTimer === 0) {
+        // Show results of game
+        console.log("Accuracy:", calculateAccuracyRate());
+        console.log("Score:", foundWords.length + " " + wordsToFind.length);
+        console.log("Time taken:", totalTime - gameTimer);
+        console.log("Longest word found:", getLongestWordFound());
+        handleShowResults();
+      }
+    }
+  }, [gameTimer, openInstructionDialog]);
 
   // State to generate empty grid and fill it with words
   useEffect(() => {
     const emptyGrid = generateEmptyGrid(gridSize);
     const gridWithWords = placeWordsInGrid(emptyGrid, wordsToFind);
     setGrid(gridWithWords);
-    setOpenInstructionDialog(true);
   }, []);
 
   return (
@@ -287,6 +378,7 @@ const WordSearchPage = () => {
       </Box>
       <Grid container direction="row">
         {showResult ? (
+          // Show the results if the timer is zero
           <>
             {/* Summary title */}
             <Grid
@@ -298,7 +390,6 @@ const WordSearchPage = () => {
             >
               <Typography variant="h4">Game Summary</Typography>
             </Grid>
-            {/* Metrics */}
             <Grid
               item
               container
@@ -326,7 +417,7 @@ const WordSearchPage = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
-                    : {60 - gameTimer} seconds
+                    : {totalTime - gameTimer} seconds
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -350,7 +441,7 @@ const WordSearchPage = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
-                    : {calculateAccuracyRate().toFixed(2)}
+                    : {foundWords.length} / {wordsToFind.length}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -392,6 +483,10 @@ const WordSearchPage = () => {
             <Grid item xs={12} sx={{ textAlign: "center" }}>
               <Typography variant="h6">
                 Time left: {gameTimer} seconds
+              </Typography>
+
+              <Typography variant="h6">
+                'Selected cells : ' {selectedCells.join(", ")}
               </Typography>
             </Grid>
             {/* Words to find list big screen */}
@@ -525,7 +620,7 @@ const WordSearchPage = () => {
 
       <Dialog
         fullScreen={fullScreen}
-        open={open}
+        open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
       >
