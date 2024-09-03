@@ -39,7 +39,7 @@ const WordSearchPage = () => {
   const [gameTimer, setGameTimer] = useState(totalTime);
   const [showResult, setShowResult] = useState(false);
 
-  const [openInstructionDialog, setOpenInstructionDialog] = useState(false);
+  const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const generateEmptyGrid = (size) => {
@@ -483,10 +483,6 @@ const WordSearchPage = () => {
             <Grid item xs={12} sx={{ textAlign: "center" }}>
               <Typography variant="h6">
                 Time left: {gameTimer} seconds
-              </Typography>
-
-              <Typography variant="h6">
-                'Selected cells : ' {selectedCells.join(", ")}
               </Typography>
             </Grid>
             {/* Words to find list big screen */}

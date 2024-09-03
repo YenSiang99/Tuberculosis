@@ -82,28 +82,32 @@ const InteractiveStoryPage = () => {
         endId: "end1",
         content:
           "Ignoring the symptoms, John's condition worsens, demonstrating the danger of neglecting early signs of TB.",
+        endType: "negative",
       },
       {
         endId: "end2",
         content:
           "Fear leads to worse health outcomes. John's condition deteriorates because he didn't proceed with the necessary tests.",
+        endType: "negative",
       },
       {
         endId: "end3",
         content:
           "By starting treatment early, John manages to recover fully, showing the importance of prompt medical response to TB.",
+        endType: "positive",
       },
       {
         endId: "end4",
         content:
           "Seeking a second opinion delays John's treatment, complicating his recovery. Immediate treatment could have prevented complications.",
+        endType: "negative",
       },
     ],
   };
 
   const [currentStepId, setCurrentStepId] = useState(storyData.steps[0].stepId);
   const [retries, setRetries] = useState(0);
-  const [startTime, setStartTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(null);
   const [timeTaken, setTimeTaken] = useState(null);
   const currentStep =
     storyData.steps.find((step) => step.stepId === currentStepId) ||
@@ -112,23 +116,33 @@ const InteractiveStoryPage = () => {
 
   const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
   };
 
   const handleRestartStory = () => {
-    setRetries(retries + 1);
+    setRetries(0);
     setStartTime(Date.now());
     setCurrentStepId(storyData.steps[0].stepId);
   };
 
+  const handleRetryStory = () => {
+    setRetries(retries + 1);
+    setCurrentStepId(storyData.steps[0].stepId);
+  };
+
   useEffect(() => {
-    if (isEnd) {
-      setTimeTaken(Date.now() - startTime);
+    if (!openInstructionDialog) {
+      setStartTime(Date.now());
     }
-  }, [isEnd, startTime]);
+    if (isEnd) {
+      if (currentStep.endType === "positive") {
+        setTimeTaken(Date.now() - startTime);
+      }
+    }
+  }, [isEnd, startTime, openInstructionDialog]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -144,6 +158,12 @@ const InteractiveStoryPage = () => {
         <Grid item xs={12}>
           <Typography variant="h4">{storyData.title}</Typography>
         </Grid>
+        {/* <Grid item xs={12}>
+          <Typography variant="h4">
+            Start Time: {new Date(startTime).toLocaleString()}
+          </Typography>
+        </Grid> */}
+
         <Grid
           item
           container
@@ -153,6 +173,9 @@ const InteractiveStoryPage = () => {
         >
           {/* photo */}
           <Grid item xs={12} md={6}>
+            <Grid item xs={6}>
+              <Typography variant="h6"> Retries: {retries}</Typography>
+            </Grid>
             <Card>
               <CardMedia
                 component="img"
@@ -196,61 +219,98 @@ const InteractiveStoryPage = () => {
               ))}
             {isEnd && (
               <Grid container spacing={1} sx={{ justifyContent: "center" }}>
-                {/* End of story title */}
-                <Grid item xs={12}>
-                  <Typography variant="h6">
-                    You reached the end of the story!
-                  </Typography>
-                </Grid>
-                {/*  */}
-                <Grid
-                  item
-                  xs={12}
-                  container
-                  sx={{
-                    textAlign: "center",
-                    justifyContent: "center",
-                  }}
-                >
+                {currentStep.endType === "negative" ? (
                   <Grid
-                    container
                     item
+                    container
                     xs={12}
-                    sm={12}
                     md={8}
-                    sx={{
-                      justifyContent: "center",
-                      width: "100%",
-                      textAlign: "left",
-                    }}
-                    spacing={2}
+                    spacing={1}
+                    sx={{ justifyContent: "center", alignItems: "center" }}
                   >
-                    <Grid item xs={6}>
-                      <Typography variant="h6">Number of retries</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">: {retries}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">Time taken</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">
-                        : {(timeTaken / 1000).toFixed(2)} seconds
+                    <Grid item>
+                      <Typography variant="h6" sx={{ color: "red" }}>
+                        Oh no! Wrong Move! Please start the story from the
+                        beginning and try again!...
                       </Typography>
                     </Grid>
+                    <Grid
+                      item
+                      container
+                      xs={12}
+                      sx={{
+                        textAlign: "left",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <Grid item xs={6}>
+                        <Typography variant="h6">Number of retries</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">: {retries}</Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleRetryStory}
+                      >
+                        Retry Story
+                      </Button>
+                    </Grid>
                   </Grid>
-                </Grid>
-
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleRestartStory}
+                ) : (
+                  <Grid
+                    item
+                    container
+                    xs={12}
+                    md={8}
+                    spacing={1}
+                    sx={{ justifyContent: "center", alignItems: "center" }}
                   >
-                    Restart Story
-                  </Button>
-                </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="h6" color="green">
+                        Congratulations! You've reached the end of the story!
+                      </Typography>
+                    </Grid>
+                    <Grid
+                      item
+                      container
+                      xs={12}
+                      sx={{
+                        textAlign: "left",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <Grid item xs={6}>
+                        <Typography variant="h6">Number of retries</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">: {retries}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">Total time taken</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">
+                          : {(timeTaken / 1000).toFixed(2)} seconds
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleRestartStory}
+                      >
+                        Restart Story
+                      </Button>
+                    </Grid>
+                  </Grid>
+                )}
               </Grid>
             )}
           </Grid>

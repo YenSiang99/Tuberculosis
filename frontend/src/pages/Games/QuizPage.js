@@ -101,7 +101,7 @@ const QuizPage = () => {
 
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleOptionClick = (option, questionId) => {
     // Set user selection option

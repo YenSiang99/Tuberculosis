@@ -6,7 +6,14 @@ import {
   Button,
   Box,
   TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 const FillInBlanksPage = () => {
   const [questions, setQuestions] = useState([
@@ -44,9 +51,17 @@ const FillInBlanksPage = () => {
   const [selectedBlankId, setSelectedBlankId] = useState(1);
   const [usedWords, setUsedWords] = useState([]);
 
-  const [gameTimer, setGameTimer] = useState(15);
+  const [gameTimer, setGameTimer] = useState(30);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
+
+  const theme = useTheme();
+  const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const handleCloseInstructionDialog = () => {
+    setOpenInstructionDialog(false);
+  };
 
   const handleWordSelect = (word) => {
     if (!usedWords.includes(word)) {
@@ -122,16 +137,18 @@ const FillInBlanksPage = () => {
   };
 
   useEffect(() => {
-    if (gameTimer > 0) {
-      const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
-      return () => clearTimeout(countdown);
+    if (!openInstructionDialog) {
+      if (gameTimer > 0) {
+        const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
+        return () => clearTimeout(countdown);
+      }
+      if (gameTimer === 0) {
+        const finalScore = calculateScore(); // Calculate the final score
+        setScore(finalScore); // Update the score state
+        handleShowResults();
+      }
     }
-    if (gameTimer === 0) {
-      const finalScore = calculateScore(); // Calculate the final score
-      setScore(finalScore); // Update the score state
-      handleShowResults();
-    }
-  }, [gameTimer]);
+  }, [gameTimer, openInstructionDialog]);
 
   return (
     <Container sx={{ padding: 2 }}>
@@ -265,6 +282,62 @@ const FillInBlanksPage = () => {
           </Button>
         </Box>
       )}
+      <Dialog
+        fullScreen={fullScreen}
+        open={openInstructionDialog}
+        onClose={handleCloseInstructionDialog}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">
+          {"Fill in the Blanks Game: How To Play?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            1. <strong>Objective:</strong> <br />
+            Fill in the blanks with the correct words to complete the sentences
+            about tuberculosis. Each blank represents a missing word that you
+            need to find and select.
+            <br />
+            <br />
+            2. <strong>Selecting Words:</strong> <br />
+            Choose a word from the list provided by clicking on it. Once
+            selected, it will be placed in the highlighted blank. You cannot
+            reuse a word once it has been used.
+            <br />
+            <br />
+            3. <strong>Removing Words:</strong> <br />
+            If you want to change a word, click on the blank where the word is
+            placed. This will remove the word and allow you to select a
+            different one.
+            <br />
+            <br />
+            4. <strong>Time Limit:</strong> <br />
+            You have a limited amount of time to fill in all the blanks. Keep an
+            eye on the timer at the top of the screen.
+            <br />
+            <br />
+            5. <strong>Submit Your Answers:</strong> <br />
+            Once you have filled in all the blanks, or when time runs out,
+            submit your answers to see your score and review the correct
+            answers.
+            <br />
+            <br />
+            6. <strong>Scoring:</strong> <br />
+            You will earn points for each correct word you place. The final
+            score will be shown after you submit your answers or when time runs
+            out.
+            <br />
+            <br />
+            7. <strong>Resetting the Game:</strong> <br />
+            You can reset the game at any time to try again with a fresh start.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseInstructionDialog} autoFocus>
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
