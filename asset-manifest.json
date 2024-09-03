@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/static/css/main.9bb26bea.css",
+    "main.js": "/static/js/main.04af4899.js",
+    "static/js/453.d855a71b.chunk.js": "/static/js/453.d855a71b.chunk.js",
+    "static/media/Presentation1.mp4": "/static/media/Presentation1.1b8517cd916185c6b256.mp4",
+    "static/media/TBInfographic_Sample_2.png": "/static/media/TBInfographic_Sample_2.a570c9b2ecbc8dacb951.png",
+    "static/media/TBInfographic_Sample_1.png": "/static/media/TBInfographic_Sample_1.03455f0d54a3af7a4b99.png",
+    "static/media/Infographic_1.png": "/static/media/Infographic_1.b46fb6fddde01ccf4494.png",
+    "static/media/Infographic_2.png": "/static/media/Infographic_2.442f71457b723ec8b060.png",
+    "static/media/Page1.png": "/static/media/Page1.b597b61a9adbb97c3f1f.png",
+    "static/media/Page2.png": "/static/media/Page2.069a9021c9ae7b896238.png",
+    "static/media/Infographic_3.png": "/static/media/Infographic_3.a2e5672c049ff4b11ec8.png",
+    "static/media/Infographic_5.png": "/static/media/Infographic_5.2176fe23676103f2c793.png",
+    "static/media/Infographic_4.png": "/static/media/Infographic_4.d0be6c72ca9cbd7c62e6.png",
+    "static/media/cover.jpeg": "/static/media/cover.db181c746b0405b4039b.jpeg",
+    "index.html": "/index.html",
+    "main.9bb26bea.css.map": "/static/css/main.9bb26bea.css.map",
+    "main.04af4899.js.map": "/static/js/main.04af4899.js.map",
+    "453.d855a71b.chunk.js.map": "/static/js/453.d855a71b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9bb26bea.css",
+    "static/js/main.04af4899.js"
+  ]
+}
