@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   Typography,
   Button,
@@ -79,17 +77,16 @@ export default function PatientVideo() {
   };
 
   // Function to close the dialog
-const handleCloseWebcamDialog = () => {
-  setOpenWebcamDialog(false);
-  stopWebcam(); // Ensure the webcam is stopped
-  setVideoURL(""); // Clear the video URL
-  setRecordedChunks([]); // Clear the recorded chunks
-};
+  const handleCloseWebcamDialog = () => {
+    setOpenWebcamDialog(false);
+    stopWebcam(); // Ensure the webcam is stopped
+    setVideoURL(""); // Clear the video URL
+    setRecordedChunks([]); // Clear the recorded chunks
+  };
 
-const handleCloseWebcamDialogAfterUploading = () => {
-  setOpenWebcamDialog(false);
-};
-
+  const handleCloseWebcamDialogAfterUploading = () => {
+    setOpenWebcamDialog(false);
+  };
 
   const webcamRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -118,11 +115,10 @@ const handleCloseWebcamDialogAfterUploading = () => {
 
   const stopWebcam = () => {
     if (webcamRef.current && webcamRef.current.srcObject) {
-        const tracks = webcamRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
+      const tracks = webcamRef.current.srcObject.getTracks();
+      tracks.forEach((track) => track.stop());
     }
-};
-
+  };
 
   const stopRecording = () => {
     mediaRecorderRef.current.stop();
@@ -130,19 +126,18 @@ const handleCloseWebcamDialogAfterUploading = () => {
 
     // Correctly stop the webcam stream to release resources
     if (webcamRef.current && webcamRef.current.srcObject) {
-        const tracks = webcamRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
+      const tracks = webcamRef.current.srcObject.getTracks();
+      tracks.forEach((track) => track.stop());
     }
 
     if (recordedChunks.length) {
-        const blob = new Blob(recordedChunks, { type: "video/webm" });
-        const previewUrl = URL.createObjectURL(blob);
-        setVideoURL(previewUrl);
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      const previewUrl = URL.createObjectURL(blob);
+      setVideoURL(previewUrl);
     } else {
-        console.error("No recorded chunks available for preview.");
+      console.error("No recorded chunks available for preview.");
     }
-};
-
+  };
 
   const handleDataAvailable = ({ data }) => {
     console.log("Data available from recording");
@@ -420,31 +415,7 @@ const handleCloseWebcamDialogAfterUploading = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
+    <div>
       <Box
         component="main"
         sx={{
@@ -694,6 +665,6 @@ const handleCloseWebcamDialogAfterUploading = () => {
           </Paper>
         </Container>
       </Box>
-    </ThemeProvider>
+    </div>
   );
 }

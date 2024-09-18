@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   Typography,
@@ -21,7 +19,8 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle, ButtonGroup, 
+  DialogTitle,
+  ButtonGroup,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ArrowBackIos from "@mui/icons-material/ArrowBackIos";
@@ -30,11 +29,9 @@ import theme from "../../components/reusable/Theme";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import DataViewer from "../../components/reusable/DataViewer";
 import axios from "../../components/axios";
-import '../../css/customCalendarStyles.css';
-
+import "../../css/customCalendarStyles.css";
 
 import { formatDate, formatTimeSlot } from "../../utils/dateUtils";
 import { parseISO } from "date-fns";
@@ -178,8 +175,8 @@ export default function HealthcareAppointment() {
 
   const CustomEvent = ({ event }) => (
     <div>
-      <strong >{event.fullName}</strong>
-      <div style={{ fontSize: '0.8rem' }}>{event.timeslot}</div>
+      <strong>{event.fullName}</strong>
+      <div style={{ fontSize: "0.8rem" }}>{event.timeslot}</div>
     </div>
   );
 
@@ -223,36 +220,60 @@ export default function HealthcareAppointment() {
 
   const CustomToolbar = ({ label, onNavigate, onView, view }) => {
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "10px 0",
+        }}
+      >
         {/* Spacer for left side */}
         <div style={{ flex: 1 }}></div>
-        
+
         {/* Navigation and label */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <IconButton onClick={() => onNavigate('PREV')}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+          }}
+        >
+          <IconButton onClick={() => onNavigate("PREV")}>
             <ArrowBackIos />
           </IconButton>
-          <span style={{ margin: '0 10px' }}>{label}</span>
-          <IconButton onClick={() => onNavigate('NEXT')}>
+          <span style={{ margin: "0 10px" }}>{label}</span>
+          <IconButton onClick={() => onNavigate("NEXT")}>
             <ArrowForwardIos />
           </IconButton>
         </div>
-        
+
         {/* View buttons */}
-        <ButtonGroup variant="outlined" size="small" style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <Button onClick={() => onView('month')} disabled={view === 'month'}>Month</Button>
-          <Button onClick={() => onView('week')} disabled={view === 'week'}>Week</Button>
-          <Button onClick={() => onView('day')} disabled={view === 'day'}>Day</Button>
-          <Button onClick={() => onView('agenda')} disabled={view === 'agenda'}>Agenda</Button>
+        <ButtonGroup
+          variant="outlined"
+          size="small"
+          style={{ flex: 1, justifyContent: "flex-end" }}
+        >
+          <Button onClick={() => onView("month")} disabled={view === "month"}>
+            Month
+          </Button>
+          <Button onClick={() => onView("week")} disabled={view === "week"}>
+            Week
+          </Button>
+          <Button onClick={() => onView("day")} disabled={view === "day"}>
+            Day
+          </Button>
+          <Button onClick={() => onView("agenda")} disabled={view === "agenda"}>
+            Agenda
+          </Button>
         </ButtonGroup>
       </div>
     );
   };
-  
+
   return (
-    <ThemeProvider theme={theme}>
-      {/* <DataViewer data={requestedAppointments} variableName="requestedAppointments"></DataViewer>
-      <DataViewer data={appointments} variableName="appointments"></DataViewer> */}
+    <div>
       <GlobalStyles
         styles={{
           ".rbc-event": {
@@ -264,30 +285,9 @@ export default function HealthcareAppointment() {
           },
         }}
       />
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
+
+      {/* <DataViewer data={requestedAppointments} variableName="requestedAppointments"></DataViewer>
+      <DataViewer data={appointments} variableName="appointments"></DataViewer> */}
 
       <Box
         component="main"
@@ -389,12 +389,12 @@ export default function HealthcareAppointment() {
             </Typography>
             <Box>
               <Calendar
-                messages={{ showMore: total => `+ ${total} more` }}
+                messages={{ showMore: (total) => `+ ${total} more` }}
                 localizer={localizer}
                 events={appointments}
                 startAccessor="start"
                 endAccessor="end"
-                style={{minHeight : 650 }}
+                style={{ minHeight: 650 }}
                 components={{
                   toolbar: CustomToolbar,
                   event: CustomEvent,
@@ -479,6 +479,6 @@ export default function HealthcareAppointment() {
           </Dialog>
         </Container>
       </Box>
-    </ThemeProvider>
+    </div>
   );
 }

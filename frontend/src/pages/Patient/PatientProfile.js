@@ -459,32 +459,7 @@ export default function PatientProfile() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
+    <div>
       <Box
         component="main"
         sx={{
@@ -1278,6 +1253,6 @@ export default function PatientProfile() {
           </Button>
         </DialogActions>
       </Dialog>
-    </ThemeProvider>
+    </div>
   );
 }

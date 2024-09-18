@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   Typography,
   Button,
@@ -201,7 +199,7 @@ export default function PatientAppointment() {
         cursor: "not-allowed",
       };
     } else {
-      console.log('Date',date)
+      console.log("Date", date);
 
       const dateString = [
         date.getFullYear(),
@@ -244,8 +242,7 @@ export default function PatientAppointment() {
       setAlertInfo({
         show: true,
         type: "error",
-        message:
-          "No available slots.",
+        message: "No available slots.",
       });
       return;
     }
@@ -296,7 +293,7 @@ export default function PatientAppointment() {
         backgroundColor = "#2196f3";
         break;
       default:
-        backgroundColor = "#f5f5f5"; 
+        backgroundColor = "#f5f5f5";
     }
 
     const style = {
@@ -387,35 +384,7 @@ export default function PatientAppointment() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {useMediaQuery(theme.breakpoints.down("sm")) && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={
-          useMediaQuery(theme.breakpoints.down("sm"))
-            ? "temporary"
-            : "permanent"
-        }
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
+    <div>
       <Box
         component="main"
         sx={{
@@ -624,8 +593,8 @@ export default function PatientAppointment() {
                         <Typography variant="body2" sx={{ mt: 1 }}>
                           <b>Status:</b> Confirmed
                         </Typography>
-                                                {/* Cancel Button */}
-                                                <Button
+                        {/* Cancel Button */}
+                        <Button
                           variant="outlined"
                           color="error"
                           size="small"
@@ -677,6 +646,6 @@ export default function PatientAppointment() {
           </Button>
         </DialogActions>
       </Dialog>
-    </ThemeProvider>
+    </div>
   );
 }

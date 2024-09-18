@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   List,
@@ -44,8 +42,6 @@ import Avatar from "@mui/material/Avatar";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
-import DrawerBar from "../../components/reusable/DrawerBar";
 import { makeStyles } from "@mui/styles";
 import { format, isValid, parseISO } from "date-fns";
 import axios from "../../components/axios";
@@ -124,7 +120,6 @@ export default function HealthcarePatient() {
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -329,32 +324,8 @@ export default function HealthcarePatient() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <DrawerBar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
+    <div>
+      {" "}
       <Box
         component="main"
         sx={{
@@ -484,7 +455,6 @@ export default function HealthcarePatient() {
           </Paper>
         </Container>
       </Box>
-
       <Dialog
         open={Boolean(selectedPatient)}
         onClose={closeManageDialog}
@@ -866,6 +836,6 @@ export default function HealthcarePatient() {
           {alertInfo.message}
         </Alert>
       </CustomDialog>
-    </ThemeProvider>
+    </div>
   );
 }

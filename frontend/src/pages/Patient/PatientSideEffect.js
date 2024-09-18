@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  ThemeProvider,
   Box,
   Typography,
   Button,
@@ -35,7 +34,7 @@ import PatientSidebar from "../../components/reusable/PatientBar";
 import MenuIcon from "@mui/icons-material/Menu";
 import InfoIcon from "@mui/icons-material/Info";
 import axios from "../../components/axios";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 
 const StyledRadioGroup = styled(RadioGroup)(({ theme }) => ({
   flexDirection: "row",
@@ -193,14 +192,14 @@ export default function PatientSideEffectReport() {
   };
 
   const fetchSideEffectHistory = async () => {
-      try {
-        const response = await axios.get(`/sideEffects/patient`);
-        setSideEffectHistory(response.data); // Update the side effect history state
-      } catch (error) {
-        console.error(
-          "Error fetching side effect history:",
-          error.response?.data || error.message
-        );
+    try {
+      const response = await axios.get(`/sideEffects/patient`);
+      setSideEffectHistory(response.data); // Update the side effect history state
+    } catch (error) {
+      console.error(
+        "Error fetching side effect history:",
+        error.response?.data || error.message
+      );
     }
   };
 
@@ -294,31 +293,7 @@ export default function PatientSideEffectReport() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
+    <div>
       <Box
         component="main"
         sx={{
@@ -548,42 +523,67 @@ export default function PatientSideEffectReport() {
             : alertInfo.message}
         </Alert>
       </CustomDialog>
-      <Dialog open={openGradeInfo} onClose={handleGradeInfoClose} fullWidth maxWidth="sm">
-  <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold', textAlign: 'center' }}>
-    Grade Explanations
-    <IconButton
-      aria-label="close"
-      onClick={handleGradeInfoClose}
-      sx={{
-        position: 'absolute',
-        right: 8,
-        top: 8,
-        color: (theme) => theme.palette.grey[500],
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
- <DialogContent sx={{ pt: 2 }}>
-  {[
-    { grade: "Grade 1: Mild", description: "Effects are mild and generally not bothersome.", color: "#4caf50" },
-    { grade: "Grade 2: Moderate", description: "Effects are bothersome and may interfere with doing some activities but are not dangerous.", color: "#ff9800" },
-    { grade: "Grade 3: Serious", description: "Effects are serious and interfere with a person's ability to do basic things like eat or get dressed.", color: "#f44336" }
-  ].map((item, index) => (
-    <Box key={index} sx={{ mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Typography variant="h6" sx={{ color: item.color, fontWeight: 'bold' }}>
-          {item.grade}
-        </Typography>
-      </Box>
-      <Typography variant="body2" sx={{ ml: 3 }}>
-        {item.description}
-      </Typography>
-    </Box>
-  ))}
-</DialogContent>
-
-</Dialog>
-    </ThemeProvider>
+      <Dialog
+        open={openGradeInfo}
+        onClose={handleGradeInfoClose}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle
+          sx={{ m: 0, p: 2, fontWeight: "bold", textAlign: "center" }}
+        >
+          Grade Explanations
+          <IconButton
+            aria-label="close"
+            onClick={handleGradeInfoClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {[
+            {
+              grade: "Grade 1: Mild",
+              description: "Effects are mild and generally not bothersome.",
+              color: "#4caf50",
+            },
+            {
+              grade: "Grade 2: Moderate",
+              description:
+                "Effects are bothersome and may interfere with doing some activities but are not dangerous.",
+              color: "#ff9800",
+            },
+            {
+              grade: "Grade 3: Serious",
+              description:
+                "Effects are serious and interfere with a person's ability to do basic things like eat or get dressed.",
+              color: "#f44336",
+            },
+          ].map((item, index) => (
+            <Box key={index} sx={{ mb: 4 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ color: item.color, fontWeight: "bold" }}
+                >
+                  {item.grade}
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ ml: 3 }}>
+                {item.description}
+              </Typography>
+            </Box>
+          ))}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

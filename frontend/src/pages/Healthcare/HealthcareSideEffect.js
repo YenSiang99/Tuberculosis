@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   List,
@@ -31,12 +29,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
-import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
 import FaceIcon from "@mui/icons-material/Face";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
 import { format, isValid, parseISO } from "date-fns";
 import axios from "../../components/axios";
@@ -63,7 +59,6 @@ export default function HealthcareSideEffect() {
   const [dateState, setDateState] = useState(new Date());
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [sideEffects, setSideEffects] = useState([]);
   const [patients, setPatients] = useState([]);
   const [videoStatuses, setVideoStatuses] = useState([]);
@@ -82,13 +77,10 @@ export default function HealthcareSideEffect() {
       console.error("Failed to fetch side effects", error);
     }
   };
-  
 
   useEffect(() => {
     fetchSideEffects();
   }, []);
-
-
 
   const fetchPatients = async () => {
     try {
@@ -112,15 +104,14 @@ export default function HealthcareSideEffect() {
     console.log("Patient", patient);
     setSelectedPatient(patient);
     setVideoStatuses([]);
-    const patientId = patient._id; 
+    const patientId = patient._id;
     if (patientId) {
       fetchSideEffectsForPatient(patientId);
       fetchVideoStatusForPatient(patientId);
     } else {
-      console.error("Patient ID is undefined",patient._id);
+      console.error("Patient ID is undefined", patient._id);
     }
   };
-  
 
   const closePatientProfile = () => {
     setSelectedPatient(null);
@@ -220,7 +211,11 @@ export default function HealthcareSideEffect() {
         setVideoStatuses([]);
       }
     } catch (error) {
-      console.error("Error fetching video statuses for patient ID:", patientId, error);
+      console.error(
+        "Error fetching video statuses for patient ID:",
+        patientId,
+        error
+      );
       setVideoStatuses([]);
     }
   };
@@ -228,40 +223,13 @@ export default function HealthcareSideEffect() {
   useEffect(() => {
     console.log("Selected Patient updated", selectedPatient);
   }, [selectedPatient]);
-  
+
   useEffect(() => {
     console.log("Video statuses updated", videoStatuses);
   }, [videoStatuses]);
-  
-  
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
+    <div>
       <Box
         component="main"
         sx={{
@@ -580,6 +548,6 @@ export default function HealthcareSideEffect() {
           </Grid>
         </DialogContent>
       </Dialog>
-    </ThemeProvider>
+    </div>
   );
 }

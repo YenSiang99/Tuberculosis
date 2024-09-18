@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   Chip,
@@ -19,7 +17,7 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import axios from "../../components/axios";
 import DataViewer from "../../components/reusable/DataViewer";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 const localizer = momentLocalizer(moment);
 
@@ -34,39 +32,38 @@ export default function PatientCalendar() {
   const [videoData, setVideoData] = useState([]);
   const [progressData, setProgressData] = useState({
     relativeCompletionPercentage: 0,
-
   });
   const [encouragingWords, setEncouragingWords] = useState();
 
-
-
   const CustomToolbar = ({ onNavigate, label, onMonthChange }) => {
     const treatmentStartDate = moment(progressData.treatmentStartDate);
-  
+
     const navigate = (action) => {
       const currentDate = moment(label, "MMMM YYYY");
       let newDate = moment(currentDate);
-  
+
       if (action === "NEXT") {
-        newDate.add(1, 'months');
+        newDate.add(1, "months");
       } else if (action === "PREV") {
-        newDate.subtract(1, 'months');
+        newDate.subtract(1, "months");
       }
-  
+
       // Check if newDate is before treatmentStartDate
-      if (newDate.isBefore(treatmentStartDate, 'month')) {
+      if (newDate.isBefore(treatmentStartDate, "month")) {
         alert("You cannot access months before your treatment started.");
         return; // Stop the navigation if it's before the treatment start date
       }
-  
+
       // Proceed with navigation
       onNavigate(action);
       onMonthChange(newDate.toDate());
     };
-  
+
     // Determine if the PREV button should be disabled
-    const isPrevDisabled = moment(label, "MMMM YYYY").isSameOrBefore(treatmentStartDate, 'month');
-  
+    const isPrevDisabled = moment(label, "MMMM YYYY").isSameOrBefore(
+      treatmentStartDate,
+      "month"
+    );
 
     return (
       <Box
@@ -105,8 +102,6 @@ export default function PatientCalendar() {
       return "You're on the right track!";
     }
   };
-
-
 
   function SemiCircleProgressBar({ progress, size = 500 }) {
     const strokeWidth = 8;
@@ -181,28 +176,28 @@ export default function PatientCalendar() {
   };
   const Legend = () => (
     <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-      <Chip 
-        label="Video Submitted" 
-        sx={{ 
-          bgcolor: "#7CC36A", 
-          mr: 1, 
-          fontSize: '1rem', 
-          height: '35px', 
-          '& .MuiChip-label': { 
-            padding: '0 12px',
+      <Chip
+        label="Video Submitted"
+        sx={{
+          bgcolor: "#7CC36A",
+          mr: 1,
+          fontSize: "1rem",
+          height: "35px",
+          "& .MuiChip-label": {
+            padding: "0 12px",
           },
-        }} 
+        }}
       />
-      <Chip 
-        label="Video Missed" 
-        sx={{ 
-          bgcolor: "#ff8080", 
-          fontSize: '1rem', 
-          height: '35px', 
-          '& .MuiChip-label': { 
-            padding: '0 12px',
+      <Chip
+        label="Video Missed"
+        sx={{
+          bgcolor: "#ff8080",
+          fontSize: "1rem",
+          height: "35px",
+          "& .MuiChip-label": {
+            padding: "0 12px",
           },
-        }} 
+        }}
       />
     </Box>
   );
@@ -211,25 +206,35 @@ export default function PatientCalendar() {
       backgroundColor: "",
       borderRadius: "0px",
     };
-    const treatmentStartDate = moment(progressData.treatmentStartDate).startOf('day');
-    const calendarDay = moment(date).startOf('day');
-    const todayStart = moment().startOf('day');
-  
+    const treatmentStartDate = moment(progressData.treatmentStartDate).startOf(
+      "day"
+    );
+    const calendarDay = moment(date).startOf("day");
+    const todayStart = moment().startOf("day");
+
     const targetYear = moment(calendarViewDate).year();
     const targetMonth = moment(calendarViewDate).month(); // month() returns a 0-based index
-  
-    if (calendarDay.year() === targetYear && calendarDay.month() === targetMonth) {
+
+    if (
+      calendarDay.year() === targetYear &&
+      calendarDay.month() === targetMonth
+    ) {
       if (calendarDay.isBefore(treatmentStartDate)) {
         style.backgroundColor = "#E0E0E0"; // Light grey for dates before treatment
-      } else if (calendarDay.isBefore(todayStart) && calendarDay.isSameOrAfter(treatmentStartDate)) {
-        const hasUploaded = videoData.some(video => {
-          const videoDate = moment(video.date).startOf('day');
+      } else if (
+        calendarDay.isBefore(todayStart) &&
+        calendarDay.isSameOrAfter(treatmentStartDate)
+      ) {
+        const hasUploaded = videoData.some((video) => {
+          const videoDate = moment(video.date).startOf("day");
           return calendarDay.isSame(videoDate);
         });
         style.backgroundColor = hasUploaded ? "#7CC36A" : "#ff8080"; // Green if uploaded, red if not
       } else if (calendarDay.isSame(todayStart)) {
         // Check if there is a video uploaded for today
-        const todayUploaded = videoData.some(video => moment(video.date).startOf('day').isSame(todayStart));
+        const todayUploaded = videoData.some((video) =>
+          moment(video.date).startOf("day").isSame(todayStart)
+        );
         if (todayUploaded) {
           style.backgroundColor = "#7CC36A"; // Green for today if video uploaded
         } else {
@@ -241,13 +246,11 @@ export default function PatientCalendar() {
     } else {
       style.backgroundColor = ""; // No specific style for dates outside the target month/year
     }
-  
+
     return {
       style: style,
     };
   };
-  
-  
 
   const Event = ({ event }) => {
     return (
@@ -280,10 +283,13 @@ export default function PatientCalendar() {
         `/progressTracker?year=${year}&month=${month}`
       );
       setProgressData(response.data);
-      setEncouragingWords(getEncouragingWords(response.data.relativeCompletionPercentage,
-        daysPassed,
-        response.data.uploadedDays))
-
+      setEncouragingWords(
+        getEncouragingWords(
+          response.data.relativeCompletionPercentage,
+          daysPassed,
+          response.data.uploadedDays
+        )
+      );
     } catch (error) {
       console.error("Error fetching Available Date Time Slots:", error);
       // Handle the error as needed
@@ -291,9 +297,9 @@ export default function PatientCalendar() {
   };
 
   const handleMonthChange = (newDate) => {
-    setCalendarViewDate(newDate); 
+    setCalendarViewDate(newDate);
     const year = newDate.getFullYear();
-    const month = newDate.getMonth() + 1; 
+    const month = newDate.getMonth() + 1;
     fetchVideoData(year, month);
     fetchProgressTrackerData(year, month);
   };
@@ -302,38 +308,10 @@ export default function PatientCalendar() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
     fetchVideoData(year, month);
-    fetchProgressTrackerData(year,month);
+    fetchProgressTrackerData(year, month);
   }, [currentDate]);
   return (
-    <ThemeProvider theme={theme}>
-      {useMediaQuery(theme.breakpoints.down("sm")) && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={
-          useMediaQuery(theme.breakpoints.down("sm"))
-            ? "temporary"
-            : "permanent"
-        }
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
+    <div>
       <Box
         component="main"
         sx={{
@@ -362,12 +340,16 @@ export default function PatientCalendar() {
                 alignItems: "center",
               }}
             >
-              <SemiCircleProgressBar progress={progressData ? progressData.relativeCompletionPercentage : 0} size={500} />
+              <SemiCircleProgressBar
+                progress={
+                  progressData ? progressData.relativeCompletionPercentage : 0
+                }
+                size={500}
+              />
               <Typography variant="h6" sx={{ fontWeight: "medium", mt: -6 }}>
                 {progressData ? progressData.uploadedDays : 0}/
-                {progressData ? progressData.totalDaysInMonth : 0}{" "}
-                videos submitted in{" "}
-                {format(calendarViewDate, 'MMMM yyyy')}
+                {progressData ? progressData.totalDaysInMonth : 0} videos
+                submitted in {format(calendarViewDate, "MMMM yyyy")}
               </Typography>
 
               <Typography
@@ -375,16 +357,17 @@ export default function PatientCalendar() {
                 sx={{
                   mt: 1,
                   mb: 4,
-                  color: getProgressColor(progressData ? progressData.relativeCompletionPercentage : 0),
+                  color: getProgressColor(
+                    progressData ? progressData.relativeCompletionPercentage : 0
+                  ),
                   fontWeight: "bold",
                 }}
               >
                 {encouragingWords}
               </Typography>
             </Box>
-             {/* <DataViewer data={videoData} variableName="videoData for the month"></DataViewer> */}
-             {/* <DataViewer data={progressData} variableName="progressTracker"></DataViewer> */}
-            
+            {/* <DataViewer data={videoData} variableName="videoData for the month"></DataViewer> */}
+            {/* <DataViewer data={progressData} variableName="progressTracker"></DataViewer> */}
 
             <Calendar
               localizer={localizer}
@@ -396,10 +379,7 @@ export default function PatientCalendar() {
               eventPropGetter={eventStyleGetter}
               components={{
                 toolbar: (props) => (
-                  <CustomToolbar
-                    {...props}
-                    onMonthChange={handleMonthChange}
-                  />
+                  <CustomToolbar {...props} onMonthChange={handleMonthChange} />
                 ),
                 event: Event,
               }}
@@ -408,6 +388,6 @@ export default function PatientCalendar() {
           </Paper>
         </Container>
       </Box>
-    </ThemeProvider>
+    </div>
   );
 }

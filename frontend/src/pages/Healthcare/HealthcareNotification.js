@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   useMediaQuery,
   Container,
   Paper,
   Typography,
-  useTheme,ListItem,
+  useTheme,
+  ListItem,
   ListItemAvatar,
   ListItemText,
-  Avatar,List,Button
+  Avatar,
+  List,
+  Button,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 import axios from "../../components/axios";
 import theme from "../../components/reusable/Theme";
 import moment from "moment";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive'; // Import an icon for notifications
-
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive"; // Import an icon for notifications
 
 // Define the NotificationItem component within the same file
 const NotificationItem = ({ notification }) => {
@@ -43,13 +42,13 @@ const NotificationItem = ({ notification }) => {
 
   const formattedTimestamp = moment(notification.timestamp).format(
     "D/M h:mm A"
-  ); 
+  );
 
   const unreadStyle = {
-    bgcolor: isRead ? 'background.default' : 'background.paper',
-    boxShadow: isRead ? 'none' : theme.shadows[1],
-    '&:hover': {
-      bgcolor: isRead ? theme.palette.action.hover : '#e3f2fd',
+    bgcolor: isRead ? "background.default" : "background.paper",
+    boxShadow: isRead ? "none" : theme.shadows[1],
+    "&:hover": {
+      bgcolor: isRead ? theme.palette.action.hover : "#e3f2fd",
     },
   };
 
@@ -58,23 +57,27 @@ const NotificationItem = ({ notification }) => {
       sx={unreadStyle}
       onClick={handleClick}
       secondaryAction={
-        <Typography variant="caption" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+        <Typography
+          variant="caption"
+          color="textSecondary"
+          sx={{ fontStyle: "italic" }}
+        >
           {formattedTimestamp}
         </Typography>
       }
     >
       <ListItemAvatar>
-        <Avatar sx={{ bgcolor: isRead ? 'action.disabledBackground' : 'red' }}>
-          <NotificationsActiveIcon color={isRead ? 'disabled' : 'white'} />
+        <Avatar sx={{ bgcolor: isRead ? "action.disabledBackground" : "red" }}>
+          <NotificationsActiveIcon color={isRead ? "disabled" : "white"} />
         </Avatar>
       </ListItemAvatar>
       <ListItemText
         primary={notification.message}
         primaryTypographyProps={{
-          color: isRead ? 'text.disabled' : 'text.primary',
-          fontWeight: isRead ? 'normal' : 'fontWeightMedium',
+          color: isRead ? "text.disabled" : "text.primary",
+          fontWeight: isRead ? "normal" : "fontWeightMedium",
         }}
-        secondary={isRead ? 'Read' : 'Unread'}
+        secondary={isRead ? "Read" : "Unread"}
       />
     </ListItem>
   );
@@ -104,39 +107,15 @@ export default function HealthcareNotification() {
 
   const deleteAllNotifications = async () => {
     try {
-      await axios.delete("/notifications/deleteAll"); 
-      setNotifications([]); 
+      await axios.delete("/notifications/deleteAll");
+      setNotifications([]);
     } catch (error) {
       console.error("Failed to delete notifications", error);
     }
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
+    <div>
       <Box
         component="main"
         sx={{
@@ -158,30 +137,30 @@ export default function HealthcareNotification() {
             >
               Notifications
             </Typography>
-            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <React.Fragment key={notification._id}>
-                  <NotificationItem notification={notification} />
-                </React.Fragment>
-              ))
-            ) : (
-              <Typography variant="subtitle1" sx={{ my: 2 }}>
-                You're all caught up! No new notifications.
-              </Typography>
-            )}
-          </List>
+            <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <React.Fragment key={notification._id}>
+                    <NotificationItem notification={notification} />
+                  </React.Fragment>
+                ))
+              ) : (
+                <Typography variant="subtitle1" sx={{ my: 2 }}>
+                  You're all caught up! No new notifications.
+                </Typography>
+              )}
+            </List>
           </Paper>
           <Button
-          variant="outlined"
-          color="primary"
-          onClick={deleteAllNotifications}
-          sx={{ mb: 2 }}
-        >
-          Delete All Notifications
-        </Button>
+            variant="outlined"
+            color="primary"
+            onClick={deleteAllNotifications}
+            sx={{ mb: 2 }}
+          >
+            Delete All Notifications
+          </Button>
         </Container>
       </Box>
-    </ThemeProvider>
+    </div>
   );
 }

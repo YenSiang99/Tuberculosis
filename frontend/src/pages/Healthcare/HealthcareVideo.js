@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   List,
@@ -23,7 +21,6 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import axios from "../../components/axios";
 
 export default function HealthcarePatient() {
@@ -47,7 +44,6 @@ export default function HealthcarePatient() {
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -104,32 +100,8 @@ export default function HealthcarePatient() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
+    <div>
+      {" "}
       <Box
         component="main"
         sx={{
@@ -221,7 +193,6 @@ export default function HealthcarePatient() {
           </Paper>
         </Container>
       </Box>
-
       <Dialog
         open={Boolean(selectedPatient)}
         onClose={closeVideoDialog}
@@ -274,6 +245,6 @@ export default function HealthcarePatient() {
           </Box>
         </DialogContent>
       </Dialog>
-    </ThemeProvider>
+    </div>
   );
 }
