@@ -133,16 +133,15 @@ const InteractiveStoryPage = () => {
     setCurrentStepId(storyData.steps[0].stepId);
   };
 
+  const calculateTimeTaken = () => {
+    return ((Date.now() - startTime) / 1000).toFixed(2); // returns time in seconds
+  };
+
   useEffect(() => {
     if (!openInstructionDialog) {
       setStartTime(Date.now());
     }
-    if (isEnd) {
-      if (currentStep.endType === "positive") {
-        setTimeTaken(Date.now() - startTime);
-      }
-    }
-  }, [isEnd, startTime, openInstructionDialog]);
+  }, [openInstructionDialog]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -212,6 +211,7 @@ const InteractiveStoryPage = () => {
                   <Button
                     variant="outlined"
                     onClick={() => setCurrentStepId(option.nextStep)}
+                    sx={{ width: "100%" }}
                   >
                     {option.optionText}
                   </Button>
@@ -296,7 +296,7 @@ const InteractiveStoryPage = () => {
                       </Grid>
                       <Grid item xs={6}>
                         <Typography variant="h6">
-                          : {(timeTaken / 1000).toFixed(2)} seconds
+                          : {calculateTimeTaken()} seconds
                         </Typography>
                       </Grid>
                     </Grid>
@@ -317,7 +317,7 @@ const InteractiveStoryPage = () => {
         </Grid>
       </Grid>
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"

@@ -201,10 +201,10 @@ const TBInfo = () => {
         <CssBaseline />
         <AppBar
           position="fixed"
-          color="transparent"
           sx={{
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
+            backgroundColor: "#CFE9F4",
           }}
         >
           <Toolbar>
@@ -280,7 +280,7 @@ const TBInfo = () => {
             <Drawer
               variant="permanent"
               sx={{
-                display: { xs: "none", sm: "block" },
+                display: { xs: "none", sm: "none", md: "block" },
                 "& .MuiDrawer-paper": {
                   boxSizing: "border-box",
                   width: drawerWidth,

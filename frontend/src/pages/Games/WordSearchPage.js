@@ -13,20 +13,10 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import axios from "../../components/axios";
 
 const WordSearchPage = () => {
-  const wordsToFind = [
-    // "TUBERCULOSIS",
-    "BACTERIA",
-    "LUNGS",
-    // "SYMPTOMS",
-    "COUGH",
-    "FEVER",
-    "NIGHT SWEATS",
-    // "FATIGUE",
-    // "DIAGNOSIS",
-    // "TREATMENT",
-  ];
+  const [wordsToFind, setWordsToFind] = useState([]);
   const gridSize = 15;
 
   const theme = useTheme();
@@ -338,20 +328,18 @@ const WordSearchPage = () => {
   };
 
   useEffect(() => {
-    if (foundWords.length === wordsToFind.length) {
-      // console.log("Accuracy:", calculateAccuracyRate());
-      // console.log("Score:", foundWords.length + " " + wordsToFind.length);
-      // console.log("Time taken:", totalTime - gameTimer);
-      // console.log("Longest word found:", getLongestWordFound());
-      handleShowResults();
-    }
-  }, [foundWords]);
-
-  useEffect(() => {
     if (!openInstructionDialog) {
       if (gameTimer > 0) {
-        const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
-        return () => clearTimeout(countdown);
+        if (foundWords.length === wordsToFind.length) {
+          // console.log("Accuracy:", calculateAccuracyRate());
+          // console.log("Score:", foundWords.length + " " + wordsToFind.length);
+          // console.log("Time taken:", totalTime - gameTimer);
+          // console.log("Longest word found:", getLongestWordFound());
+          handleShowResults();
+        } else {
+          const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
+          return () => clearTimeout(countdown);
+        }
       }
       if (gameTimer === 0) {
         // Show results of game
@@ -362,14 +350,26 @@ const WordSearchPage = () => {
         handleShowResults();
       }
     }
-  }, [gameTimer, openInstructionDialog]);
+  }, [gameTimer, openInstructionDialog, foundWords]);
 
-  // State to generate empty grid and fill it with words
   useEffect(() => {
-    const emptyGrid = generateEmptyGrid(gridSize);
-    const gridWithWords = placeWordsInGrid(emptyGrid, wordsToFind);
-    setGrid(gridWithWords);
-  }, []);
+    const fetchActiveWordList = async () => {
+      try {
+        const response = await axios.get("/wordLists/active");
+        const data = response.data;
+        if (data && data.words) {
+          setWordsToFind(data.words); // Set the fetched words in the state
+          const emptyGrid = generateEmptyGrid(gridSize);
+          const gridWithWords = placeWordsInGrid(emptyGrid, data.words); // Use the fetched words
+          setGrid(gridWithWords); // Set the grid with the words
+        }
+      } catch (error) {
+        console.error("Failed to fetch word list", error);
+      }
+    };
+
+    fetchActiveWordList();
+  }, [gridSize]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -468,7 +468,7 @@ const WordSearchPage = () => {
                       wordsToFind
                     );
                     setGrid(gridWithWords);
-                    setGameTimer(60); // Reset the timer
+                    setGameTimer(totalTime); // Reset the timer
                     setShowResult(false); // Go back to the game
                   }}
                 >
@@ -615,7 +615,7 @@ const WordSearchPage = () => {
       </Grid>
 
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"

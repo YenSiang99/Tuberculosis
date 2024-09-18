@@ -16,80 +16,13 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import axios from "../../components/axios";
 
 const QuizPage = () => {
   const test = false;
 
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      questionText: "What is Tuberculosis?",
-      options: [
-        { id: "q1o1", optionText: "A bacterial infection", isCorrect: true },
-        { id: "q1o2", optionText: "A viral infection", isCorrect: false },
-        { id: "q1o3", optionText: "A fungal infection", isCorrect: false },
-        { id: "q1o4", optionText: "None of the above", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 2,
-      questionText: "How is Tuberculosis spread?",
-      options: [
-        {
-          id: "q2o1",
-          optionText: "Through contaminated water",
-          isCorrect: false,
-        },
-        {
-          id: "q2o2",
-          optionText:
-            "Through the air when an infected person coughs or sneezes",
-          isCorrect: true,
-        },
-        { id: "q2o3", optionText: "Through insect bites", isCorrect: false },
-        {
-          id: "q2o4",
-          optionText: "By touching infected surfaces",
-          isCorrect: false,
-        },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 3,
-      questionText: "Which organ is primarily affected by Tuberculosis?",
-      options: [
-        { id: "q3o1", optionText: "Liver", isCorrect: false },
-        { id: "q3o2", optionText: "Heart", isCorrect: false },
-        { id: "q3o3", optionText: "Lungs", isCorrect: true },
-        { id: "q3o4", optionText: "Kidneys", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 4,
-      questionText: "What is the standard treatment duration for Tuberculosis?",
-      options: [
-        { id: "q4o1", optionText: "1 week", isCorrect: false },
-        { id: "q4o2", optionText: "2 months", isCorrect: false },
-        { id: "q4o3", optionText: "6 to 9 months", isCorrect: true },
-        { id: "q4o4", optionText: "1 year", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 5,
-      questionText: "What is the vaccine used to prevent Tuberculosis?",
-      options: [
-        { id: "q5o1", optionText: "BCG vaccine", isCorrect: true },
-        { id: "q5o2", optionText: "Hepatitis B vaccine", isCorrect: false },
-        { id: "q5o3", optionText: "MMR vaccine", isCorrect: false },
-        { id: "q5o4", optionText: "Polio vaccine", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-  ]);
+  const [questions, setQuestions] = useState([]); // Initialize as empty array
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   // Timer variables
@@ -185,6 +118,23 @@ const QuizPage = () => {
     }
   }, [nextQuestionTimer, answerFeedback, openInstructionDialog]);
 
+  useEffect(() => {
+    const fetchActiveQuiz = async () => {
+      try {
+        const response = await axios.get("/quizzes/active");
+        const data = response.data;
+
+        if (data && data.questions) {
+          setQuestions(data.questions); // Set the questions based on the API response
+        }
+      } catch (error) {
+        console.error("Failed to fetch active quiz", error);
+      }
+    };
+
+    fetchActiveQuiz();
+  }, []);
+
   const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"]; // Dark Red, Dark Blue, Dark Yellow, Dark Green
 
   return (
@@ -196,7 +146,7 @@ const QuizPage = () => {
       >
         Quiz Time!
       </Typography>
-      {!showResult ? (
+      {!showResult && questions.length > 0 ? (
         <Grid
           container
           justifyContent="center"
@@ -306,55 +256,64 @@ const QuizPage = () => {
           <Typography variant="h4" gutterBottom>
             Summary of Questions:
           </Typography>
-          {questions.map((question) => (
-            <Box key={question.id} sx={{ mb: 4 }}>
-              <Typography
-                sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
-              >
-                {question.questionText}
-              </Typography>
-              <RadioGroup>
-                {question.options.map((option) => {
-                  const isUserSelection = question.selectedOption === option.id;
-                  const isCorrect = option.isCorrect;
-                  return (
-                    <FormControlLabel
-                      key={option.id}
-                      value={option.optionText}
-                      control={<Radio checked={isUserSelection} />}
-                      label={
-                        <span
-                          style={{
-                            color: isCorrect
-                              ? "green"
-                              : isUserSelection
-                              ? "red"
-                              : "black",
-                            fontWeight: isUserSelection ? "bold" : "normal",
+          {questions.length > 0 ? (
+            <>
+              {questions.map((question) => (
+                <Box key={question.id} sx={{ mb: 4 }}>
+                  <Typography
+                    sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
+                  >
+                    {question.questionText}
+                  </Typography>
+                  <RadioGroup>
+                    {question.options.map((option) => {
+                      const isUserSelection =
+                        question.selectedOption === option.id;
+                      const isCorrect = option.isCorrect;
+                      return (
+                        <FormControlLabel
+                          key={option.id}
+                          value={option.optionText}
+                          control={<Radio checked={isUserSelection} />}
+                          label={
+                            <span
+                              style={{
+                                color: isCorrect
+                                  ? "green"
+                                  : isUserSelection
+                                  ? "red"
+                                  : "black",
+                                fontWeight: isUserSelection ? "bold" : "normal",
+                              }}
+                            >
+                              {option.optionText}
+                              {isUserSelection &&
+                                !isCorrect &&
+                                " (Your Choice)"}
+                              {isCorrect && " (Correct)"}
+                            </span>
+                          }
+                          sx={{
+                            "& .MuiFormControlLabel-label": {
+                              color: isUserSelection
+                                ? isCorrect
+                                  ? "green"
+                                  : "red"
+                                : isCorrect
+                                ? "green"
+                                : "black",
+                            },
                           }}
-                        >
-                          {option.optionText}
-                          {isUserSelection && !isCorrect && " (Your Choice)"}
-                          {isCorrect && " (Correct)"}
-                        </span>
-                      }
-                      sx={{
-                        "& .MuiFormControlLabel-label": {
-                          color: isUserSelection
-                            ? isCorrect
-                              ? "green"
-                              : "red"
-                            : isCorrect
-                            ? "green"
-                            : "black",
-                        },
-                      }}
-                    />
-                  );
-                })}
-              </RadioGroup>
-            </Box>
-          ))}
+                        />
+                      );
+                    })}
+                  </RadioGroup>
+                </Box>
+              ))}
+            </>
+          ) : (
+            <Typography variant="h6">Loading quiz...</Typography> // Show loading message until data is fetched
+          )}
         </Box>
       )}
       <Dialog

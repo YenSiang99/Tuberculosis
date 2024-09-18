@@ -283,7 +283,7 @@ const FillInBlanksPage = () => {
         </Box>
       )}
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
