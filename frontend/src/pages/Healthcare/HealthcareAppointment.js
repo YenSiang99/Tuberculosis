@@ -3,7 +3,6 @@ import {
   Box,
   IconButton,
   Typography,
-  useMediaQuery,
   Paper,
   Container,
   Card,
@@ -11,8 +10,6 @@ import {
   Grid,
   CardContent,
   Button,
-  Tooltip,
-  GlobalStyles,
   Alert,
   styled,
   Dialog,
@@ -22,10 +19,8 @@ import {
   DialogTitle,
   ButtonGroup,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import ArrowBackIos from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
-import theme from "../../components/reusable/Theme";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -40,12 +35,10 @@ import { utcToZonedTime } from "date-fns-tz";
 const localizer = momentLocalizer(moment);
 
 export default function HealthcareAppointment() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   // own appointments
   const [appointments, setAppointments] = useState([]);
   // patient requested
   const [requestedAppointments, setRequestedAppointments] = useState([]);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState(null);
@@ -93,9 +86,6 @@ export default function HealthcareAppointment() {
     handleConfirmationClose();
   };
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
   // Functions
   // Api functions
   const fetchAppointmentRequests = async () => {
@@ -138,10 +128,7 @@ export default function HealthcareAppointment() {
       status: "approved",
     };
     try {
-      const response = await axios.patch(
-        `/appointments/${appointmentId}`,
-        payload
-      );
+      await axios.patch(`/appointments/${appointmentId}`, payload);
       fetchAppointments();
       fetchAppointmentRequests();
     } catch (error) {

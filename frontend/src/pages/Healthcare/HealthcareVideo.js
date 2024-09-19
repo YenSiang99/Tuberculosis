@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useMediaQuery,
   Grid,
   Paper,
   Container,
@@ -18,15 +17,11 @@ import {
   DialogContent,
   Avatar,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "../../components/axios";
 
 export default function HealthcareVideo() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [patients, setPatients] = useState([]);
-  const [videos, setVideos] = useState([]);
 
   const fetchPatients = async () => {
     try {
@@ -44,10 +39,6 @@ export default function HealthcareVideo() {
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const openVideoDialog = async (patient) => {
     try {

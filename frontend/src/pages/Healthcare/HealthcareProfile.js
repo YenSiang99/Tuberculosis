@@ -9,7 +9,6 @@ import {
   Grid,
   TextField,
   Button,
-  useMediaQuery,
   Avatar,
   List,
   ListItem,
@@ -30,8 +29,7 @@ import {
   TableCell,
   TableBody,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
+import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
@@ -47,7 +45,7 @@ import { green, blue, red, orange } from "@mui/material/colors";
 import axios from "../../components/axios";
 
 export default function HealthcareProfile() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const theme = useTheme();
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [healthcareData, setHealthcareData] = useState({});
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -113,10 +111,6 @@ export default function HealthcareProfile() {
     group: healthcareData.group || "",
   });
 
-  const toggleEditMode = (field) => {
-    setEditMode((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
-
   const handleFieldChange = (field, value) => {
     setEditableFields((fields) => ({ ...fields, [field]: value }));
 
@@ -148,10 +142,6 @@ export default function HealthcareProfile() {
       overflow: "visible",
     },
   }));
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const handleClickShowCurrentPassword = () => {
     setShowCurrentPassword(!showCurrentPassword);
@@ -233,7 +223,7 @@ export default function HealthcareProfile() {
     }
 
     try {
-      const response = await axios.post("/users/changePassword", {
+      await axios.post("/users/changePassword", {
         currentPassword,
         newPassword,
       });

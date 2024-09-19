@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useMediaQuery,
   Grid,
   Paper,
   Container,
@@ -25,7 +24,6 @@ import {
   TableCell,
   TableBody,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
@@ -57,10 +55,8 @@ const useStyles = makeStyles((theme) => ({
 export default function HealthcareSideEffect() {
   const classes = useStyles();
   const [dateState, setDateState] = useState(new Date());
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [sideEffects, setSideEffects] = useState([]);
-  const [patients, setPatients] = useState([]);
   const [videoStatuses, setVideoStatuses] = useState([]);
 
   const fetchSideEffects = async () => {
@@ -81,24 +77,6 @@ export default function HealthcareSideEffect() {
   useEffect(() => {
     fetchSideEffects();
   }, []);
-
-  const fetchPatients = async () => {
-    try {
-      const response = await axios.get("/users/patients");
-      setPatients(response.data);
-      console.log(patients);
-    } catch (error) {
-      console.error("Error fetching patients", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPatients();
-  }, []);
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const openPatientProfile = (patient) => {
     console.log("Patient", patient);

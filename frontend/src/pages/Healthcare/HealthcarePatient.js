@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Drawer,
   Box,
   IconButton,
   List,
@@ -9,7 +8,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useMediaQuery,
   Grid,
   Paper,
   Container,
@@ -32,8 +30,6 @@ import {
   Alert,
   styled,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
 import FaceIcon from "@mui/icons-material/Face";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
@@ -63,8 +59,6 @@ export default function HealthcarePatient() {
   const [dateState, setDateState] = useState(new Date());
   const [editTreatmentInfo, setEditTreatmentInfo] = useState(false);
   const [tempTreatmentInfo, setTempTreatmentInfo] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [patients, setPatients] = useState([]);
   const [videoStatuses, setVideoStatuses] = useState([]);
   const [inactivePatients, setInactivePatients] = useState([]);
   const [activePatients, setActivePatients] = useState([]);
@@ -121,11 +115,6 @@ export default function HealthcarePatient() {
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const openManageDialog = (patient) => {
     console.log("Patient", patient);

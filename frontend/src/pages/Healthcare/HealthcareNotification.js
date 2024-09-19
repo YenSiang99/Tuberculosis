@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
-  IconButton,
-  useMediaQuery,
   Container,
   Paper,
   Typography,
@@ -14,10 +11,8 @@ import {
   List,
   Button,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 import axios from "../../components/axios";
-import theme from "../../components/reusable/Theme";
 import moment from "moment";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive"; // Import an icon for notifications
 
@@ -84,8 +79,6 @@ const NotificationItem = ({ notification }) => {
 };
 
 export default function HealthcareNotification() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
@@ -100,10 +93,6 @@ export default function HealthcareNotification() {
 
     fetchNotifications();
   }, []);
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const deleteAllNotifications = async () => {
     try {
