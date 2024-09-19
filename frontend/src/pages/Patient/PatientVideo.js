@@ -10,7 +10,6 @@ import {
   Dialog,
   Alert,
   IconButton,
-  useMediaQuery,
   Container,
   DialogTitle,
   DialogContent,
@@ -18,9 +17,6 @@ import {
   DialogActions,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
-import MenuIcon from "@mui/icons-material/Menu";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import CloseIcon from "@mui/icons-material/Close";
@@ -65,8 +61,6 @@ export default function PatientVideo() {
     type: "",
     message: "",
   });
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [isRecording, setIsRecording] = useState(false);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [openWebcamDialog, setOpenWebcamDialog] = useState(false);
@@ -280,10 +274,6 @@ export default function PatientVideo() {
   };
 
   // Function to toggle drawer
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
   const handleVideoChange = (event) => {
     const file = event.target.files[0];
     if (file) {

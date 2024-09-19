@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  IconButton,
-  useMediaQuery,
   Container,
   Paper,
   Typography,
@@ -14,20 +12,18 @@ import {
   Dialog,
   Button,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import axios from "../../components/axios";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
-import DataViewer from "../../components/reusable/DataViewer";
+// import DataViewer from "../../components/reusable/DataViewer";
+
+const defaultReminderTime = new Date();
+defaultReminderTime.setHours(22, 0, 0);
 
 export default function PatientNotification() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
   // Set default reminder time to today at 10:00 PM
-  const defaultReminderTime = new Date();
-  defaultReminderTime.setHours(22, 0, 0);
+  // const defaultReminderTime = new Date();
+  // defaultReminderTime.setHours(22, 0, 0);
 
   const [videoUploadAlert, setVideoUploadAlert] = useState(true);
   const [reminderTime, setReminderTime] = useState(defaultReminderTime);
@@ -39,10 +35,6 @@ export default function PatientNotification() {
     message: "",
     nextAlert: null,
   });
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   // const handleToggleVideoUploadAlert = async (event) => {
   //   const newVideoUploadAlertValue = event.target.checked;
@@ -128,7 +120,6 @@ export default function PatientNotification() {
         setReminderFrequency(60);
       }
     };
-
     fetchSettings();
   }, []);
 

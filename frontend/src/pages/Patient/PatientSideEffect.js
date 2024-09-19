@@ -12,9 +12,7 @@ import {
   styled,
   TextField,
   Grid,
-  useMediaQuery,
   IconButton,
-  Drawer,
   Table,
   TableBody,
   TableCell,
@@ -27,11 +25,8 @@ import {
   DialogContent,
 } from "@mui/material";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
-import { isValid, parseISO, format } from "date-fns";
+import { parseISO, format } from "date-fns";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
-import MenuIcon from "@mui/icons-material/Menu";
 import InfoIcon from "@mui/icons-material/Info";
 import axios from "../../components/axios";
 import CloseIcon from "@mui/icons-material/Close";
@@ -109,8 +104,6 @@ export default function PatientSideEffectReport() {
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [selectedSideEffects, setSelectedSideEffects] = useState([]);
   const [sideEffectDetails, setSideEffectDetails] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [otherDescription, setOtherDescription] = useState("");
   const [alertInfo, setAlertInfo] = useState({
     show: false,
@@ -274,10 +267,6 @@ export default function PatientSideEffectReport() {
         error.response?.data || error.message
       );
     }
-  };
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
   };
 
   const handleOtherDescriptionChange = (event) => {

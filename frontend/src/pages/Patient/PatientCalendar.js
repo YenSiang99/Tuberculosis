@@ -1,32 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   IconButton,
   Chip,
-  useMediaQuery,
   Typography,
   Container,
   Paper,
 } from "@mui/material";
 import { NavigateBefore, NavigateNext } from "@mui/icons-material";
-import MenuIcon from "@mui/icons-material/Menu";
 import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import axios from "../../components/axios";
-import DataViewer from "../../components/reusable/DataViewer";
+// import DataViewer from "../../components/reusable/DataViewer";
 import { format } from "date-fns";
 
 const localizer = momentLocalizer(moment);
 
 export default function PatientCalendar() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const daysPassed = moment().diff(moment().startOf("month"), "days") + 1;
 
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarViewDate, setCalendarViewDate] = useState(new Date());
 
   const [videoData, setVideoData] = useState([]);
@@ -161,10 +155,6 @@ export default function PatientCalendar() {
     );
   }
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
   const eventStyleGetter = (event) => {
     let backgroundColor = "#fff"; // Default color
     const style = {
@@ -266,35 +256,67 @@ export default function PatientCalendar() {
   };
 
   // Api functions
-  const fetchVideoData = async (year, month) => {
+  // const fetchVideoData = async (year, month) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `/videos/getVideo?year=${year}&month=${month}`
+  //     );
+  //     setVideoData(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching Available Date Time Slots:", error);
+  //     // Handle the error as needed
+  //   }
+  // };
+  // const fetchProgressTrackerData = async (year, month) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `/progressTracker?year=${year}&month=${month}`
+  //     );
+  //     setProgressData(response.data);
+  //     setEncouragingWords(
+  //       getEncouragingWords(
+  //         response.data.relativeCompletionPercentage,
+  //         daysPassed,
+  //         response.data.uploadedDays
+  //       )
+  //     );
+  //   } catch (error) {
+  //     console.error("Error fetching Available Date Time Slots:", error);
+  //     // Handle the error as needed
+  //   }
+  // };
+
+  const fetchVideoData = useCallback(async (year, month) => {
     try {
       const response = await axios.get(
         `/videos/getVideo?year=${year}&month=${month}`
       );
       setVideoData(response.data);
     } catch (error) {
-      console.error("Error fetching Available Date Time Slots:", error);
-      // Handle the error as needed
+      console.error("Error fetching video data:", error);
     }
-  };
-  const fetchProgressTrackerData = async (year, month) => {
-    try {
-      const response = await axios.get(
-        `/progressTracker?year=${year}&month=${month}`
-      );
-      setProgressData(response.data);
-      setEncouragingWords(
-        getEncouragingWords(
-          response.data.relativeCompletionPercentage,
-          daysPassed,
-          response.data.uploadedDays
-        )
-      );
-    } catch (error) {
-      console.error("Error fetching Available Date Time Slots:", error);
-      // Handle the error as needed
-    }
-  };
+  }, []); // Include dependencies if any variables inside useCallback are expected to change
+
+  const fetchProgressTrackerData = useCallback(
+    async (year, month) => {
+      try {
+        const response = await axios.get(
+          `/progressTracker?year=${year}&month=${month}`
+        );
+        setProgressData(response.data);
+        setEncouragingWords(
+          getEncouragingWords(
+            response.data.relativeCompletionPercentage,
+            daysPassed,
+            response.data.uploadedDays
+          )
+        );
+      } catch (error) {
+        console.error("Error fetching progress tracker data:", error);
+      }
+    },
+    [daysPassed]
+  ); // 'daysPassed' is used here so it needs to be a dependency
 
   const handleMonthChange = (newDate) => {
     setCalendarViewDate(newDate);
@@ -304,12 +326,20 @@ export default function PatientCalendar() {
     fetchProgressTrackerData(year, month);
   };
 
+  // useEffect(() => {
+  //   const year = currentDate.getFullYear();
+  //   const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+  //   fetchVideoData(year, month);
+  //   fetchProgressTrackerData(year, month);
+  // }, [currentDate]);
+
   useEffect(() => {
+    const currentDate = new Date(); // Now defined inside useEffect
     const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+    const month = currentDate.getMonth() + 1;
     fetchVideoData(year, month);
     fetchProgressTrackerData(year, month);
-  }, [currentDate]);
+  }, [fetchVideoData, fetchProgressTrackerData]);
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
       <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>

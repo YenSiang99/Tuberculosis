@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   Typography,
   IconButton,
@@ -11,7 +9,6 @@ import {
   Grid,
   TextField,
   Button,
-  useMediaQuery,
   Avatar,
   List,
   ListItem,
@@ -31,9 +28,6 @@ import {
   InputAdornment,
   MenuItem,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
@@ -45,8 +39,6 @@ import { format, isValid, parseISO } from "date-fns";
 import { CountryDropdown } from "react-country-region-selector";
 
 export default function PatientProfile() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [patientData, setPatientData] = useState({});
   const [sideEffectHistory, setSideEffectHistory] = useState([]);
@@ -167,10 +159,6 @@ export default function PatientProfile() {
       overflow: "visible",
     },
   }));
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const handleClickShowCurrentPassword = () => {
     setShowCurrentPassword(!showCurrentPassword);
@@ -301,7 +289,7 @@ export default function PatientProfile() {
     }
 
     try {
-      const response = await axios.post("/users/changePassword", {
+      await axios.post("/users/changePassword", {
         currentPassword,
         newPassword,
       });
@@ -429,7 +417,7 @@ export default function PatientProfile() {
     if (!nric || nric.length < 6) return "";
 
     const currentYear = new Date().getFullYear();
-    let birthYearPrefix = currentYear >= 2000 ? 19 : 20;
+    // let birthYearPrefix = currentYear >= 2000 ? 19 : 20;
     let birthYear = parseInt(nric.substring(0, 2), 10);
     birthYear += birthYear <= currentYear % 100 ? 2000 : 1900;
 

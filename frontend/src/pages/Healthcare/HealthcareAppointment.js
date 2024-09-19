@@ -24,7 +24,7 @@ import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import DataViewer from "../../components/reusable/DataViewer";
+// import DataViewer from "../../components/reusable/DataViewer";
 import axios from "../../components/axios";
 import "../../css/customCalendarStyles.css";
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -7,12 +7,10 @@ import {
   Divider,
   Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   Paper,
   IconButton,
-  useMediaQuery,
   Alert,
   Dialog,
   Chip,
@@ -25,12 +23,8 @@ import {
   DialogContentText,
   DialogActions,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
-import MenuIcon from "@mui/icons-material/Menu";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -67,8 +61,6 @@ export default function PatientAppointment() {
   const [appointmentHistory, setAppointmentHistory] = useState([]);
 
   // Controllers
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
   const [alertInfo, setAlertInfo] = useState({
     show: false,
     type: "",
@@ -79,30 +71,32 @@ export default function PatientAppointment() {
 
   // Functions
   // Api fetching
-  const fetchAvailableSlots = async (year, month) => {
-    try {
-      const response = await axios.get(
-        `/appointments/availableSlots/?year=${year}&month=${month}`
-      );
-      setAvailableDateTimeSlots(response.data);
+  const fetchAvailableSlots = useCallback(
+    async (year, month) => {
+      try {
+        const response = await axios.get(
+          `/appointments/availableSlots/?year=${year}&month=${month}`
+        );
+        setAvailableDateTimeSlots(response.data);
 
-      // Automatically select the current date's available slots if any, for initial load or when changing months
-      const formattedSelectedDateString = `${year}-${("0" + month).slice(
-        -2
-      )}-${("0" + selectedDate.getDate()).slice(-2)}`;
-      const dayInfo = response.data.find((d) =>
-        d.day.startsWith(formattedSelectedDateString)
-      );
-      if (dayInfo) {
-        setAvailableTimeSlots(dayInfo.availableTimeSlotList);
-      } else {
-        setAvailableTimeSlots([]);
+        const formattedSelectedDateString = `${year}-${("0" + month).slice(
+          -2
+        )}-${("0" + selectedDate.getDate()).slice(-2)}`;
+        const dayInfo = response.data.find((d) =>
+          d.day.startsWith(formattedSelectedDateString)
+        );
+
+        if (dayInfo) {
+          setAvailableTimeSlots(dayInfo.availableTimeSlotList);
+        } else {
+          setAvailableTimeSlots([]);
+        }
+      } catch (error) {
+        console.error("Error fetching Available Date Time Slots:", error);
       }
-    } catch (error) {
-      console.error("Error fetching Available Date Time Slots:", error);
-      // Handle the error as needed
-    }
-  };
+    },
+    [selectedDate]
+  );
   const fetchPatientAppointments = async () => {
     try {
       const response = await axios.get("appointments/patientAppointments");
@@ -124,9 +118,7 @@ export default function PatientAppointment() {
     }
   };
   // Controller function
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -220,6 +212,9 @@ export default function PatientAppointment() {
             break;
           case "Fully Booked":
             style.backgroundColor = "#2196f3"; // Even darker blue for fully booked
+            break;
+          default:
+            style.backgroundColor = "#f5f5f5"; // Default color if no status matches
             break;
         }
       }
@@ -376,7 +371,7 @@ export default function PatientAppointment() {
     const month = selectedDate.getMonth() + 1; // JavaScript months are 0-indexed
     fetchAvailableSlots(year, month);
     fetchPatientAppointments();
-  }, [selectedDate]);
+  }, [selectedDate, fetchAvailableSlots]);
 
   const promptCancelAppointment = (appointmentId) => {
     setAppointmentIdToCancel(appointmentId);
