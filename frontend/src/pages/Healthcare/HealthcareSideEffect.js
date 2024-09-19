@@ -229,108 +229,92 @@ export default function HealthcareSideEffect() {
   }, [videoStatuses]);
 
   return (
-    <div>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
       >
-        <Container>
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+        <Box sx={{ p: 3 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            component="div"
+            sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
           >
-            <Box sx={{ p: 3 }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-              >
-                Review Side Effect
-              </Typography>
-              <List>
-                {sideEffects.map((sideEffect, index) => (
-                  <Card key={index} sx={{ mb: 2, bgcolor: "neutral.light" }}>
-                    <CardContent>
-                      <ListItem alignItems="flex-start">
-                        <Avatar
-                          alt={sideEffect.patient?.firstName}
-                          src={sideEffect.patient?.profilePicture}
-                          sx={{ mr: 2 }}
-                        />
-                        <ListItemText
-                          primary={
-                            <Typography className={classes.boldText}>
-                              {sideEffect.patient?.firstName}{" "}
-                              {sideEffect.patient?.lastName}
-                            </Typography>
-                          }
-                          secondary={
-                            <>
+            Review Side Effect
+          </Typography>
+          <List>
+            {sideEffects.map((sideEffect, index) => (
+              <Card key={index} sx={{ mb: 2, bgcolor: "neutral.light" }}>
+                <CardContent>
+                  <ListItem alignItems="flex-start">
+                    <Avatar
+                      alt={sideEffect.patient?.firstName}
+                      src={sideEffect.patient?.profilePicture}
+                      sx={{ mr: 2 }}
+                    />
+                    <ListItemText
+                      primary={
+                        <Typography className={classes.boldText}>
+                          {sideEffect.patient?.firstName}{" "}
+                          {sideEffect.patient?.lastName}
+                        </Typography>
+                      }
+                      secondary={
+                        <>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="textPrimary"
+                          >
+                            {format(
+                              parseISO(sideEffect.datetime),
+                              "d MMMM yyyy, h:mm a"
+                            )}
+                          </Typography>
+                          <br />
+                          {"Side Effects: "}
+                          {sideEffect.sideEffects
+                            .map((effect, index) => (
                               <Typography
+                                key={index}
                                 component="span"
-                                variant="body2"
-                                color="textPrimary"
+                                className={
+                                  effect.grade >= 2 ? classes.highlightRed : ""
+                                }
+                                style={{ display: "inline" }}
                               >
-                                {format(
-                                  parseISO(sideEffect.datetime),
-                                  "d MMMM yyyy, h:mm a"
-                                )}
+                                {effect.effect === "Others (Please Describe)"
+                                  ? effect.description
+                                  : `${effect.effect} (Grade ${effect.grade})`}
                               </Typography>
-                              <br />
-                              {"Side Effects: "}
-                              {sideEffect.sideEffects
-                                .map((effect, index) => (
-                                  <Typography
-                                    key={index}
-                                    component="span"
-                                    className={
-                                      effect.grade >= 2
-                                        ? classes.highlightRed
-                                        : ""
-                                    }
-                                    style={{ display: "inline" }}
-                                  >
-                                    {effect.effect ===
-                                    "Others (Please Describe)"
-                                      ? effect.description
-                                      : `${effect.effect} (Grade ${effect.grade})`}
-                                  </Typography>
-                                ))
-                                .reduce(
-                                  (prev, curr, index) => [
-                                    ...prev,
-                                    index > 0 ? ", " : "",
-                                    curr,
-                                  ],
-                                  []
-                                )}
-                            </>
-                          }
-                        />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => openPatientProfile(sideEffect.patient)}
-                          sx={{ mt: 2 }}
-                        >
-                          View profile
-                        </Button>
-                      </ListItem>
-                    </CardContent>
-                  </Card>
-                ))}
-              </List>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-
+                            ))
+                            .reduce(
+                              (prev, curr, index) => [
+                                ...prev,
+                                index > 0 ? ", " : "",
+                                curr,
+                              ],
+                              []
+                            )}
+                        </>
+                      }
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openPatientProfile(sideEffect.patient)}
+                      sx={{ mt: 2 }}
+                    >
+                      View profile
+                    </Button>
+                  </ListItem>
+                </CardContent>
+              </Card>
+            ))}
+          </List>
+        </Box>
+      </Paper>
       <Dialog
         open={Boolean(selectedPatient)}
         onClose={closePatientProfile}
@@ -548,6 +532,6 @@ export default function HealthcareSideEffect() {
           </Grid>
         </DialogContent>
       </Dialog>
-    </div>
+    </Container>
   );
 }

@@ -415,256 +415,236 @@ export default function PatientVideo() {
   }
 
   return (
-    <div>
+    <Container sx={{ padding: 0, margin: 0 }}>
       <Box
-        component="main"
         sx={{
-          flexGrow: 1,
+          mt: 4,
           p: 3,
-          ml: { sm: "240px", md: "240px" },
+          backgroundColor: getStatusColor(
+            videoData?.status || userDetails.careStatus
+          ),
+          borderRadius: "4px",
         }}
       >
-        <Container>
-          <Box
-            sx={{
-              mt: 4,
-              p: 3,
-              backgroundColor: getStatusColor(
-                videoData?.status || userDetails.careStatus
-              ),
-              borderRadius: "4px",
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ fontWeight: "bold" }}
-            >
-              {["Switch to DOTS", "Appointment to see doctor"].includes(
-                userDetails.careStatus
-              ) ? (
-                <>
-                  Status: {userDetails.careStatus}. You no longer need to upload
-                  videos.
-                </>
-              ) : hasTreatmentEnded() ? (
-                "Your treatment has ended. You no longer need to upload videos."
-              ) : (
-                `Video Status: ${capitalizeWords(videoData.status)}`
-              )}
-            </Typography>
-          </Box>
-
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Box
-              sx={{
-                p: 3,
-              }}
-            >
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-              >
-                {videoUploaded ? "Your Video" : "Upload Video"}
-              </Typography>
-              {!videoUploaded && (
-                <FormControl fullWidth margin="normal">
-                  <InputLabelStyled
-                    htmlFor="video-upload-button"
-                    sx={{ fontWeight: "normal", fontSize: "1rem" }}
-                  >
-                    {videoFile
-                      ? videoFile.name
-                      : "Choose a video to upload or record one"}
-                  </InputLabelStyled>
-                  <InputStyled
-                    accept="video/*"
-                    id="video-upload-button"
-                    type="file"
-                    onChange={handleVideoChange}
-                  />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "flex-start",
-                      gap: 2,
-                    }}
-                  >
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      component="span"
-                      onClick={() =>
-                        document.getElementById("video-upload-button").click()
-                      }
-                      sx={{ mt: 2 }}
-                      startIcon={<FileUploadIcon />}
-                    >
-                      Browse File
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={handleOpenWebcamDialog} // This opens the dialog with the webcam
-                      disabled={isRecording}
-                      sx={{ mt: 2 }}
-                      startIcon={<VideocamIcon />}
-                    >
-                      Record Video
-                    </Button>
-                  </Box>
-                </FormControl>
-              )}
-
-              {videoURL && !videoUploaded && !openWebcamDialog && (
-                <Box sx={{ mt: 2, maxWidth: "480px" }}>
-                  <Typography variant="h6" gutterBottom>
-                    Video Preview
-                  </Typography>
-                  <video width="100%" controls>
-                    <source src={videoURL} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                </Box>
-              )}
-
-              {videoUploaded && (
-                <Box sx={{ mt: 2, maxWidth: "480px" }}>
-                  <video width="100%" controls>
-                    <source src={videoURL} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={promptDeleteVideo}
-                    sx={{ mt: 2 }}
-                    disabled={
-                      videoData?.status === "approved" ||
-                      videoData?.status === "rejected"
-                    }
-                  >
-                    Delete Video
-                  </Button>
-                </Box>
-              )}
-
-              {!videoUploaded && (
-                <>
-                  <UploadButton
-                    variant="contained"
-                    color="primary"
-                    onClick={handleUpload}
-                    disabled={!videoFile || uploadProgress !== 0}
-                  >
-                    Upload Video
-                  </UploadButton>
-                  {uploadProgress > 0 && (
-                    <LinearProgress
-                      variant="determinate"
-                      value={uploadProgress}
-                    />
-                  )}
-                </>
-              )}
-
-              <CustomDialog
-                open={alertInfo.show}
-                onClose={handleCloseAlert}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-              >
-                <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
-                  {alertInfo.message}
-                </Alert>
-              </CustomDialog>
-              <CustomDialog
-                open={openConfirmDialog}
-                onClose={handleToggleConfirmDialog}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-              >
-                <DialogTitle id="alert-dialog-title">
-                  {"Delete Video"}
-                </DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                    Are you sure you want to delete this video?
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleToggleConfirmDialog}>Cancel</Button>
-                  <Button onClick={handleDeleteVideo} autoFocus color="error">
-                    Delete
-                  </Button>
-                </DialogActions>
-              </CustomDialog>
-              <Dialog
-                open={openWebcamDialog}
-                onClose={handleCloseWebcamDialog}
-                maxWidth="sm"
-                fullWidth
-              >
-                <DialogTitle>
-                  Record Your Video
-                  <IconButton
-                    aria-label="close"
-                    onClick={handleCloseWebcamDialog}
-                    sx={{
-                      position: "absolute",
-                      right: 8,
-                      top: 8,
-                      color: (theme) => theme.palette.grey[500],
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </DialogTitle>
-                <DialogContent>
-                  {videoURL ? (
-                    <video controls src={videoURL} style={{ width: "100%" }} />
-                  ) : (
-                    <Webcam
-                      audio={false}
-                      ref={webcamRef}
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                </DialogContent>
-
-                <DialogActions>
-                  {videoURL ? (
-                    <>
-                      <Button
-                        onClick={() => {
-                          setVideoURL("");
-                          setRecordedChunks([]);
-                        }}
-                      >
-                        Record Again
-                      </Button>
-                      <Button onClick={handleUploadRecordedVideo}>
-                        Upload Video
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button onClick={startRecording} disabled={isRecording}>
-                        Start Recording
-                      </Button>
-                      <Button onClick={stopRecording} disabled={!isRecording}>
-                        Stop Recording
-                      </Button>
-                    </>
-                  )}
-                </DialogActions>
-              </Dialog>
-            </Box>
-          </Paper>
-        </Container>
+        <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
+          {["Switch to DOTS", "Appointment to see doctor"].includes(
+            userDetails.careStatus
+          ) ? (
+            <>
+              Status: {userDetails.careStatus}. You no longer need to upload
+              videos.
+            </>
+          ) : hasTreatmentEnded() ? (
+            "Your treatment has ended. You no longer need to upload videos."
+          ) : (
+            `Video Status: ${capitalizeWords(videoData.status)}`
+          )}
+        </Typography>
       </Box>
-    </div>
+
+      <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            component="div"
+            sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+          >
+            {videoUploaded ? "Your Video" : "Upload Video"}
+          </Typography>
+          {!videoUploaded && (
+            <FormControl fullWidth margin="normal">
+              <InputLabelStyled
+                htmlFor="video-upload-button"
+                sx={{ fontWeight: "normal", fontSize: "1rem" }}
+              >
+                {videoFile
+                  ? videoFile.name
+                  : "Choose a video to upload or record one"}
+              </InputLabelStyled>
+              <InputStyled
+                accept="video/*"
+                id="video-upload-button"
+                type="file"
+                onChange={handleVideoChange}
+              />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  gap: 2,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  component="span"
+                  onClick={() =>
+                    document.getElementById("video-upload-button").click()
+                  }
+                  sx={{ mt: 2 }}
+                  startIcon={<FileUploadIcon />}
+                >
+                  Browse File
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleOpenWebcamDialog} // This opens the dialog with the webcam
+                  disabled={isRecording}
+                  sx={{ mt: 2 }}
+                  startIcon={<VideocamIcon />}
+                >
+                  Record Video
+                </Button>
+              </Box>
+            </FormControl>
+          )}
+
+          {videoURL && !videoUploaded && !openWebcamDialog && (
+            <Box sx={{ mt: 2, maxWidth: "480px" }}>
+              <Typography variant="h6" gutterBottom>
+                Video Preview
+              </Typography>
+              <video width="100%" controls>
+                <source src={videoURL} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </Box>
+          )}
+
+          {videoUploaded && (
+            <Box sx={{ mt: 2, maxWidth: "480px" }}>
+              <video width="100%" controls>
+                <source src={videoURL} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={promptDeleteVideo}
+                sx={{ mt: 2 }}
+                disabled={
+                  videoData?.status === "approved" ||
+                  videoData?.status === "rejected"
+                }
+              >
+                Delete Video
+              </Button>
+            </Box>
+          )}
+
+          {!videoUploaded && (
+            <>
+              <UploadButton
+                variant="contained"
+                color="primary"
+                onClick={handleUpload}
+                disabled={!videoFile || uploadProgress !== 0}
+              >
+                Upload Video
+              </UploadButton>
+              {uploadProgress > 0 && (
+                <LinearProgress variant="determinate" value={uploadProgress} />
+              )}
+            </>
+          )}
+
+          <CustomDialog
+            open={alertInfo.show}
+            onClose={handleCloseAlert}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <Alert severity={alertInfo.type} onClose={handleCloseAlert}>
+              {alertInfo.message}
+            </Alert>
+          </CustomDialog>
+          <CustomDialog
+            open={openConfirmDialog}
+            onClose={handleToggleConfirmDialog}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">{"Delete Video"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Are you sure you want to delete this video?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleToggleConfirmDialog}>Cancel</Button>
+              <Button onClick={handleDeleteVideo} autoFocus color="error">
+                Delete
+              </Button>
+            </DialogActions>
+          </CustomDialog>
+          <Dialog
+            open={openWebcamDialog}
+            onClose={handleCloseWebcamDialog}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>
+              Record Your Video
+              <IconButton
+                aria-label="close"
+                onClick={handleCloseWebcamDialog}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: (theme) => theme.palette.grey[500],
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent>
+              {videoURL ? (
+                <video controls src={videoURL} style={{ width: "100%" }} />
+              ) : (
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  style={{ width: "100%" }}
+                />
+              )}
+            </DialogContent>
+
+            <DialogActions>
+              {videoURL ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      setVideoURL("");
+                      setRecordedChunks([]);
+                    }}
+                  >
+                    Record Again
+                  </Button>
+                  <Button onClick={handleUploadRecordedVideo}>
+                    Upload Video
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={startRecording} disabled={isRecording}>
+                    Start Recording
+                  </Button>
+                  <Button onClick={stopRecording} disabled={!isRecording}>
+                    Stop Recording
+                  </Button>
+                </>
+              )}
+            </DialogActions>
+          </Dialog>
+        </Box>
+      </Paper>
+    </Container>
   );
 }

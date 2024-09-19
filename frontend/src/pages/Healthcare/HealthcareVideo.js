@@ -23,7 +23,7 @@ import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "../../components/axios";
 
-export default function HealthcarePatient() {
+export default function HealthcareVideo() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [patients, setPatients] = useState([]);
   const [videos, setVideos] = useState([]);
@@ -100,99 +100,84 @@ export default function HealthcarePatient() {
   };
 
   return (
-    <div>
-      {" "}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
       >
-        <Container>
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
-          >
-            <Box sx={{ p: 3 }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-              >
-                Review Video
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                color="textSecondary"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "normal", fontSize: "1rem", mt: 2 }}
-              >
-                Videos for {getTodaysDateFormatted()}
-              </Typography>
+        <Typography
+          variant="h5"
+          gutterBottom
+          component="div"
+          sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+        >
+          Review Video
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          color="textSecondary"
+          gutterBottom
+          component="div"
+          sx={{ fontWeight: "normal", fontSize: "1rem", mt: 2 }}
+        >
+          Videos for {getTodaysDateFormatted()}
+        </Typography>
+        <List>
+          {patients.map((patient) => (
+            <Card
+              key={patient.id}
+              sx={{
+                mb: 2,
+                bgcolor:
+                  patient.status === "approved"
+                    ? "#c8e6c9"
+                    : patient.status === "rejected"
+                    ? "#ffcdd2"
+                    : "neutral.light",
+              }}
+            >
+              <CardContent>
+                <ListItem>
+                  <Avatar
+                    src={patient.profilePicture}
+                    alt={`${patient.firstName} ${patient.lastName}`}
+                    sx={{ mr: 2 }}
+                  />
+                  <ListItemText primary={`${patient.patientName}`} />
+                  {patient.status === "approved" && (
+                    <Button
+                      variant="contained"
+                      disabled
+                      sx={{ bgcolor: "#c8e6c9" }}
+                    >
+                      Approved
+                    </Button>
+                  )}
+                  {patient.status === "rejected" && (
+                    <Button
+                      variant="contained"
+                      disabled
+                      sx={{ bgcolor: "#ffcdd2" }}
+                    >
+                      Rejected
+                    </Button>
+                  )}
+                  {patient.status === "pending approval" && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openVideoDialog(patient)}
+                    >
+                      Review video
+                    </Button>
+                  )}
+                </ListItem>
+              </CardContent>
+            </Card>
+          ))}
+        </List>
+      </Paper>
 
-              <List>
-                {patients.map((patient) => (
-                  <Card
-                    key={patient.id}
-                    sx={{
-                      mb: 2,
-                      bgcolor:
-                        patient.status === "approved"
-                          ? "#c8e6c9"
-                          : patient.status === "rejected"
-                          ? "#ffcdd2"
-                          : "neutral.light",
-                    }}
-                  >
-                    <CardContent>
-                      <ListItem>
-                        <Avatar
-                          src={patient.profilePicture}
-                          alt={`${patient.firstName} ${patient.lastName}`}
-                          sx={{ mr: 2 }}
-                        />
-                        <ListItemText primary={`${patient.patientName}`} />
-                        {patient.status === "approved" && (
-                          <Button
-                            variant="contained"
-                            disabled
-                            sx={{ bgcolor: "#c8e6c9" }}
-                          >
-                            Approved
-                          </Button>
-                        )}
-                        {patient.status === "rejected" && (
-                          <Button
-                            variant="contained"
-                            disabled
-                            sx={{ bgcolor: "#ffcdd2" }}
-                          >
-                            Rejected
-                          </Button>
-                        )}
-                        {patient.status === "pending approval" && (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => openVideoDialog(patient)}
-                          >
-                            Review video
-                          </Button>
-                        )}
-                      </ListItem>
-                    </CardContent>
-                  </Card>
-                ))}
-              </List>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
       <Dialog
         open={Boolean(selectedPatient)}
         onClose={closeVideoDialog}
@@ -245,6 +230,6 @@ export default function HealthcarePatient() {
           </Box>
         </DialogContent>
       </Dialog>
-    </div>
+    </Container>
   );
 }

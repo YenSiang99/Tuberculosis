@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   Typography,
   Button,
@@ -16,20 +14,17 @@ import {
   Alert,
   Dialog,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { styled } from "@mui/material/styles";
 
-
 export default function PatientSetting() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -45,11 +40,12 @@ export default function PatientSetting() {
   };
 
   const handleResetPassword = () => {
-    if (currentPassword !== "user's actual current password") { // Replace with actual validation
+    if (currentPassword !== "user's actual current password") {
+      // Replace with actual validation
       setAlertInfo({
         show: true,
         type: "error",
-        message: "Current password is incorrect."
+        message: "Current password is incorrect.",
       });
       return;
     }
@@ -58,7 +54,7 @@ export default function PatientSetting() {
       setAlertInfo({
         show: true,
         type: "error",
-        message: "Passwords do not match."
+        message: "Passwords do not match.",
       });
       return;
     }
@@ -67,16 +63,16 @@ export default function PatientSetting() {
     console.log("Password reset to:", newPassword);
 
     // Clear the form fields
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmNewPassword('');
-    setPasswordError('');
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordError("");
 
     // Set success alert
     setAlertInfo({
       show: true,
       type: "success",
-      message: "Password successfully reset."
+      message: "Password successfully reset.",
     });
   };
 
@@ -104,32 +100,7 @@ export default function PatientSetting() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
+    <div>
       <Box
         component="main"
         sx={{
@@ -153,75 +124,85 @@ export default function PatientSetting() {
               <Divider sx={{ mb: 2 }} />
 
               <FormGroup>
-        <TextField
-          label="Current Password"
-          type={showCurrentPassword ? "text" : "password"}
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          margin="normal"
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleClickShowCurrentPassword}
-                  edge="end"
+                <TextField
+                  label="Current Password"
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  margin="normal"
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleClickShowCurrentPassword}
+                          edge="end"
+                        >
+                          {showCurrentPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  label="New Password"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  margin="normal"
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleClickShowNewPassword}
+                          edge="end"
+                        >
+                          {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  label="Confirm New Password"
+                  type={showConfirmNewPassword ? "text" : "password"}
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  margin="normal"
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleClickShowConfirmNewPassword}
+                          edge="end"
+                        >
+                          {showConfirmNewPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {passwordError && (
+                  <Typography color="error">{passwordError}</Typography>
+                )}
+                <Button
+                  variant="contained"
+                  sx={{ mt: 2 }}
+                  onClick={handleResetPassword}
                 >
-                  {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField
-          label="New Password"
-          type={showNewPassword ? "text" : "password"}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          margin="normal"
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleClickShowNewPassword}
-                  edge="end"
-                >
-                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField
-          label="Confirm New Password"
-          type={showConfirmNewPassword ? "text" : "password"}
-          value={confirmNewPassword}
-          onChange={(e) => setConfirmNewPassword(e.target.value)}
-          margin="normal"
-          fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleClickShowConfirmNewPassword}
-                  edge="end"
-                >
-                  {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        {passwordError && <Typography color="error">{passwordError}</Typography>}
-        <Button
-          variant="contained"
-          sx={{ mt: 2 }}
-          onClick={handleResetPassword}
-        >
-          Reset Password
-        </Button>
-      </FormGroup>
+                  Reset Password
+                </Button>
+              </FormGroup>
             </Box>
           </Paper>
         </Container>
@@ -236,6 +217,6 @@ export default function PatientSetting() {
           {alertInfo.message}
         </Alert>
       </CustomDialog>
-    </ThemeProvider>
+    </div>
   );
 }

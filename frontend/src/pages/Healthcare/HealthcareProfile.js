@@ -441,355 +441,329 @@ export default function HealthcareProfile() {
   }, []);
 
   return (
-    <div>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
-      >
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Grid container spacing={3}>
-            {/* Healthcare Profile Section */}
-            <Grid item xs={12}>
-              <Paper
-                elevation={3}
-                sx={{ p: 3, display: "flex", alignItems: "center" }}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Grid container spacing={3}>
+        {/* Healthcare Profile Section */}
+        <Grid item xs={12}>
+          <Paper
+            elevation={3}
+            sx={{ p: 3, display: "flex", alignItems: "center" }}
+          >
+            <Box sx={{ position: "relative", marginRight: 3 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  width: 100,
+                  height: 100,
+                }}
               >
-                <Box sx={{ position: "relative", marginRight: 3 }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: "primary.main",
-                      width: 100,
-                      height: 100,
+                {healthcareData.profilePicture ? (
+                  <img
+                    src={healthcareData.profilePicture}
+                    alt="Profile"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
-                  >
-                    {healthcareData.profilePicture ? (
-                      <img
-                        src={healthcareData.profilePicture}
-                        alt="Profile"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
+                  />
+                ) : (
+                  <AccountCircleIcon sx={{ fontSize: 100 }} />
+                )}
+              </Avatar>
+              <IconButton
+                color="primary"
+                component="label"
+                sx={{
+                  position: "absolute",
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "background.paper",
+                  "&:hover": {
+                    backgroundColor: "background.default",
+                  },
+                  borderRadius: "50%",
+                }}
+              >
+                <input
+                  hidden
+                  accept="image/*"
+                  type="file"
+                  onChange={handleProfilePictureChange}
+                />
+                <PhotoCamera />
+              </IconButton>
+            </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                {healthcareData.firstName} {healthcareData.lastName}
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{ color: "text.secondary", mb: 2, fontSize: "1rem" }}
+              >
+                {" "}
+                Group:{" "}
+                {capitalizeFirstLetter(healthcareData.group) || "Not Set"}
+              </Typography>
+
+              <Divider sx={{ my: 2 }} />
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleOpenPasswordDialog}
+                sx={{ textTransform: "none" }}
+              >
+                Change Password
+              </Button>
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Personal Information */}
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Personal Information
+            </Typography>
+            {!editMode.personalInfo && (
+              <IconButton
+                size="small"
+                sx={{ position: "absolute", top: 8, right: 8 }}
+                onClick={() =>
+                  setEditMode({
+                    ...editMode,
+                    personalInfo: !editMode.personalInfo,
+                  })
+                }
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            <Divider sx={{ mb: 2 }} />
+            <List dense>
+              {/* First Name */}
+              <ListItem>
+                <ListItemText
+                  primary="First Name"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.firstName}
+                        onChange={(e) =>
+                          handleFieldChange("firstName", e.target.value)
+                        }
+                        fullWidth
                       />
                     ) : (
-                      <AccountCircleIcon sx={{ fontSize: 100 }} />
-                    )}
-                  </Avatar>
-                  <IconButton
-                    color="primary"
-                    component="label"
-                    sx={{
-                      position: "absolute",
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: "background.paper",
-                      "&:hover": {
-                        backgroundColor: "background.default",
-                      },
-                      borderRadius: "50%",
-                    }}
-                  >
-                    <input
-                      hidden
-                      accept="image/*"
-                      type="file"
-                      onChange={handleProfilePictureChange}
-                    />
-                    <PhotoCamera />
-                  </IconButton>
-                </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{ fontWeight: 600 }}
-                  >
-                    {healthcareData.firstName} {healthcareData.lastName}
-                  </Typography>
+                      healthcareData.firstName || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  <Typography
-                    variant="body1"
-                    sx={{ color: "text.secondary", mb: 2, fontSize: "1rem" }}
-                  >
-                    {" "}
-                    Group:{" "}
-                    {capitalizeFirstLetter(healthcareData.group) || "Not Set"}
-                  </Typography>
+              {/* Last Name */}
+              <ListItem>
+                <ListItemText
+                  primary="Last Name"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.lastName}
+                        onChange={(e) =>
+                          handleFieldChange("lastName", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      healthcareData.lastName || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  <Divider sx={{ my: 2 }} />
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={handleOpenPasswordDialog}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Change Password
-                  </Button>
-                </Box>
-              </Paper>
-            </Grid>
+              {/* Email */}
+              <ListItem>
+                <ListItemText
+                  primary="Email"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        error={!!errors.emailError}
+                        helperText={errors.emailError}
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.email}
+                        onChange={(e) =>
+                          handleFieldChange("email", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      healthcareData.email || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-            {/* Personal Information */}
-            <Grid item xs={12}>
-              <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
+              {/* MCP ID */}
+              <ListItem>
+                <ListItemText
+                  primary="MCP ID"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.mcpId}
+                        onChange={(e) =>
+                          handleFieldChange("mcpId", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      healthcareData.mcpId || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+
+              {/* Group */}
+              <ListItem>
+                <ListItemText
+                  primary="Group"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        select
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.group}
+                        onChange={(e) =>
+                          handleFieldChange("group", e.target.value)
+                        }
+                        fullWidth
+                      >
+                        <MenuItem value="doctor">Doctor</MenuItem>
+                        <MenuItem value="nurse">Nurse</MenuItem>
+                        <MenuItem value="medical assistant">
+                          Medical Assistant
+                        </MenuItem>
+                      </TextField>
+                    ) : (
+                      capitalizeFirstLetter(healthcareData.group) || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+            </List>
+            {editMode.personalInfo && (
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                <Button
+                  sx={{ mr: 1 }}
+                  variant="contained"
+                  onClick={() => {
+                    const fieldsToUpdate = {
+                      firstName: editableFields.firstName,
+                      lastName: editableFields.lastName,
+                      email: editableFields.email,
+                      mcpId: editableFields.mcpId,
+                      group: editableFields.group,
+                    };
+
+                    updateProfile(fieldsToUpdate);
+                    console.log(
+                      "Saving Personal Information...",
+                      fieldsToUpdate
+                    );
+                    setEditMode({ ...editMode, personalInfo: false });
+                  }}
+                  disabled={!!errors.emailError}
                 >
-                  Personal Information
-                </Typography>
-                {!editMode.personalInfo && (
-                  <IconButton
-                    size="small"
-                    sx={{ position: "absolute", top: 8, right: 8 }}
-                    onClick={() =>
-                      setEditMode({
-                        ...editMode,
-                        personalInfo: !editMode.personalInfo,
-                      })
-                    }
-                  >
-                    <EditIcon />
-                  </IconButton>
-                )}
-                <Divider sx={{ mb: 2 }} />
-                <List dense>
-                  {/* First Name */}
-                  <ListItem>
-                    <ListItemText
-                      primary="First Name"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.firstName}
-                            onChange={(e) =>
-                              handleFieldChange("firstName", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          healthcareData.firstName || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+                  Save
+                </Button>
 
-                  {/* Last Name */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Last Name"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.lastName}
-                            onChange={(e) =>
-                              handleFieldChange("lastName", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          healthcareData.lastName || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+                <Button
+                  variant="outlined"
+                  onClick={() =>
+                    setEditMode({ ...editMode, personalInfo: false })
+                  }
+                >
+                  Cancel
+                </Button>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
 
-                  {/* Email */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Email"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            error={!!errors.emailError}
-                            helperText={errors.emailError}
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.email}
-                            onChange={(e) =>
-                              handleFieldChange("email", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          healthcareData.email || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+        {/* Dashboard */}
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Monthly Video Tracker
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Typography variant="subtitle1" gutterBottom>
+              {` ${getCurrentMonthAndYear()}`}
+            </Typography>
+            <Grid container spacing={2} justifyContent="center">
+              {/* Enhanced Stat Cards */}
+              <Grid item xs={12} sm={6} md={3}>
+                <StatCard
+                  icon={<VideocamIcon fontSize="large" />}
+                  title="Total Submitted Videos"
+                  value={videoStats.total}
+                  color={blue[500]}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <StatCard
+                  icon={<ThumbUpIcon fontSize="large" />}
+                  title="Approved Videos"
+                  value={videoStats.approved}
+                  color={green[500]}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <StatCard
+                  icon={<ThumbDownIcon fontSize="large" />}
+                  title="Rejected Videos"
+                  value={videoStats.rejected}
+                  color={red[500]}
+                />
+              </Grid>
 
-                  {/* MCP ID */}
-                  <ListItem>
-                    <ListItemText
-                      primary="MCP ID"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.mcpId}
-                            onChange={(e) =>
-                              handleFieldChange("mcpId", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          healthcareData.mcpId || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Group */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Group"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            select
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.group}
-                            onChange={(e) =>
-                              handleFieldChange("group", e.target.value)
-                            }
-                            fullWidth
-                          >
-                            <MenuItem value="doctor">Doctor</MenuItem>
-                            <MenuItem value="nurse">Nurse</MenuItem>
-                            <MenuItem value="medical assistant">
-                              Medical Assistant
-                            </MenuItem>
-                          </TextField>
-                        ) : (
-                          capitalizeFirstLetter(healthcareData.group) || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-                </List>
-                {editMode.personalInfo && (
-                  <Box
-                    sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
-                  >
-                    <Button
-                      sx={{ mr: 1 }}
-                      variant="contained"
-                      onClick={() => {
-                        const fieldsToUpdate = {
-                          firstName: editableFields.firstName,
-                          lastName: editableFields.lastName,
-                          email: editableFields.email,
-                          mcpId: editableFields.mcpId,
-                          group: editableFields.group,
-                        };
-
-                        updateProfile(fieldsToUpdate);
-                        console.log(
-                          "Saving Personal Information...",
-                          fieldsToUpdate
-                        );
-                        setEditMode({ ...editMode, personalInfo: false });
+              <Grid item xs={12} sm={6} md={3}>
+                <StatCard
+                  icon={<ReportProblemIcon fontSize="large" />}
+                  title="Total Missed Videos"
+                  value={missedVideosData.totalMissedVideos}
+                  color={orange[800]}
+                  actionIcon={
+                    <IconButton
+                      onClick={() => setIsMissedVideosDialogOpen(true)}
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        color: "rgba(255, 255, 255, 0.8)",
                       }}
-                      disabled={!!errors.emailError}
                     >
-                      Save
-                    </Button>
-
-                    <Button
-                      variant="outlined"
-                      onClick={() =>
-                        setEditMode({ ...editMode, personalInfo: false })
-                      }
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
-                )}
-              </Paper>
+                      <MoreVertIcon />
+                    </IconButton>
+                  }
+                />
+              </Grid>
             </Grid>
-
-            {/* Dashboard */}
-            <Grid item xs={12}>
-              <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
-                >
-                  Monthly Video Tracker
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Typography variant="subtitle1" gutterBottom>
-                  {` ${getCurrentMonthAndYear()}`}
-                </Typography>
-                <Grid container spacing={2} justifyContent="center">
-                  {/* Enhanced Stat Cards */}
-                  <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                      icon={<VideocamIcon fontSize="large" />}
-                      title="Total Submitted Videos"
-                      value={videoStats.total}
-                      color={blue[500]}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                      icon={<ThumbUpIcon fontSize="large" />}
-                      title="Approved Videos"
-                      value={videoStats.approved}
-                      color={green[500]}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                      icon={<ThumbDownIcon fontSize="large" />}
-                      title="Rejected Videos"
-                      value={videoStats.rejected}
-                      color={red[500]}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} sm={6} md={3}>
-                    <StatCard
-                      icon={<ReportProblemIcon fontSize="large" />}
-                      title="Total Missed Videos"
-                      value={missedVideosData.totalMissedVideos}
-                      color={orange[800]}
-                      actionIcon={
-                        <IconButton
-                          onClick={() => setIsMissedVideosDialogOpen(true)}
-                          size="small"
-                          sx={{
-                            position: "absolute",
-                            top: 8,
-                            right: 8,
-                            color: "rgba(255, 255, 255, 0.8)",
-                          }}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      }
-                    />
-                  </Grid>
-                </Grid>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+          </Paper>
+        </Grid>
+      </Grid>
       <Dialog open={passwordDialogOpen} onClose={handleClosePasswordDialog}>
         <DialogTitle>
           Change Password
@@ -979,6 +953,6 @@ export default function HealthcareProfile() {
           </Table>
         </DialogContent>
       </Dialog>
-    </div>
+    </Container>
   );
 }

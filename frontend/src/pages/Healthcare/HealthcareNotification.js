@@ -115,52 +115,41 @@ export default function HealthcareNotification() {
   };
 
   return (
-    <div>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-        }}
-      >
-        <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Typography
-              variant="h5"
-              gutterBottom
-              component="div"
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-              }}
-            >
-              Notifications
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          component="div"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+          }}
+        >
+          Notifications
+        </Typography>
+        <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+          {notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <React.Fragment key={notification._id}>
+                <NotificationItem notification={notification} />
+              </React.Fragment>
+            ))
+          ) : (
+            <Typography variant="subtitle1" sx={{ my: 2 }}>
+              You're all caught up! No new notifications.
             </Typography>
-            <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <React.Fragment key={notification._id}>
-                    <NotificationItem notification={notification} />
-                  </React.Fragment>
-                ))
-              ) : (
-                <Typography variant="subtitle1" sx={{ my: 2 }}>
-                  You're all caught up! No new notifications.
-                </Typography>
-              )}
-            </List>
-          </Paper>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={deleteAllNotifications}
-            sx={{ mb: 2 }}
-          >
-            Delete All Notifications
-          </Button>
-        </Container>
-      </Box>
-    </div>
+          )}
+        </List>
+      </Paper>
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={deleteAllNotifications}
+        sx={{ mb: 2 }}
+      >
+        Delete All Notifications
+      </Button>
+    </Container>
   );
 }

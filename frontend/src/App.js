@@ -127,6 +127,23 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/patientnotification"
+              element={
+                <ProtectedRoute>
+                  <PatientNotification />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patientsettings"
+              element={
+                <ProtectedRoute>
+                  <PatientSetting />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           <Route
@@ -134,22 +151,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <PatientPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/patientnotification"
-            element={
-              <ProtectedRoute>
-                <PatientNotification />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/patientsettings"
-            element={
-              <ProtectedRoute>
-                <PatientSetting />
               </ProtectedRoute>
             }
           />

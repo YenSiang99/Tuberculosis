@@ -311,83 +311,72 @@ export default function PatientCalendar() {
     fetchProgressTrackerData(year, month);
   }, [currentDate]);
   return (
-    <div>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-        }}
-      >
-        <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Typography
-              variant="h5"
-              gutterBottom
-              component="div"
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-              }}
-            >
-              Progress Tracker
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <SemiCircleProgressBar
-                progress={
-                  progressData ? progressData.relativeCompletionPercentage : 0
-                }
-                size={500}
-              />
-              <Typography variant="h6" sx={{ fontWeight: "medium", mt: -6 }}>
-                {progressData ? progressData.uploadedDays : 0}/
-                {progressData ? progressData.totalDaysInMonth : 0} videos
-                submitted in {format(calendarViewDate, "MMMM yyyy")}
-              </Typography>
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          component="div"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+          }}
+        >
+          Progress Tracker
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <SemiCircleProgressBar
+            progress={
+              progressData ? progressData.relativeCompletionPercentage : 0
+            }
+            size={500}
+          />
+          <Typography variant="h6" sx={{ fontWeight: "medium", mt: -6 }}>
+            {progressData ? progressData.uploadedDays : 0}/
+            {progressData ? progressData.totalDaysInMonth : 0} videos submitted
+            in {format(calendarViewDate, "MMMM yyyy")}
+          </Typography>
 
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  mt: 1,
-                  mb: 4,
-                  color: getProgressColor(
-                    progressData ? progressData.relativeCompletionPercentage : 0
-                  ),
-                  fontWeight: "bold",
-                }}
-              >
-                {encouragingWords}
-              </Typography>
-            </Box>
-            {/* <DataViewer data={videoData} variableName="videoData for the month"></DataViewer> */}
-            {/* <DataViewer data={progressData} variableName="progressTracker"></DataViewer> */}
+          <Typography
+            variant="subtitle1"
+            sx={{
+              mt: 1,
+              mb: 4,
+              color: getProgressColor(
+                progressData ? progressData.relativeCompletionPercentage : 0
+              ),
+              fontWeight: "bold",
+            }}
+          >
+            {encouragingWords}
+          </Typography>
+        </Box>
+        {/* <DataViewer data={videoData} variableName="videoData for the month"></DataViewer> */}
+        {/* <DataViewer data={progressData} variableName="progressTracker"></DataViewer> */}
 
-            <Calendar
-              localizer={localizer}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: "60vh" }}
-              views={{ month: true, agenda: true }}
-              dayPropGetter={dayPropGetter}
-              eventPropGetter={eventStyleGetter}
-              components={{
-                toolbar: (props) => (
-                  <CustomToolbar {...props} onMonthChange={handleMonthChange} />
-                ),
-                event: Event,
-              }}
-            />
-            <Legend />
-          </Paper>
-        </Container>
-      </Box>
-    </div>
+        <Calendar
+          localizer={localizer}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: "60vh" }}
+          views={{ month: true, agenda: true }}
+          dayPropGetter={dayPropGetter}
+          eventPropGetter={eventStyleGetter}
+          components={{
+            toolbar: (props) => (
+              <CustomToolbar {...props} onMonthChange={handleMonthChange} />
+            ),
+            event: Event,
+          }}
+        />
+        <Legend />
+      </Paper>
+    </Container>
   );
 }

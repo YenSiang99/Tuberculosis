@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Toolbar,
+  Container,
+  Paper,
   Drawer,
   IconButton,
   Box,
@@ -15,6 +18,7 @@ import {
   ListItemText,
   Divider,
   Badge,
+  CssBaseline,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
@@ -39,6 +43,8 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setAuth } = useAuth();
+
+  const drawerWidth = 240;
 
   useEffect(() => {
     const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
@@ -141,6 +147,7 @@ export default function MainLayout() {
     if (userRole?.includes("patient")) {
       return (
         <>
+          {/* Video */}
           <ListItemButton
             onClick={() => navigateTo("/patientvideo")}
             selected={location.pathname === "/patientvideo"}
@@ -150,6 +157,7 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Upload Video" />
           </ListItemButton>
+          {/* Report side effects */}
           <ListItemButton
             onClick={() => navigateTo("/patientsideeffect")}
             selected={location.pathname === "/patientsideeffect"}
@@ -159,6 +167,7 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Report Side Effects" />
           </ListItemButton>
+          {/* Appointments */}
           <ListItemButton
             onClick={() => navigateTo("/patientappointment")}
             selected={location.pathname === "/patientappointment"}
@@ -168,6 +177,7 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Appointment" />
           </ListItemButton>
+          {/* progress tracker */}
           <ListItemButton
             onClick={() => navigateTo("/patientcalendar")}
             selected={location.pathname === "/patientcalendar"}
@@ -177,7 +187,7 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Progress Tracker" />
           </ListItemButton>
-          {/* Add more patient-specific links */}
+
           <ListItemButton
             onClick={() => navigateTo("/patientprofile")}
             selected={location.pathname === "/patientprofile"}
@@ -187,6 +197,26 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Profile" />
           </ListItemButton>
+          <ListItemButton
+            onClick={() => navigateTo("/patientnotification")}
+            selected={location.pathname === "/patientnotification"}
+          >
+            <ListItemIcon>
+              <NotificationsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Notifications" />
+          </ListItemButton>
+          <ListItemButton
+            onClick={() => navigateTo("/patientsettings")}
+            selected={location.pathname === "/patientsettings"}
+          >
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Settings" />
+          </ListItemButton>
+
+          {/* Add more patient-specific links */}
         </>
       );
     }
@@ -215,56 +245,46 @@ export default function MainLayout() {
   return (
     <ThemeProvider theme={theme}>
       {/* Small screen menu button */}
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-
-      {/* Drawer */}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
-        }}
+      <CssBaseline />
+      <Box
+        sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
       >
         <Box
-          sx={{
-            minHeight: 64,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            padding: 2,
-          }}
+          component="nav"
+          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+          aria-label="mailbox folders"
         >
-          <Avatar
-            src={userData.profilePicture}
-            sx={{ width: 56, height: 56, marginBottom: 1 }}
-          />
-          <Typography variant="h6">{`${userData.firstName} ${userData.lastName}`}</Typography>
-        </Box>
-        <Divider />
-        <List>
-          {renderDrawerContent()}
-          {/* Notifications */}
-          {/* <ListItemButton
+          <Drawer
+            variant={matchesSM ? "temporary" : "permanent"}
+            open={drawerOpen}
+            onClose={handleDrawerToggle}
+            sx={{
+              width: 240,
+              flexShrink: 0,
+              "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
+            }}
+          >
+            <Box
+              sx={{
+                minHeight: 64,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                padding: 2,
+              }}
+            >
+              <Avatar
+                src={userData.profilePicture}
+                sx={{ width: 56, height: 56, marginBottom: 1 }}
+              />
+              <Typography variant="h6">{`${userData.firstName} ${userData.lastName}`}</Typography>
+            </Box>
+            <Divider />
+            <List>
+              {renderDrawerContent()}
+              {/* Notifications */}
+              {/* <ListItemButton
             onClick={() => navigateTo("/notifications")}
             selected={location.pathname === "/notifications"}
           >
@@ -275,8 +295,8 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Notifications" />
           </ListItemButton> */}
-          {/* Settings */}
-          {/* <ListItemButton
+              {/* Settings */}
+              {/* <ListItemButton
             onClick={() => navigateTo("/settings")}
             selected={location.pathname === "/settings"}
           >
@@ -285,28 +305,33 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton> */}
-          {/* Logout */}
-          <ListItemButton onClick={handleLogout}>
-            <ListItemIcon>
-              <ExitToAppIcon />
-            </ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItemButton>
-        </List>
-      </Drawer>
-
-      {/* Main content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
-      >
-        {/* Render child routes */}
-        <Outlet />
+              {/* Logout */}
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <ExitToAppIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </List>
+          </Drawer>
+        </Box>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            bgcolor: "background.default",
+            // backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <Toolbar />
+          <Container>
+            <Paper style={{ padding: theme.spacing(2) }}>
+              <Outlet />
+            </Paper>
+          </Container>
+        </Box>
       </Box>
     </ThemeProvider>
   );

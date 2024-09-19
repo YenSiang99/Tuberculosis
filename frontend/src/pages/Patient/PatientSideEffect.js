@@ -293,219 +293,197 @@ export default function PatientSideEffectReport() {
   };
 
   return (
-    <div>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-        }}
-      >
-        <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 2 }}
-            >
-              <SectionTitle
-                variant="h5"
-                component="h2"
-                sx={{ fontWeight: "bold" }}
-              >
-                Report Side Effects
-              </SectionTitle>
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+          <SectionTitle variant="h5" component="h2" sx={{ fontWeight: "bold" }}>
+            Report Side Effects
+          </SectionTitle>
 
-              <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
-                When did these symptoms start?
-              </TitleWithBackground>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                  <Grid item xs={12}>
-                    <DateTimePicker
-                      label="Select Date and Time"
-                      value={selectedDateTime}
-                      onChange={setSelectedDateTime}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-              </LocalizationProvider>
+          <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
+            When did these symptoms start?
+          </TitleWithBackground>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid item xs={12}>
+                <DateTimePicker
+                  label="Select Date and Time"
+                  value={selectedDateTime}
+                  onChange={setSelectedDateTime}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+              </Grid>
+            </Grid>
+          </LocalizationProvider>
 
-              <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
-                Symptoms (Choose all that apply)
-              </TitleWithBackground>
-              <IconButton onClick={handleGradeInfoClick} size="big">
-                <InfoIcon sx={{ fontSize: "1.5rem" }} />
-              </IconButton>
+          <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
+            Symptoms (Choose all that apply)
+          </TitleWithBackground>
+          <IconButton onClick={handleGradeInfoClick} size="big">
+            <InfoIcon sx={{ fontSize: "1.5rem" }} />
+          </IconButton>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
+            <Box sx={{ my: 2 }}>
               <Box
                 sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mt: 2,
+                  mb: 2,
                 }}
               >
-                <Box sx={{ my: 2 }}>
+                {["Mild", "Moderate", "Serious"].map((grade, index) => (
                   <Box
+                    key={grade}
                     sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mt: 2,
-                      mb: 2,
+                      flexDirection: "column",
+                      alignItems:
+                        index === 0
+                          ? "flex-start"
+                          : index === 1
+                          ? "center"
+                          : "flex-end",
+                      width: "33%",
                     }}
                   >
-                    {["Mild", "Moderate", "Serious"].map((grade, index) => (
-                      <Box
-                        key={grade}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
                         sx={{
-                          flexDirection: "column",
-                          alignItems:
+                          fontWeight: "bold",
+                          fontSize: "0.875rem",
+                          color:
                             index === 0
-                              ? "flex-start"
+                              ? "#4caf50"
                               : index === 1
-                              ? "center"
-                              : "flex-end",
-                          width: "33%",
+                              ? "#ff9800"
+                              : "#f44336",
                         }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: "bold",
-                              fontSize: "0.875rem",
-                              color:
-                                index === 0
-                                  ? "#4caf50"
-                                  : index === 1
-                                  ? "#ff9800"
-                                  : "#f44336",
-                            }}
-                          >
-                            Grade {index + 1}: {grade}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))}
+                        Grade {index + 1}: {grade}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-                <Grid container spacing={2}>
-                  {/* First Column */}
-                  <Grid item xs={12} md={6}>
-                    {firstHalfOptions.map((sideEffect) => (
-                      <Box key={sideEffect}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedSideEffects.includes(sideEffect)}
-                              onChange={handleCheckboxChange}
-                              name={sideEffect}
-                            />
-                          }
-                          label={sideEffect}
-                        />
-                        {selectedSideEffects.includes(sideEffect) &&
-                          sideEffect !== "Others (Please Describe)" && (
-                            <StyledRadioGroup
-                              aria-label={`grade-${sideEffect}`}
-                              name={`grade-${sideEffect}`}
-                              value={sideEffectDetails[sideEffect]?.grade || ""}
-                              onChange={(e) => handleRadioChange(e, sideEffect)}
-                            >
-                              <FormControlLabel
-                                value="1"
-                                control={<Radio />}
-                                label="Grade 1"
-                              />
-                              <FormControlLabel
-                                value="2"
-                                control={<Radio />}
-                                label="Grade 2"
-                              />
-                              <FormControlLabel
-                                value="3"
-                                control={<Radio />}
-                                label="Grade 3"
-                              />
-                            </StyledRadioGroup>
-                          )}
-                      </Box>
-                    ))}
-                  </Grid>
-
-                  {/* Second Column */}
-                  <Grid item xs={12} md={6}>
-                    {secondHalfOptions.map((sideEffect) => (
-                      <Box key={sideEffect}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedSideEffects.includes(sideEffect)}
-                              onChange={handleCheckboxChange}
-                              name={sideEffect}
-                            />
-                          }
-                          label={sideEffect}
-                        />
-                        {selectedSideEffects.includes(sideEffect) &&
-                          sideEffect === "Others (Please Describe)" && (
-                            <TextField
-                              label="Please describe"
-                              value={otherDescription}
-                              onChange={handleOtherDescriptionChange}
-                              margin="normal"
-                              fullWidth
-                            />
-                          )}
-                        {selectedSideEffects.includes(sideEffect) &&
-                          sideEffect !== "Others (Please Describe)" && (
-                            <StyledRadioGroup
-                              aria-label={`grade-${sideEffect}`}
-                              name={`grade-${sideEffect}`}
-                              value={sideEffectDetails[sideEffect]?.grade || ""}
-                              onChange={(e) => handleRadioChange(e, sideEffect)}
-                            >
-                              <FormControlLabel
-                                value="1"
-                                control={<Radio />}
-                                label="Grade 1"
-                              />
-                              <FormControlLabel
-                                value="2"
-                                control={<Radio />}
-                                label="Grade 2"
-                              />
-                              <FormControlLabel
-                                value="3"
-                                control={<Radio />}
-                                label="Grade 3"
-                              />
-                            </StyledRadioGroup>
-                          )}
-                      </Box>
-                    ))}
-                  </Grid>
-                </Grid>
+                ))}
               </Box>
-
-              <Button type="submit" variant="contained" sx={{ mt: 4 }}>
-                Submit
-              </Button>
             </Box>
-          </Paper>
-          <div ref={historyRef}>
-            <SideEffectHistory history={sideEffectHistory} />
-          </div>
-        </Container>
-      </Box>
+            <Grid container spacing={2}>
+              {/* First Column */}
+              <Grid item xs={12} md={6}>
+                {firstHalfOptions.map((sideEffect) => (
+                  <Box key={sideEffect}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedSideEffects.includes(sideEffect)}
+                          onChange={handleCheckboxChange}
+                          name={sideEffect}
+                        />
+                      }
+                      label={sideEffect}
+                    />
+                    {selectedSideEffects.includes(sideEffect) &&
+                      sideEffect !== "Others (Please Describe)" && (
+                        <StyledRadioGroup
+                          aria-label={`grade-${sideEffect}`}
+                          name={`grade-${sideEffect}`}
+                          value={sideEffectDetails[sideEffect]?.grade || ""}
+                          onChange={(e) => handleRadioChange(e, sideEffect)}
+                        >
+                          <FormControlLabel
+                            value="1"
+                            control={<Radio />}
+                            label="Grade 1"
+                          />
+                          <FormControlLabel
+                            value="2"
+                            control={<Radio />}
+                            label="Grade 2"
+                          />
+                          <FormControlLabel
+                            value="3"
+                            control={<Radio />}
+                            label="Grade 3"
+                          />
+                        </StyledRadioGroup>
+                      )}
+                  </Box>
+                ))}
+              </Grid>
+
+              {/* Second Column */}
+              <Grid item xs={12} md={6}>
+                {secondHalfOptions.map((sideEffect) => (
+                  <Box key={sideEffect}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedSideEffects.includes(sideEffect)}
+                          onChange={handleCheckboxChange}
+                          name={sideEffect}
+                        />
+                      }
+                      label={sideEffect}
+                    />
+                    {selectedSideEffects.includes(sideEffect) &&
+                      sideEffect === "Others (Please Describe)" && (
+                        <TextField
+                          label="Please describe"
+                          value={otherDescription}
+                          onChange={handleOtherDescriptionChange}
+                          margin="normal"
+                          fullWidth
+                        />
+                      )}
+                    {selectedSideEffects.includes(sideEffect) &&
+                      sideEffect !== "Others (Please Describe)" && (
+                        <StyledRadioGroup
+                          aria-label={`grade-${sideEffect}`}
+                          name={`grade-${sideEffect}`}
+                          value={sideEffectDetails[sideEffect]?.grade || ""}
+                          onChange={(e) => handleRadioChange(e, sideEffect)}
+                        >
+                          <FormControlLabel
+                            value="1"
+                            control={<Radio />}
+                            label="Grade 1"
+                          />
+                          <FormControlLabel
+                            value="2"
+                            control={<Radio />}
+                            label="Grade 2"
+                          />
+                          <FormControlLabel
+                            value="3"
+                            control={<Radio />}
+                            label="Grade 3"
+                          />
+                        </StyledRadioGroup>
+                      )}
+                  </Box>
+                ))}
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Button type="submit" variant="contained" sx={{ mt: 4 }}>
+            Submit
+          </Button>
+        </Box>
+      </Paper>
+      <div ref={historyRef}>
+        <SideEffectHistory history={sideEffectHistory} />
+      </div>
       <CustomDialog
         open={alertInfo.show}
         onClose={handleCloseAlert}
@@ -584,6 +562,6 @@ export default function PatientSideEffectReport() {
           ))}
         </DialogContent>
       </Dialog>
-    </div>
+    </Container>
   );
 }
