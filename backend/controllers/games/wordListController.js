@@ -35,6 +35,21 @@ exports.getWordLists = async (req, res) => {
   }
 };
 
+exports.getWordListById = async (req, res) => {
+  try {
+    const wordListId = req.params.id;
+    const wordList = await WordList.findById(wordListId);
+
+    if (!wordList) {
+      return res.status(404).send("Word list not found.");
+    }
+
+    res.status(200).send(wordList);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
 exports.getActiveWordList = async (req, res) => {
   try {
     const activeWordList = await WordList.findOne({ active: true });

@@ -19,7 +19,11 @@ import {
   Divider,
   Badge,
   CssBaseline,
+  Collapse,
 } from "@mui/material";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
@@ -45,6 +49,12 @@ export default function MainLayout() {
   const { setAuth } = useAuth();
 
   const drawerWidth = 240;
+
+  const [adminOpen, setAdminOpen] = useState(true);
+
+  const handleGamesClick = () => {
+    setAdminOpen(!adminOpen);
+  };
 
   useEffect(() => {
     const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
@@ -83,8 +93,11 @@ export default function MainLayout() {
 
   // Sidebar content based on role
   const renderDrawerContent = () => {
+    const menuItems = [];
+
+    // Healthcare role content
     if (userRole?.includes("healthcare")) {
-      return (
+      menuItems.push(
         <>
           <ListItemButton
             onClick={() => navigateTo("/healthcarepatient")}
@@ -144,10 +157,10 @@ export default function MainLayout() {
       );
     }
 
+    // Patient role content
     if (userRole?.includes("patient")) {
-      return (
+      menuItems.push(
         <>
-          {/* Video */}
           <ListItemButton
             onClick={() => navigateTo("/patientvideo")}
             selected={location.pathname === "/patientvideo"}
@@ -157,7 +170,6 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Upload Video" />
           </ListItemButton>
-          {/* Report side effects */}
           <ListItemButton
             onClick={() => navigateTo("/patientsideeffect")}
             selected={location.pathname === "/patientsideeffect"}
@@ -167,7 +179,6 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Report Side Effects" />
           </ListItemButton>
-          {/* Appointments */}
           <ListItemButton
             onClick={() => navigateTo("/patientappointment")}
             selected={location.pathname === "/patientappointment"}
@@ -177,7 +188,6 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Appointment" />
           </ListItemButton>
-          {/* progress tracker */}
           <ListItemButton
             onClick={() => navigateTo("/patientcalendar")}
             selected={location.pathname === "/patientcalendar"}
@@ -187,7 +197,6 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Progress Tracker" />
           </ListItemButton>
-
           <ListItemButton
             onClick={() => navigateTo("/patientprofile")}
             selected={location.pathname === "/patientprofile"}
@@ -215,17 +224,15 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton>
-
-          {/* Add more patient-specific links */}
         </>
       );
     }
 
-    // If the user has 'admin' role, you can extend it similarly
+    // Admin role content
     if (userRole?.includes("admin")) {
-      return (
+      menuItems.push(
         <>
-          <ListItemButton
+          {/* <ListItemButton
             onClick={() => navigateTo("/adminpanel")}
             selected={location.pathname === "/adminpanel"}
           >
@@ -233,13 +240,39 @@ export default function MainLayout() {
               <SettingsIcon />
             </ListItemIcon>
             <ListItemText primary="Admin Panel" />
+          </ListItemButton> */}
+          {/* Add your Games menu and submenus here */}
+          <ListItemButton onClick={handleGamesClick}>
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Admin" />
+            {adminOpen ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
-          {/* Add more admin-specific links */}
+          <Collapse in={adminOpen} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                onClick={() => navigateTo("/wordsearchmenu")}
+                selected={location.pathname === "/wordsearchmenu"}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText primary="Word Search" />
+              </ListItemButton>
+              {/* Add more submenus here if needed */}
+              <ListItemButton
+                onClick={() => navigateTo("/quizzes")}
+                selected={location.pathname === "/quizzes"}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText primary="Quizzes" />
+              </ListItemButton>
+            </List>
+          </Collapse>
         </>
       );
     }
 
-    return null; // Return null if no roles match
+    return menuItems.length > 0 ? menuItems : null;
   };
 
   return (
@@ -249,42 +282,43 @@ export default function MainLayout() {
       <Box
         sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
       >
-        <Box
-          component="nav"
-          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-          aria-label="mailbox folders"
-        >
-          <Drawer
-            variant={matchesSM ? "temporary" : "permanent"}
-            open={drawerOpen}
-            onClose={handleDrawerToggle}
-            sx={{
-              width: 240,
-              flexShrink: 0,
-              "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
-            }}
+        <Box sx={{ display: "flex", flexGrow: 1 }}>
+          <Box
+            component="nav"
+            sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+            aria-label="mailbox folders"
           >
-            <Box
+            <Drawer
+              variant={matchesSM ? "temporary" : "permanent"}
+              open={drawerOpen}
+              onClose={handleDrawerToggle}
               sx={{
-                minHeight: 64,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
-                padding: 2,
+                width: 240,
+                flexShrink: 0,
+                "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
               }}
             >
-              <Avatar
-                src={userData.profilePicture}
-                sx={{ width: 56, height: 56, marginBottom: 1 }}
-              />
-              <Typography variant="h6">{`${userData.firstName} ${userData.lastName}`}</Typography>
-            </Box>
-            <Divider />
-            <List>
-              {renderDrawerContent()}
-              {/* Notifications */}
-              {/* <ListItemButton
+              <Box
+                sx={{
+                  minHeight: 64,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  padding: 2,
+                }}
+              >
+                <Avatar
+                  src={userData.profilePicture}
+                  sx={{ width: 56, height: 56, marginBottom: 1 }}
+                />
+                <Typography variant="h6">{`${userData.firstName} ${userData.lastName}`}</Typography>
+              </Box>
+              <Divider />
+              <List>
+                {renderDrawerContent()}
+                {/* Notifications */}
+                {/* <ListItemButton
             onClick={() => navigateTo("/notifications")}
             selected={location.pathname === "/notifications"}
           >
@@ -295,8 +329,8 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Notifications" />
           </ListItemButton> */}
-              {/* Settings */}
-              {/* <ListItemButton
+                {/* Settings */}
+                {/* <ListItemButton
             onClick={() => navigateTo("/settings")}
             selected={location.pathname === "/settings"}
           >
@@ -305,32 +339,33 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton> */}
-              {/* Logout */}
-              <ListItemButton onClick={handleLogout}>
-                <ListItemIcon>
-                  <ExitToAppIcon />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            </List>
-          </Drawer>
-        </Box>
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            bgcolor: "background.default",
-            // backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <Toolbar />
-          <Container>
-            <Paper style={{ padding: theme.spacing(2) }}>
-              <Outlet />
-            </Paper>
-          </Container>
+                {/* Logout */}
+                <ListItemButton onClick={handleLogout}>
+                  <ListItemIcon>
+                    <ExitToAppIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItemButton>
+              </List>
+            </Drawer>
+          </Box>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              bgcolor: "background.default",
+              // backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <Toolbar />
+            <Container>
+              <Paper style={{ padding: theme.spacing(2) }}>
+                <Outlet />
+              </Paper>
+            </Container>
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

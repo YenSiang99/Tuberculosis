@@ -23,6 +23,13 @@ import FillInBlanksPage from "./pages/Games/FillInBlanksPage";
 import TrueFalsePage from "./pages/Games/TrueFalsePage";
 import AboutTBCompanionPage from "./pages/AboutTBCompanionPage";
 
+// Admin game
+import WordSearchMenu from "./pages/Administration/games/WordSearchMenu";
+import CreateUpdateWordSearchList from "./pages/Administration/games/CreateUpdateWordSearchList";
+
+import QuizzesTable from "./pages/Administration/games/QuizzesTable";
+import CreateUpdateQuiz from "./pages/Administration/games/CreateUpdateQuiz";
+
 // Register pages
 import PatientRegister from "./pages/Registration/PatientRegister";
 import HealthcareRegister from "./pages/Registration/HealthcareRegister";
@@ -146,14 +153,14 @@ function App() {
             />
           </Route>
 
-          <Route
+          {/* <Route
             path="/patientpassword"
             element={
               <ProtectedRoute>
                 <PatientPassword />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           {/* healthcare paths */}
           <Route path="/" element={<MainLayout />}>
@@ -205,6 +212,23 @@ function App() {
                 </ProtectedRoute>
               }
             />
+          </Route>
+
+          <Route path="/" element={<MainLayout />}>
+            <Route path="/wordsearchmenu" element={<WordSearchMenu />} />
+            {/* <Route path="/wordlistform" element={<WordListForm />} /> */}
+            <Route
+              path="/wordsearchlist"
+              element={<CreateUpdateWordSearchList />}
+            />
+            <Route
+              path="/wordsearchlist/:id"
+              element={<CreateUpdateWordSearchList />}
+            />
+
+            <Route path="/quizzes" element={<QuizzesTable />} />
+            <Route path="/quiz/create" element={<CreateUpdateQuiz />} />
+            <Route path="/quiz/:id" element={<CreateUpdateQuiz />} />
           </Route>
           {/* Admin paths */}
           <Route path="/adminfaq" element={<AdminFAQ />} />
