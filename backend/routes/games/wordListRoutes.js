@@ -5,6 +5,10 @@ const wordListController = require("../../controllers/games/wordListController")
 // Create
 router.post("/", wordListController.createWordList);
 
+// Additional filters
+router.get("/active", wordListController.getActiveWordList); // Route for fetching the active word list
+router.get("/search", wordListController.getWordListByFields); // Generalized route for field-based searching
+
 // Read
 router.get("/", wordListController.getWordLists);
 router.get("/:id", wordListController.getWordListById);
@@ -16,7 +20,5 @@ router.put("/:id", wordListController.updateWordList);
 router.delete("/:id", wordListController.deleteWordList);
 
 // Additional
-router.get("/active", wordListController.getActiveWordList); // Route for fetching the active word list
-router.get("/search", wordListController.getWordListByFields); // Generalized route for field-based searching
 
 module.exports = router;

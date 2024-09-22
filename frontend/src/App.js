@@ -30,6 +30,9 @@ import CreateUpdateWordSearchList from "./pages/Administration/games/CreateUpdat
 import QuizzesTable from "./pages/Administration/games/QuizzesTable";
 import CreateUpdateQuiz from "./pages/Administration/games/CreateUpdateQuiz";
 
+import StoryListMenu from "./pages/Administration/games/StoryListMenu";
+import StoryCreateUpdate from "./pages/Administration/games/StoryCreateUpdate";
+
 // Register pages
 import PatientRegister from "./pages/Registration/PatientRegister";
 import HealthcareRegister from "./pages/Registration/HealthcareRegister";
@@ -68,7 +71,6 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-
           {/* TB Info Nested Paths */}
           <Route path="/tb-info" element={<TBInfo />}>
             <Route path="infographics" element={<InfographicsPage />} />
@@ -84,14 +86,11 @@ function App() {
             <Route path="games/true-false" element={<TrueFalsePage />} />
             <Route path="about" element={<AboutTBCompanionPage />} />
           </Route>
-
           <Route path="/test" element={<TestPage />}></Route>
-
           {/* Register paths */}
           <Route path="/register/patient" element={<PatientRegister />} />
           <Route path="/register/healthcare" element={<HealthcareRegister />} />
           <Route path="/register/success" element={<SuccessfulRegister />} />
-
           {/* Patient paths */}
           <Route path="/" element={<MainLayout />}>
             <Route
@@ -152,7 +151,6 @@ function App() {
               }
             />
           </Route>
-
           {/* <Route
             path="/patientpassword"
             element={
@@ -161,7 +159,6 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-
           {/* healthcare paths */}
           <Route path="/" element={<MainLayout />}>
             <Route
@@ -213,7 +210,6 @@ function App() {
               }
             />
           </Route>
-
           <Route path="/" element={<MainLayout />}>
             <Route path="/wordsearchmenu" element={<WordSearchMenu />} />
             {/* <Route path="/wordlistform" element={<WordListForm />} /> */}
@@ -229,6 +225,10 @@ function App() {
             <Route path="/quizzes" element={<QuizzesTable />} />
             <Route path="/quiz/create" element={<CreateUpdateQuiz />} />
             <Route path="/quiz/:id" element={<CreateUpdateQuiz />} />
+
+            <Route path="/storymenu" element={<StoryListMenu />} />
+            <Route path="/story/create" element={<StoryCreateUpdate />} />
+            <Route path="/story/edit/:id" element={<StoryCreateUpdate />} />
           </Route>
           {/* Admin paths */}
           <Route path="/adminfaq" element={<AdminFAQ />} />

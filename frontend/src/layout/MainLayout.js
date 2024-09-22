@@ -266,6 +266,14 @@ export default function MainLayout() {
               >
                 <ListItemText primary="Quizzes" />
               </ListItemButton>
+
+              <ListItemButton
+                onClick={() => navigateTo("/storymenu")}
+                selected={location.pathname === "/storymenu"}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText primary="Interactive Story" />
+              </ListItemButton>
             </List>
           </Collapse>
         </>

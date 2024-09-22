@@ -18,7 +18,9 @@ const appointmentRoutes = require("./routes/appointment/appointmentRoutes");
 const progressTrackerRoutes = require("./routes/progressTracker/progressTrackerRoutes");
 const notificationRoutes = require("./routes/notification/notificationRoutes");
 const wordListRoutes = require("./routes/games/wordListRoutes");
-const quizRoutes = require("./routes/games/quizRoutes"); // Adjust the path as necessary
+const quizRoutes = require("./routes/games/quizRoutes");
+const storyRoutes = require("./routes/games/storyRoutes");
+const fillBlankRoutes = require("./routes/games/fillBlankRoutes");
 
 const profilesDir = path.join(__dirname, "media/profiles/");
 if (!fs.existsSync(profilesDir)) {
@@ -49,6 +51,8 @@ app.use("/api/progressTracker", progressTrackerRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/wordLists", wordListRoutes);
 app.use("/api/quizzes", quizRoutes);
+app.use("/api/stories", storyRoutes);
+app.use("/api/fillBlanks", fillBlankRoutes);
 
 // media files
 app.use("/media", express.static(path.join(__dirname, "media")));
