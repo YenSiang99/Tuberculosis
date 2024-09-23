@@ -153,7 +153,7 @@ const TBInfo = () => {
             >
               <ListItemText primary="Fill in the Blanks" />
             </ListItemButton>
-            <ListItemButton
+            {/* <ListItemButton
               sx={{ pl: 4 }}
               onClick={() => {
                 navigate("/tb-info/games/true-false");
@@ -162,7 +162,7 @@ const TBInfo = () => {
               selected={location.pathname === "/tb-info/games/true-false"}
             >
               <ListItemText primary="True or False" />
-            </ListItemButton>
+            </ListItemButton> */}
           </List>
         </Collapse>
 

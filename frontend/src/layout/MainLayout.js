@@ -37,6 +37,7 @@ import theme from "../components/reusable/Theme";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Outlet } from "react-router-dom"; // To render child routes
+import GamesIcon from "@mui/icons-material/Games";
 
 export default function MainLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -52,8 +53,14 @@ export default function MainLayout() {
 
   const [adminOpen, setAdminOpen] = useState(true);
 
-  const handleGamesClick = () => {
+  const handleAdminClick = () => {
     setAdminOpen(!adminOpen);
+  };
+
+  const [openGames, setOpenGames] = useState(true);
+
+  const handleGamesClick = () => {
+    setOpenGames(!openGames);
   };
 
   useEffect(() => {
@@ -242,7 +249,7 @@ export default function MainLayout() {
             <ListItemText primary="Admin Panel" />
           </ListItemButton> */}
           {/* Add your Games menu and submenus here */}
-          <ListItemButton onClick={handleGamesClick}>
+          <ListItemButton onClick={handleAdminClick}>
             <ListItemIcon>
               <SettingsIcon />
             </ListItemIcon>
@@ -287,6 +294,72 @@ export default function MainLayout() {
         </>
       );
     }
+
+    menuItems.push(
+      <>
+        <ListItemButton onClick={handleGamesClick}>
+          <ListItemIcon>
+            <GamesIcon />
+          </ListItemIcon>
+          <ListItemText primary="Games" />
+          {openGames ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openGames} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => {
+                navigate("/games/word-search");
+                handleDrawerToggle();
+              }}
+              selected={location.pathname === "/games/word-search"}
+            >
+              <ListItemText primary="Word Search" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => {
+                navigate("/games/quiz");
+                handleDrawerToggle();
+              }}
+              selected={location.pathname === "/games/quiz"}
+            >
+              <ListItemText primary="Quiz" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => {
+                navigate("/games/interactive-story");
+                handleDrawerToggle();
+              }}
+              selected={location.pathname === "/games/interactive-story"}
+            >
+              <ListItemText primary="Interactive Story" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => {
+                navigate("/games/fill-in-blanks");
+                handleDrawerToggle();
+              }}
+              selected={location.pathname === "/games/fill-in-blanks"}
+            >
+              <ListItemText primary="Fill in the Blanks" />
+            </ListItemButton>
+            {/* <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => {
+                navigate("/games/true-false");
+                handleDrawerToggle();
+              }}
+              selected={location.pathname === "/games/true-false"}
+            >
+              <ListItemText primary="True or False" />
+            </ListItemButton> */}
+          </List>
+        </Collapse>
+      </>
+    );
 
     return menuItems.length > 0 ? menuItems : null;
   };

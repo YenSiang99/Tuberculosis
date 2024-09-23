@@ -12,7 +12,7 @@ import ForgotPassword from "./pages/PasswordRecovery/ForgotPassword";
 import ResetPassword from "./pages/PasswordRecovery/ResetPassword";
 
 // TBInfo Pages
-import TBInfo from "./pages/TBInfo";
+import TBInfoLayout from "./layout/TBInfoLayout";
 import InfographicsPage from "./pages/TBInfo/InfographicsPage";
 import VideosPage from "./pages/TBInfo/VideosPage";
 import FAQsPage from "./pages/TBInfo/FAQsPage";
@@ -74,8 +74,8 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* TB Info Nested Paths */}
-          <Route path="/tb-info" element={<TBInfo />}>
+
+          <Route path="/tb-info" element={<TBInfoLayout />}>
             <Route path="infographics" element={<InfographicsPage />} />
             <Route path="videos" element={<VideosPage />} />
             <Route path="faqs" element={<FAQsPage />} />
@@ -237,6 +237,19 @@ function App() {
             <Route path="/blanks/create" element={<BlanksCreateUpdate />} />
             <Route path="/blanks/:id" element={<BlanksCreateUpdate />} />
           </Route>
+          {/* Games that is inside login */}
+          <Route path="/" element={<MainLayout />}>
+            {" "}
+            <Route path="games/word-search" element={<WordSearchPage />} />
+            <Route path="games/quiz" element={<QuizPage />} />
+            <Route
+              path="games/interactive-story"
+              element={<InteractiveStoryPage />}
+            />
+            <Route path="games/fill-in-blanks" element={<FillInBlanksPage />} />
+            <Route path="games/true-false" element={<TrueFalsePage />} />
+          </Route>
+
           {/* Admin paths */}
           <Route path="/adminfaq" element={<AdminFAQ />} />
           <Route path="/adminuser" element={<AdminUser />} />
