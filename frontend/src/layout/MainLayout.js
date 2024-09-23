@@ -6,7 +6,6 @@ import {
   Container,
   Paper,
   Drawer,
-  IconButton,
   Box,
   useMediaQuery,
   ThemeProvider,
@@ -17,14 +16,11 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Badge,
   CssBaseline,
   Collapse,
 } from "@mui/material";
-import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import MenuIcon from "@mui/icons-material/Menu";
 import VideoCameraFrontIcon from "@mui/icons-material/VideoCameraFront";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";

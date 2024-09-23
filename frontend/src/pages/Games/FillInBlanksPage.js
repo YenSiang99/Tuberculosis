@@ -11,9 +11,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useMediaQuery,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios"; // Adjust with your axios instance
 
 const FillInBlanksPage = () => {
@@ -25,9 +23,7 @@ const FillInBlanksPage = () => {
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
 
-  const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [gameOver, setGameOver] = useState(false);
 
@@ -85,10 +81,6 @@ const FillInBlanksPage = () => {
     setQuestions(updatedQuestions);
     setUsedWords(usedWords.filter((word) => word !== wordToRemove));
     setSelectedBlankId(id);
-  };
-
-  const handleShowResults = () => {
-    setShowResult(true);
   };
 
   const calculateScore = () => {

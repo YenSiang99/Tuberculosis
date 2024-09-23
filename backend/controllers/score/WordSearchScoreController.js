@@ -14,8 +14,6 @@ exports.submitWordSearchScore = async (req, res) => {
     } = req.body;
     const userId = req.user.userId;
 
-    console.log("this is the user ... ", userId);
-
     // Find the active word list
     const activeWordList = await WordList.findOne({ active: true });
     if (!activeWordList) {

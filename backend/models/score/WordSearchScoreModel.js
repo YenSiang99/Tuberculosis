@@ -23,7 +23,7 @@ const wordSearchScoreSchema = new mongoose.Schema(
     },
     longestWordFound: {
       type: String,
-      required: true,
+      required: false,
     },
     score: {
       type: Number, // number of words found
