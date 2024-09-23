@@ -33,6 +33,9 @@ import CreateUpdateQuiz from "./pages/Administration/games/CreateUpdateQuiz";
 import StoryListMenu from "./pages/Administration/games/StoryListMenu";
 import StoryCreateUpdate from "./pages/Administration/games/StoryCreateUpdate";
 
+import FillBlanksTable from "./pages/Administration/games/FillBlanksTable";
+import BlanksCreateUpdate from "./pages/Administration/games/BlanksCreateUpdate";
+
 // Register pages
 import PatientRegister from "./pages/Registration/PatientRegister";
 import HealthcareRegister from "./pages/Registration/HealthcareRegister";
@@ -229,6 +232,10 @@ function App() {
             <Route path="/storymenu" element={<StoryListMenu />} />
             <Route path="/story/create" element={<StoryCreateUpdate />} />
             <Route path="/story/edit/:id" element={<StoryCreateUpdate />} />
+
+            <Route path="/blanks" element={<FillBlanksTable />} />
+            <Route path="/blanks/create" element={<BlanksCreateUpdate />} />
+            <Route path="/blanks/:id" element={<BlanksCreateUpdate />} />
           </Route>
           {/* Admin paths */}
           <Route path="/adminfaq" element={<AdminFAQ />} />

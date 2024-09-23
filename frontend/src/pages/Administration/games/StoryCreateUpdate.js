@@ -182,7 +182,7 @@ export default function StoryCreateUpdate() {
       <Typography variant="h4" sx={{ marginBottom: 2 }}>
         {id ? "Edit Story" : "Create New Story"}
       </Typography>
-      <DataViewer data={story} variableName="story"></DataViewer>
+      {/* <DataViewer data={story} variableName="story"></DataViewer> */}
       <Box>
         <TextField
           fullWidth

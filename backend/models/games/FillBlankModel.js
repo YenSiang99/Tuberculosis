@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 
 const questionSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
-  text: { type: String, required: true },
-  answer: { type: String, required: true },
+  textBefore: { type: String, required: true }, // Text before the blank
+  textAfter: { type: String, required: true }, // Text after the blank
+  answer: { type: String, required: true }, // Correct answer (blank word)
+  position: { type: Number, required: true }, // Position of the blank in the sentence (optional, for word highlight)
 });
 
 const fillBlankSchema = new mongoose.Schema({

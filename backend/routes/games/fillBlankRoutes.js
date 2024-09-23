@@ -5,6 +5,9 @@ const fillBlankController = require("../../controllers/games/fillBlankController
 // Create
 router.post("/", fillBlankController.createFillBlank);
 
+// Filters
+router.get("/active", fillBlankController.getActiveFillBlank);
+
 // Read
 router.get("/", fillBlankController.getFillBlanks);
 router.get("/:id", fillBlankController.getFillBlankById);

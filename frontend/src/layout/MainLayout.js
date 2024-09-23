@@ -274,6 +274,14 @@ export default function MainLayout() {
               >
                 <ListItemText primary="Interactive Story" />
               </ListItemButton>
+
+              <ListItemButton
+                onClick={() => navigateTo("/blanks")}
+                selected={location.pathname === "/blanks"}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText primary="Fill in the blanks" />
+              </ListItemButton>
             </List>
           </Collapse>
         </>
