@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
@@ -19,18 +18,38 @@ const WordSearchPage = () => {
   const [wordsToFind, setWordsToFind] = useState([]);
   const gridSize = 15;
 
-  const theme = useTheme();
-
   const [grid, setGrid] = useState([]);
   const [selectedCells, setSelectedCells] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
 
-  const totalTime = 90;
+  const totalTime = 10;
   const [gameTimer, setGameTimer] = useState(totalTime);
   const [showResult, setShowResult] = useState(false);
 
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const submitScore = async () => {
+    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+
+    if (!storedUserData) return; // Only submit score if user is logged in
+
+    try {
+      const payload = {
+        totalTimeTaken: totalTime - gameTimer,
+        accuracyRate: calculateAccuracyRate(),
+        longestWordFound: getLongestWordFound(),
+        score: foundWords.length,
+        completionStatus:
+          foundWords.length === wordsToFind.length ? "Completed" : "Incomplete",
+      };
+
+      const response = await axios.post("/score/wordsearch/submit", payload);
+
+      console.log("Score submitted successfully", response.data);
+    } catch (error) {
+      console.error("Failed to submit score", error);
+    }
+  };
 
   const generateEmptyGrid = (size) => {
     const emptyGrid = [];
@@ -327,31 +346,26 @@ const WordSearchPage = () => {
     setShowResult(true);
   };
 
+  // countdown timer
   useEffect(() => {
     if (!openInstructionDialog) {
       if (gameTimer > 0) {
         if (foundWords.length === wordsToFind.length) {
-          // console.log("Accuracy:", calculateAccuracyRate());
-          // console.log("Score:", foundWords.length + " " + wordsToFind.length);
-          // console.log("Time taken:", totalTime - gameTimer);
-          // console.log("Longest word found:", getLongestWordFound());
           handleShowResults();
+          submitScore(); // Submit score when user finds all words
         } else {
           const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
           return () => clearTimeout(countdown);
         }
       }
       if (gameTimer === 0) {
-        // Show results of game
-        console.log("Accuracy:", calculateAccuracyRate());
-        console.log("Score:", foundWords.length + " " + wordsToFind.length);
-        console.log("Time taken:", totalTime - gameTimer);
-        console.log("Longest word found:", getLongestWordFound());
         handleShowResults();
+        submitScore(); // Submit score when timer runs out
       }
     }
   }, [gameTimer, openInstructionDialog, foundWords]);
 
+  // fetch word list
   useEffect(() => {
     const fetchActiveWordList = async () => {
       try {

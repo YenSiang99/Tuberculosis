@@ -90,12 +90,32 @@ const InteractiveStoryPage = () => {
     return ((Date.now() - startTime) / 1000).toFixed(2); // returns time in seconds
   };
 
+  const submitStoryScore = async () => {
+    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+
+    if (!storedUserData) return; // Only submit score if user is logged in
+
+    const payload = {
+      numberOfRetries: retries,
+      totalTimeTaken: calculateTimeTaken(),
+    };
+
+    try {
+      const response = await axios.post("/score/stories/submit", payload);
+      console.log("Score submitted successfully", response.data);
+    } catch (error) {
+      console.error("Failed to submit story score", error);
+    }
+  };
+
+  // Set start time to calculate total time taken
   useEffect(() => {
     if (!openInstructionDialog) {
       setStartTime(Date.now());
     }
   }, [openInstructionDialog]);
 
+  // Fetch story api
   useEffect(() => {
     // Fetch active story from the API
     axios
@@ -111,6 +131,13 @@ const InteractiveStoryPage = () => {
         setLoading(false);
       });
   }, []);
+
+  // Determine whether the user reaches the correct ending
+  useEffect(() => {
+    if (isEnd && currentStep.endType === "positive") {
+      submitStoryScore(); // Automatically submit the score on positive ending
+    }
+  }, [isEnd, currentStep]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -198,29 +225,14 @@ const InteractiveStoryPage = () => {
                     spacing={1}
                     sx={{ justifyContent: "center", alignItems: "center" }}
                   >
+                    {/* Negative ending content */}
                     <Grid item>
                       <Typography variant="h6" sx={{ color: "red" }}>
                         Oh no! Wrong Move! Please start the story from the
                         beginning and try again!...
                       </Typography>
                     </Grid>
-                    <Grid
-                      item
-                      container
-                      xs={12}
-                      sx={{
-                        textAlign: "left",
-                        alignItems: "center",
-                        width: "100%",
-                      }}
-                    >
-                      <Grid item xs={6}>
-                        <Typography variant="h6">Number of retries</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">: {retries}</Typography>
-                      </Grid>
-                    </Grid>
+                    {/* Retry the story */}
                     <Grid item>
                       <Button
                         variant="contained"
@@ -240,43 +252,35 @@ const InteractiveStoryPage = () => {
                     spacing={1}
                     sx={{ justifyContent: "center", alignItems: "center" }}
                   >
+                    {/* Positive ending content */}
                     <Grid item xs={12}>
                       <Typography variant="h6" color="green">
                         Congratulations! You've reached the end of the story!
                       </Typography>
                     </Grid>
-                    <Grid
-                      item
-                      container
-                      xs={12}
-                      sx={{
-                        textAlign: "left",
-                        alignItems: "center",
-                        width: "100%",
-                      }}
-                    >
-                      <Grid item xs={6}>
-                        <Typography variant="h6">Number of retries</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">: {retries}</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">Total time taken</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">
-                          : {calculateTimeTaken()} seconds
-                        </Typography>
-                      </Grid>
+                    {/* Display retries and total time */}
+                    <Grid item xs={6}>
+                      <Typography variant="h6">Number of retries</Typography>
                     </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="h6">: {retries}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="h6">Total time taken</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="h6">
+                        : {calculateTimeTaken()} seconds
+                      </Typography>
+                    </Grid>
+                    {/* Call the API to submit the score */}
                     <Grid item>
                       <Button
                         variant="contained"
                         color="primary"
                         onClick={handleRestartStory}
                       >
-                        Restart Story
+                        Restart Story!
                       </Button>
                     </Grid>
                   </Grid>

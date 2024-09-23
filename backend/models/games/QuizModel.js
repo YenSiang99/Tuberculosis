@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 const optionSchema = new mongoose.Schema({
-  id: String,
   optionText: String,
   isCorrect: Boolean,
 });

@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
+import DataViewer from "../../components/reusable/DataViewer";
 
 const QuizPage = () => {
   const test = false;
@@ -26,7 +27,8 @@ const QuizPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   // Timer variables
-  const [questionTimer, setQuestionTimer] = useState(10);
+  const questionTime = 10;
+  const [questionTimer, setQuestionTimer] = useState(questionTime);
   const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
   // Asnwer Feedback for each question and summary
   const [answerFeedback, setFeedback] = useState(null);
@@ -36,15 +38,40 @@ const QuizPage = () => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [totalTimeTaken, setTotalTimeTaken] = useState(0);
+
+  const submitQuizScore = async () => {
+    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+
+    if (!storedUserData) return; // Only submit score if user is logged in
+
+    const payload = {
+      totalTimeTaken: totalTimeTaken, // Total time taken to answer the quiz
+      score: score, // User's score
+      completionStatus: score === questions.length ? "Completed" : "Incomplete",
+    };
+
+    try {
+      const response = await axios.post("/score/quizzes/submit", payload);
+      console.log("Score submitted successfully", response.data);
+    } catch (error) {
+      console.error("Error submitting quiz score", error);
+    }
+  };
+
   const handleOptionClick = (option, questionId) => {
     // Set user selection option
+    const timeSpentOnQuestion = questionTime - questionTimer; // Time taken to answer the current question
+    setTotalTimeTaken((prevTime) => prevTime + timeSpentOnQuestion); // Accumulate time spent
+
     setQuestions((prevQuestions) =>
       prevQuestions.map((question) =>
-        question.id === questionId
-          ? { ...question, selectedOption: option.id }
+        question._id === questionId
+          ? { ...question, selectedOption: option._id }
           : question
       )
     );
+
     // Let user know if they selected the right or wrong answer
     setFeedback(option.isCorrect ? "correct" : "wrong");
     if (option.isCorrect) setScore(score + 1);
@@ -61,18 +88,19 @@ const QuizPage = () => {
 
   const handleNoAnswer = () => {
     setFeedback("wrong");
-    setNextQuestionTimer(5); // Start the countdown to the next question
+    setTotalTimeTaken((prevTime) => prevTime + questionTime); // Assume full time used if no answer
+    setNextQuestionTimer(5);
   };
 
   const goToNextQuestion = () => {
-    console.log("Hello this is go to next question");
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setQuestionTimer(10);
+      setQuestionTimer(questionTime);
       setFeedback(null);
       setNextQuestionTimer(0);
     } else {
       setShowResult(true);
+      submitQuizScore(); // Submit score when quiz is completed
     }
   };
 
@@ -146,6 +174,7 @@ const QuizPage = () => {
       >
         Quiz Time!
       </Typography>
+      {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
       {!showResult && questions.length > 0 ? (
         <Grid
           container
@@ -186,13 +215,13 @@ const QuizPage = () => {
           {/* Answer Selection */}
           <Grid item container spacing={1}>
             {questions[currentQuestionIndex].options.map((option, index) => (
-              <Grid item xs={12} sm={12} md={6} lg={6} key={option.id}>
+              <Grid item xs={12} sm={12} md={6} lg={6} key={option._id}>
                 <Button
                   variant="contained"
                   onClick={() =>
                     handleOptionClick(
                       option,
-                      questions[currentQuestionIndex].id
+                      questions[currentQuestionIndex]._id
                     )
                   }
                   disabled={answerFeedback !== null}
@@ -259,7 +288,7 @@ const QuizPage = () => {
           {questions.length > 0 ? (
             <>
               {questions.map((question) => (
-                <Box key={question.id} sx={{ mb: 4 }}>
+                <Box key={question._id} sx={{ mb: 4 }}>
                   <Typography
                     sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
                   >
@@ -268,11 +297,11 @@ const QuizPage = () => {
                   <RadioGroup>
                     {question.options.map((option) => {
                       const isUserSelection =
-                        question.selectedOption === option.id;
+                        question.selectedOption === option._id;
                       const isCorrect = option.isCorrect;
                       return (
                         <FormControlLabel
-                          key={option.id}
+                          key={option._id}
                           value={option.optionText}
                           control={<Radio checked={isUserSelection} />}
                           label={
@@ -337,7 +366,7 @@ const QuizPage = () => {
             <br />
             <br />
             3. <strong>Time Limit:</strong> <br />
-            You have 10 seconds to answer each question.
+            You have {questionTime} seconds to answer each question.
             <br />
             <br />
             4. <strong>Missed Answers:</strong> <br />
