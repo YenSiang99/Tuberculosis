@@ -20,7 +20,6 @@ const InteractiveStoryPage = () => {
     title: "Journey of a TB Patient",
     steps: [
       {
-        _id: "step1",
         content:
           "John, a 30-year-old male, has been coughing for more than 3 weeks. What should John do?",
         options: [
@@ -37,28 +36,28 @@ const InteractiveStoryPage = () => {
     ],
     ends: [
       {
-        _id: "end1",
         content:
           "Ignoring the symptoms, John's condition worsens, demonstrating the danger of neglecting early signs of TB.",
         endType: "positive",
       },
       {
-        _id: "end2",
         content:
           "Fear leads to worse health outcomes. John's condition deteriorates because he didn't proceed with the necessary tests.",
         endType: "negative",
       },
     ],
   });
-  const [currentStepId, setCurrentStepId] = useState(storyData.steps[0]._id);
+  const [currentStepId, setCurrentStepId] = useState(
+    storyData.steps[0].content
+  );
   const [loading, setLoading] = useState(true); // To handle loading state
   const [error, setError] = useState(null); // For error handling
 
   const [retries, setRetries] = useState(0);
   const [startTime, setStartTime] = useState(null);
   const currentStep =
-    storyData.steps.find((step) => step._id === currentStepId) ||
-    storyData.ends.find((end) => end._id === currentStepId);
+    storyData.steps.find((step) => step.content === currentStepId) ||
+    storyData.ends.find((end) => end.content === currentStepId);
   const isEnd = currentStep && "endType" in currentStep;
 
   const theme = useTheme();
@@ -79,12 +78,12 @@ const InteractiveStoryPage = () => {
   const handleRestartStory = () => {
     setRetries(0);
     setStartTime(Date.now());
-    setCurrentStepId(storyData.steps[0]._id);
+    setCurrentStepId(storyData.steps[0].content);
   };
 
   const handleRetryStory = () => {
     setRetries(retries + 1);
-    setCurrentStepId(storyData.steps[0]._id);
+    setCurrentStepId(storyData.steps[0].content);
   };
 
   const calculateTimeTaken = () => {
@@ -104,7 +103,7 @@ const InteractiveStoryPage = () => {
       .then((response) => {
         console.log("reading stories .. response.data", response.data);
         setStoryData(response.data);
-        setCurrentStepId(response.data.steps[0]._id); // Set initial step to the first step
+        setCurrentStepId(response.data.steps[0].content); // Set initial step to the first step
         setLoading(false); // Stop loading once data is fetched
       })
       .catch((err) => {
