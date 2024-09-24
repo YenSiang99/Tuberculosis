@@ -45,12 +45,26 @@ exports.getUserWordSearchScores = async (req, res) => {
   try {
     const userId = req.user.userId;
     const scores = await WordSearchScore.find({ user: userId })
-      .populate("wordList", "name description")
-      .sort({ createdAt: -1 });
+      .populate("wordList") // Populate to get `totalGameTime`
+      .lean();
 
-    res.status(200).json(scores);
+    // Add `totalPossibleScore` and ensure `totalGameTime` is included
+    for (let score of scores) {
+      if (score.wordList && score.wordList.words) {
+        score.totalPossibleScore = score.wordList.words.length;
+        score.totalGameTime = score.wordList.totalGameTime;
+      } else {
+        const wordList = await WordList.findById(score.wordList._id).lean();
+        score.totalPossibleScore = wordList.words.length;
+        score.totalGameTime = wordList.totalGameTime;
+        score.wordList = wordList;
+      }
+    }
+
+    res.json(scores);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching word search scores:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

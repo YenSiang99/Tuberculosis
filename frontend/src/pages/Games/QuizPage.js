@@ -27,8 +27,8 @@ const QuizPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   // Timer variables
-  const questionTime = 10;
-  const [questionTimer, setQuestionTimer] = useState(questionTime);
+  const [questionTime, setQuestionTime] = useState(null);
+  const [questionTimer, setQuestionTimer] = useState(null);
   const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
   // Asnwer Feedback for each question and summary
   const [answerFeedback, setFeedback] = useState(null);
@@ -61,6 +61,7 @@ const QuizPage = () => {
 
   const handleOptionClick = (option, questionId) => {
     // Set user selection option
+
     const timeSpentOnQuestion = questionTime - questionTimer; // Time taken to answer the current question
     setTotalTimeTaken((prevTime) => prevTime + timeSpentOnQuestion); // Accumulate time spent
 
@@ -88,7 +89,7 @@ const QuizPage = () => {
 
   const handleNoAnswer = () => {
     setFeedback("wrong");
-    setTotalTimeTaken((prevTime) => prevTime + questionTime); // Assume full time used if no answer
+    setTotalTimeTaken((prevTime) => prevTime + questionTime);
     setNextQuestionTimer(5);
   };
 
@@ -132,7 +133,7 @@ const QuizPage = () => {
 
   // State to countdown next question timer
   useEffect(() => {
-    if (!test && !openInstructionDialog) {
+    if (!test && !openInstructionDialog && questionTimer !== null) {
       if (answerFeedback && nextQuestionTimer > 0) {
         const countdown = setTimeout(
           () => setNextQuestionTimer(nextQuestionTimer - 1),
@@ -151,9 +152,10 @@ const QuizPage = () => {
       try {
         const response = await axios.get("/quizzes/active");
         const data = response.data;
-
         if (data && data.questions) {
           setQuestions(data.questions); // Set the questions based on the API response
+          setQuestionTime(data.timeLimitPerQuestion);
+          setQuestionTimer(data.timeLimitPerQuestion);
         }
       } catch (error) {
         console.error("Failed to fetch active quiz", error);
@@ -191,9 +193,13 @@ const QuizPage = () => {
           </Grid>
           {/* Time Countdown for question */}
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Typography variant="h7">
-              Time left: {questionTimer} seconds
-            </Typography>
+            {questionTimer !== null ? (
+              <Typography variant="h7">
+                Time left: {questionTimer} seconds
+              </Typography>
+            ) : (
+              <Typography variant="h7">Loading...</Typography>
+            )}
           </Grid>
           {/* Time Countdown interval to next question*/}
           {answerFeedback && (

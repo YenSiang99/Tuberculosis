@@ -1,9 +1,37 @@
 const Quiz = require("../../models/games/QuizModel");
 
 // Create Quiz
+// exports.createQuiz = async (req, res) => {
+//   try {
+//     const { name, description, questions } = req.body;
+
+//     // Optionally deactivate all other quizzes
+//     await Quiz.updateMany({}, { active: false });
+
+//     const newQuiz = new Quiz({
+//       name,
+//       description,
+//       questions,
+//       active: true, // Automatically activate the new quiz
+//     });
+//     await newQuiz.save();
+
+//     res.status(201).send(newQuiz);
+//   } catch (error) {
+//     res.status(400).send(error.message);
+//   }
+// };
+
 exports.createQuiz = async (req, res) => {
   try {
-    const { name, description, questions } = req.body;
+    const { name, description, timeLimitPerQuestion, questions } = req.body;
+
+    // Validate that `timeLimitPerQuestion` is a number
+    if (typeof timeLimitPerQuestion !== "number" || timeLimitPerQuestion <= 0) {
+      return res
+        .status(400)
+        .send("`timeLimitPerQuestion` must be a positive number in seconds.");
+    }
 
     // Optionally deactivate all other quizzes
     await Quiz.updateMany({}, { active: false });
@@ -11,6 +39,7 @@ exports.createQuiz = async (req, res) => {
     const newQuiz = new Quiz({
       name,
       description,
+      timeLimitPerQuestion,
       questions,
       active: true, // Automatically activate the new quiz
     });
@@ -61,12 +90,60 @@ exports.getActiveQuiz = async (req, res) => {
 };
 
 // Update Quiz
+// exports.updateQuiz = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updates = req.body; // This includes name, description, questions, and active state
+//     const updatedQuiz = await Quiz.findByIdAndUpdate(id, updates, {
+//       new: true,
+//     });
+//     if (!updatedQuiz) {
+//       return res.status(404).send("Quiz not found.");
+//     }
+//     res.status(200).send(updatedQuiz);
+//   } catch (error) {
+//     res.status(400).send(error.message);
+//   }
+// };
+
+// Update Quiz
 exports.updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body; // This includes name, description, questions, and active state
+    const updates = req.body;
+
+    // Validate allowed updates
+    const allowedUpdates = [
+      "name",
+      "description",
+      "timeLimitPerQuestion",
+      "questions",
+      "active",
+    ];
+    const updateKeys = Object.keys(updates);
+    const isValidOperation = updateKeys.every((key) =>
+      allowedUpdates.includes(key)
+    );
+
+    if (!isValidOperation) {
+      return res.status(400).send({ error: "Invalid updates!" });
+    }
+
+    // Validate `timeLimitPerQuestion` if it's being updated
+    if (updates.timeLimitPerQuestion !== undefined) {
+      if (
+        typeof updates.timeLimitPerQuestion !== "number" ||
+        updates.timeLimitPerQuestion <= 0
+      ) {
+        return res
+          .status(400)
+          .send("`timeLimitPerQuestion` must be a positive number in seconds.");
+      }
+    }
+
     const updatedQuiz = await Quiz.findByIdAndUpdate(id, updates, {
       new: true,
+      runValidators: true,
     });
     if (!updatedQuiz) {
       return res.status(404).send("Quiz not found.");

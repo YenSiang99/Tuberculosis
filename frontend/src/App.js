@@ -16,12 +16,16 @@ import TBInfoLayout from "./layout/TBInfoLayout";
 import InfographicsPage from "./pages/TBInfo/InfographicsPage";
 import VideosPage from "./pages/TBInfo/VideosPage";
 import FAQsPage from "./pages/TBInfo/FAQsPage";
+import AboutTBCompanionPage from "./pages/AboutTBCompanionPage";
+
+// Games
 import WordSearchPage from "./pages/Games/WordSearchPage";
 import QuizPage from "./pages/Games/QuizPage";
 import InteractiveStoryPage from "./pages/Games/InteractiveStoryPage";
 import FillInBlanksPage from "./pages/Games/FillInBlanksPage";
 import TrueFalsePage from "./pages/Games/TrueFalsePage";
-import AboutTBCompanionPage from "./pages/AboutTBCompanionPage";
+
+import ScoreDashboardPage from "./pages/Games/ScoreDashboardPage";
 
 // Admin game
 import WordSearchMenu from "./pages/Administration/games/WordSearchMenu";
@@ -248,6 +252,11 @@ function App() {
             />
             <Route path="games/fill-in-blanks" element={<FillInBlanksPage />} />
             <Route path="games/true-false" element={<TrueFalsePage />} />
+            <Route
+              path="/games/score-dashboard"
+              element={<ScoreDashboardPage />}
+            />
+            ScoreDashboardPage
           </Route>
 
           {/* Admin paths */}

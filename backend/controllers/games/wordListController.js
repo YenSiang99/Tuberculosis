@@ -2,7 +2,7 @@ const WordList = require("../../models/games/WordListModel");
 
 exports.createWordList = async (req, res) => {
   try {
-    const { name, words, description } = req.body;
+    const { name, words, description, totalGameTime } = req.body;
 
     // Find and deactivate currently active word list
     const activeWordList = await WordList.findOne({ active: true });
@@ -16,6 +16,7 @@ exports.createWordList = async (req, res) => {
       name,
       words,
       description,
+      totalGameTime, // Include the total game time
       active: true, // Set the new word list as active
     });
     await newWordList.save();
@@ -76,13 +77,49 @@ exports.getWordListByFields = async (req, res) => {
   }
 };
 
+// exports.updateWordList = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updates = req.body;
+//     const wordList = await WordList.findByIdAndUpdate(id, updates, {
+//       new: true,
+//     });
+//     if (!wordList) {
+//       return res.status(404).send("Word list not found.");
+//     }
+//     res.send(wordList);
+//   } catch (error) {
+//     res.status(400).send(error.message);
+//   }
+// };
+
 exports.updateWordList = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    // Validate allowed updates
+    const allowedUpdates = [
+      "name",
+      "words",
+      "description",
+      "active",
+      "totalGameTime",
+    ];
+    const updateKeys = Object.keys(updates);
+    const isValidOperation = updateKeys.every((key) =>
+      allowedUpdates.includes(key)
+    );
+
+    if (!isValidOperation) {
+      return res.status(400).send({ error: "Invalid updates!" });
+    }
+
     const wordList = await WordList.findByIdAndUpdate(id, updates, {
       new: true,
+      runValidators: true,
     });
+
     if (!wordList) {
       return res.status(404).send("Word list not found.");
     }

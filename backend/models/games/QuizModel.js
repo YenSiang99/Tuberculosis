@@ -21,6 +21,11 @@ const quizSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    timeLimitPerQuestion: {
+      type: Number, // Time limit in seconds for each question
+      required: true,
+      default: 30, // Default time limit if not specified
+    },
     questions: [questionSchema],
     active: {
       type: Boolean,

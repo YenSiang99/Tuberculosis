@@ -1,4 +1,3 @@
-// models/score/QuizScoreModel.js
 const mongoose = require("mongoose");
 
 const quizScoreSchema = new mongoose.Schema(
@@ -10,15 +9,27 @@ const quizScoreSchema = new mongoose.Schema(
     },
     quiz: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Quiz", // Reference the active quiz
+      ref: "Quiz",
       required: true,
     },
     totalTimeTaken: {
       type: Number, // in seconds
       required: true,
     },
+    averageTimePerQuestion: {
+      type: Number, // in seconds
+      required: true,
+    },
     score: {
-      type: Number, // quiz score
+      type: Number, // Number of correct answers
+      required: true,
+    },
+    totalPossibleScore: {
+      type: Number, // Total number of questions
+      required: true,
+    },
+    accuracyRate: {
+      type: Number, // Percentage of correct answers
       required: true,
     },
     completionStatus: {
@@ -28,7 +39,7 @@ const quizScoreSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // automatically adds createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 

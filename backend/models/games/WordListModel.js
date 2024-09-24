@@ -19,6 +19,12 @@ const wordListSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    totalGameTime: {
+      // Total time for the game in seconds
+      type: Number,
+      required: true,
+      default: 90, // Set a default value if desired
+    },
   },
   {
     timestamps: true,

@@ -305,6 +305,16 @@ export default function MainLayout() {
             <ListItemButton
               sx={{ pl: 4 }}
               onClick={() => {
+                navigate("/games/score-dashboard");
+                handleDrawerToggle();
+              }}
+              selected={location.pathname === "/games/score-dashboard"}
+            >
+              <ListItemText primary="Score Dashboard" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => {
                 navigate("/games/word-search");
                 handleDrawerToggle();
               }}

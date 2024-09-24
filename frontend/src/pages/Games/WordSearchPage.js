@@ -22,8 +22,8 @@ const WordSearchPage = () => {
   const [selectedCells, setSelectedCells] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
 
-  const totalTime = 10;
-  const [gameTimer, setGameTimer] = useState(totalTime);
+  const [totalTime, setTotalTime] = useState(null);
+  const [gameTimer, setGameTimer] = useState(null);
   const [showResult, setShowResult] = useState(false);
 
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
@@ -348,7 +348,7 @@ const WordSearchPage = () => {
 
   // countdown timer
   useEffect(() => {
-    if (!openInstructionDialog) {
+    if (!openInstructionDialog && gameTimer !== null) {
       if (gameTimer > 0) {
         if (foundWords.length === wordsToFind.length) {
           handleShowResults();
@@ -371,6 +371,8 @@ const WordSearchPage = () => {
       try {
         const response = await axios.get("/wordLists/active");
         const data = response.data;
+        setTotalTime(data.totalGameTime);
+        setGameTimer(data.totalGameTime); // Set gameTimer to totalGameTime
         if (data && data.words) {
           setWordsToFind(data.words); // Set the fetched words in the state
           const emptyGrid = generateEmptyGrid(gridSize);
