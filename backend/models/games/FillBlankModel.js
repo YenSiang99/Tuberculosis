@@ -10,6 +10,7 @@ const questionSchema = new mongoose.Schema({
 const fillBlankSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
+  totalGameTime: { type: Number, required: true, default: 60 }, // Total game time in seconds
   questions: [questionSchema],
   active: { type: Boolean, default: false }, // Include the active field to manage the active state
 });

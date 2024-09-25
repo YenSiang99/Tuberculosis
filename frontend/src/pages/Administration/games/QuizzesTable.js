@@ -56,7 +56,7 @@ export default function QuizzesTable() {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => navigate("/quiz/create")}
+        onClick={() => navigate("/admin/quiz/create")}
         sx={{ marginBottom: 2 }}
       >
         Create New Quiz
@@ -85,7 +85,9 @@ export default function QuizzesTable() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <IconButton onClick={() => navigate(`/quiz/${quiz._id}`)}>
+                  <IconButton
+                    onClick={() => navigate(`/admin/quiz/${quiz._id}`)}
+                  >
                     <EditIcon />
                   </IconButton>
                   <IconButton onClick={() => handleDelete(quiz._id)}>

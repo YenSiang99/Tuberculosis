@@ -1,4 +1,3 @@
-// models/score/FillBlankScoreModel.js
 const mongoose = require("mongoose");
 
 const fillBlankScoreSchema = new mongoose.Schema(
@@ -10,15 +9,32 @@ const fillBlankScoreSchema = new mongoose.Schema(
     },
     fillBlank: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "FillBlank", // Reference the active fill-in-the-blanks game
+      ref: "FillBlank",
       required: true,
     },
     totalTimeTaken: {
       type: Number, // in seconds
       required: true,
     },
+    totalGameTime: {
+      type: Number, // in seconds
+      required: true,
+    },
     score: {
-      type: Number, // score based on correct answers
+      type: Number, // Number of correct answers
+      required: true,
+    },
+    totalPossibleScore: {
+      type: Number, // Total number of questions
+      required: true,
+    },
+    accuracyRate: {
+      type: Number, // Percentage of correct answers
+      required: true,
+    },
+    completionStatus: {
+      type: String,
+      enum: ["Completed", "Incomplete"],
       required: true,
     },
   },

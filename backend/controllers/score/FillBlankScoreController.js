@@ -1,4 +1,3 @@
-// controllers/score/FillBlankScoreController.js
 const FillBlankScore = require("../../models/score/FillBlankScoreModel");
 const FillBlank = require("../../models/games/FillBlankModel");
 
@@ -16,12 +15,22 @@ exports.submitFillBlankScore = async (req, res) => {
         .json({ message: "No active fill-in-the-blanks game available." });
     }
 
+    const totalPossibleScore = activeFillBlank.questions.length;
+    const accuracyRate = (score / totalPossibleScore) * 100;
+    const totalGameTime = activeFillBlank.totalGameTime;
+    const completionStatus =
+      totalTimeTaken <= totalGameTime ? "Completed" : "Incomplete";
+
     // Create a new score entry
     const newScore = new FillBlankScore({
       user: userId,
-      fillBlank: activeFillBlank._id, // Associate the score with the active fill-in-the-blanks game
+      fillBlank: activeFillBlank._id,
       totalTimeTaken,
+      totalGameTime,
       score,
+      totalPossibleScore,
+      accuracyRate,
+      completionStatus,
     });
 
     await newScore.save();
@@ -36,7 +45,7 @@ exports.getUserFillBlankScores = async (req, res) => {
   try {
     const userId = req.user.userId;
     const scores = await FillBlankScore.find({ user: userId })
-      .populate("fillBlank", "name description") // Populate fillBlank details
+      .populate("fillBlank", "name description")
       .sort({ createdAt: -1 });
 
     res.status(200).json(scores);
@@ -50,7 +59,7 @@ exports.getAllFillBlankScores = async (req, res) => {
   try {
     const scores = await FillBlankScore.find()
       .populate("user", "username")
-      .populate("fillBlank", "name description") // Populate fillBlank details
+      .populate("fillBlank", "name description")
       .sort({ createdAt: -1 });
 
     res.status(200).json(scores);

@@ -18,8 +18,9 @@ const FillInBlanksPage = () => {
   const [questions, setQuestions] = useState([]);
   const [selectedBlankId, setSelectedBlankId] = useState(null);
   const [usedWords, setUsedWords] = useState([]);
-  const gameTime = 90;
-  const [gameTimer, setGameTimer] = useState(gameTime);
+  const [gameTime, setGameTime] = useState(null);
+  const [gameTimer, setGameTimer] = useState(null);
+
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
 
@@ -33,8 +34,11 @@ const FillInBlanksPage = () => {
 
     if (!storedUserData) return; // Only submit score if user is logged in
 
+    const totalTimeTaken =
+      gameTime !== null && gameTimer !== null ? gameTime - gameTimer : 0;
+
     const payload = {
-      totalTimeTaken: gameTime - gameTimer, // Total time taken to complete the game
+      totalTimeTaken, // Total time taken to complete the game
       score: calculateScore(), // Calculate the user's score
     };
 
@@ -121,7 +125,9 @@ const FillInBlanksPage = () => {
 
     setQuestions(resetQuestions);
     setUsedWords([]);
-    setGameTimer(gameTime); // Reset the game timer
+    if (gameTime !== null) {
+      setGameTimer(gameTime); // Reset the game timer
+    }
     setShowResult(false);
     setScore(0);
 
@@ -134,7 +140,7 @@ const FillInBlanksPage = () => {
   };
 
   useEffect(() => {
-    if (!openInstructionDialog && !gameOver) {
+    if (!openInstructionDialog && !gameOver && gameTimer !== null) {
       if (gameTimer > 0) {
         const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
         return () => clearTimeout(countdown);
@@ -148,6 +154,10 @@ const FillInBlanksPage = () => {
     axios
       .get("/fillBlanks/active")
       .then((response) => {
+        const data = response.data;
+
+        setGameTime(data.totalGameTime);
+        setGameTimer(data.totalGameTime);
         const questionsWithAnswers = response.data.questions.map((q) => ({
           ...q,
           answerChoice: "", // Add empty answerChoice field to each question
@@ -199,8 +209,15 @@ const FillInBlanksPage = () => {
             ))}
           </Grid>
           <Grid item xs={12} sx={{ textAlign: "center" }}>
-            <Typography variant="h7">Time left: {gameTimer} seconds</Typography>
+            {gameTimer !== null ? (
+              <Typography variant="h7">
+                Time left: {gameTimer} seconds
+              </Typography>
+            ) : (
+              <Typography variant="h7">Loading...</Typography>
+            )}
           </Grid>
+
           {/* Questions blanks */}
           <Grid item container spacing={2}>
             {questions.map((question, index) => (
@@ -321,8 +338,9 @@ const FillInBlanksPage = () => {
             <br />
             <br />
             4. <strong>Time Limit:</strong> <br />
-            You have a limited amount of time to fill in all the blanks. Keep an
-            eye on the timer at the top of the screen.
+            You have {gameTime !== null ? gameTime : "a limited amount of"}{" "}
+            seconds to fill in all the blanks. Keep an eye on the timer at the
+            top of the screen.
             <br />
             <br />
             5. <strong>Submit Your Answers:</strong> <br />

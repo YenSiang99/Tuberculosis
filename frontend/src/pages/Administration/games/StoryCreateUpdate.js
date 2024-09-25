@@ -140,7 +140,7 @@ export default function StoryCreateUpdate() {
 
     method(url, story)
       .then(() => {
-        navigate("/storymenu");
+        navigate("/admin/storymenu");
       })
       .catch((error) => {
         console.error("Error submitting story", error);

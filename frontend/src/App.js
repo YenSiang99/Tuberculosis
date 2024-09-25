@@ -4,19 +4,26 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Layouts
 import MainLayout from "./layout/MainLayout";
+import TBInfoLayout from "./layout/TBInfoLayout";
+import AuthLayout from "./layout/AuthLayout";
 
 // Public pages
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/PasswordRecovery/ForgotPassword";
 import ResetPassword from "./pages/PasswordRecovery/ResetPassword";
+// Register pages
+import PatientRegister from "./pages/Registration/PatientRegister";
+import HealthcareRegister from "./pages/Registration/HealthcareRegister";
+import SuccessfulRegister from "./pages/Registration/SuccessfulRegister";
+import UserRegister from "./pages/Registration/UserRegister";
 
 // TBInfo Pages
-import TBInfoLayout from "./layout/TBInfoLayout";
 import InfographicsPage from "./pages/TBInfo/InfographicsPage";
 import VideosPage from "./pages/TBInfo/VideosPage";
 import FAQsPage from "./pages/TBInfo/FAQsPage";
-import AboutTBCompanionPage from "./pages/AboutTBCompanionPage";
+import AboutTBCompanionPage from "./pages/TBInfo/AboutTBCompanionPage";
 
 // Games
 import WordSearchPage from "./pages/Games/WordSearchPage";
@@ -24,10 +31,9 @@ import QuizPage from "./pages/Games/QuizPage";
 import InteractiveStoryPage from "./pages/Games/InteractiveStoryPage";
 import FillInBlanksPage from "./pages/Games/FillInBlanksPage";
 import TrueFalsePage from "./pages/Games/TrueFalsePage";
-
 import ScoreDashboardPage from "./pages/Games/ScoreDashboardPage";
 
-// Admin game
+// Admin pages
 import WordSearchMenu from "./pages/Administration/games/WordSearchMenu";
 import CreateUpdateWordSearchList from "./pages/Administration/games/CreateUpdateWordSearchList";
 
@@ -40,10 +46,8 @@ import StoryCreateUpdate from "./pages/Administration/games/StoryCreateUpdate";
 import FillBlanksTable from "./pages/Administration/games/FillBlanksTable";
 import BlanksCreateUpdate from "./pages/Administration/games/BlanksCreateUpdate";
 
-// Register pages
-import PatientRegister from "./pages/Registration/PatientRegister";
-import HealthcareRegister from "./pages/Registration/HealthcareRegister";
-import SuccessfulRegister from "./pages/Registration/SuccessfulRegister";
+import AdminFAQ from "./pages/Administration/AdminFAQ";
+import AdminUser from "./pages/Administration/AdminUser";
 
 // Patient pages
 import PatientVideo from "./pages/Patient/PatientVideo";
@@ -51,7 +55,6 @@ import PatientSideEffect from "./pages/Patient/PatientSideEffect";
 import PatientCalendar from "./pages/Patient/PatientCalendar";
 import PatientAppointment from "./pages/Patient/PatientAppointment";
 import PatientProfile from "./pages/Patient/PatientProfile";
-import PatientPassword from "./pages/Patient/PatientPassword";
 import PatientNotification from "./pages/Patient/PatientNotification";
 import PatientSetting from "./pages/Patient/PatientSetting";
 
@@ -63,10 +66,6 @@ import HealthcareAppointment from "./pages/Healthcare/HealthcareAppointment";
 import HealthcareProfile from "./pages/Healthcare/HealthcareProfile";
 import HealthcareNotification from "./pages/Healthcare/HealthcareNotification";
 
-// Admin pages
-import AdminFAQ from "./pages/Administration/AdminFAQ";
-import AdminUser from "./pages/Administration/AdminUser";
-
 import TestPage from "./pages/TestPage";
 
 function App() {
@@ -74,11 +73,30 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Public paths */}
-          <Route path="/" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/test" element={<TestPage />}></Route>
 
+          {/* Auth paths */}
+          <Route path="/" element={<AuthLayout />}>
+            {/* Registration paths */}
+            <Route path="register/patient" element={<PatientRegister />} />
+            <Route
+              path="register/healthcare"
+              element={<HealthcareRegister />}
+            />
+            <Route path="register" element={<UserRegister />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+
+            <Route path="register/success" element={<SuccessfulRegister />} />
+
+            {/* Login */}
+            <Route path="/" element={<Login />} />
+
+            {/* Forgot password */}
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+          </Route>
+
+          {/* TB Info */}
           <Route path="/tb-info" element={<TBInfoLayout />}>
             <Route path="infographics" element={<InfographicsPage />} />
             <Route path="videos" element={<VideosPage />} />
@@ -93,12 +111,7 @@ function App() {
             <Route path="games/true-false" element={<TrueFalsePage />} />
             <Route path="about" element={<AboutTBCompanionPage />} />
           </Route>
-          <Route path="/test" element={<TestPage />}></Route>
-          {/* Register paths */}
-          <Route path="/register/patient" element={<PatientRegister />} />
-          <Route path="/register/healthcare" element={<HealthcareRegister />} />
-          <Route path="/register/success" element={<SuccessfulRegister />} />
-          {/* Patient paths */}
+          {/* Patient */}
           <Route path="/" element={<MainLayout />}>
             <Route
               path="/patientvideo"
@@ -158,15 +171,7 @@ function App() {
               }
             />
           </Route>
-          {/* <Route
-            path="/patientpassword"
-            element={
-              <ProtectedRoute>
-                <PatientPassword />
-              </ProtectedRoute>
-            }
-          /> */}
-          {/* healthcare paths */}
+          {/* Healthcare */}
           <Route path="/" element={<MainLayout />}>
             <Route
               path="/healthcarepatient"
@@ -217,51 +222,47 @@ function App() {
               }
             />
           </Route>
-          <Route path="/" element={<MainLayout />}>
-            <Route path="/wordsearchmenu" element={<WordSearchMenu />} />
-            {/* <Route path="/wordlistform" element={<WordListForm />} /> */}
+
+          {/* Admin  */}
+          <Route path="/admin" element={<MainLayout />}>
+            <Route path="wordsearchmenu" element={<WordSearchMenu />} />
             <Route
-              path="/wordsearchlist"
+              path="wordsearchlist"
               element={<CreateUpdateWordSearchList />}
             />
             <Route
-              path="/wordsearchlist/:id"
+              path="wordsearchlist/:id"
               element={<CreateUpdateWordSearchList />}
             />
 
-            <Route path="/quizzes" element={<QuizzesTable />} />
-            <Route path="/quiz/create" element={<CreateUpdateQuiz />} />
-            <Route path="/quiz/:id" element={<CreateUpdateQuiz />} />
+            <Route path="quizzes" element={<QuizzesTable />} />
+            <Route path="quiz/create" element={<CreateUpdateQuiz />} />
+            <Route path="quiz/:id" element={<CreateUpdateQuiz />} />
 
-            <Route path="/storymenu" element={<StoryListMenu />} />
-            <Route path="/story/create" element={<StoryCreateUpdate />} />
-            <Route path="/story/edit/:id" element={<StoryCreateUpdate />} />
+            <Route path="storymenu" element={<StoryListMenu />} />
+            <Route path="story/create" element={<StoryCreateUpdate />} />
+            <Route path="story/edit/:id" element={<StoryCreateUpdate />} />
 
-            <Route path="/blanks" element={<FillBlanksTable />} />
-            <Route path="/blanks/create" element={<BlanksCreateUpdate />} />
-            <Route path="/blanks/:id" element={<BlanksCreateUpdate />} />
+            <Route path="blanks" element={<FillBlanksTable />} />
+            <Route path="blanks/create" element={<BlanksCreateUpdate />} />
+            <Route path="blanks/:id" element={<BlanksCreateUpdate />} />
+
+            <Route path="adminfaq" element={<AdminFAQ />} />
+            <Route path="adminuser" element={<AdminUser />} />
           </Route>
-          {/* Games that is inside login */}
-          <Route path="/" element={<MainLayout />}>
-            {" "}
-            <Route path="games/word-search" element={<WordSearchPage />} />
-            <Route path="games/quiz" element={<QuizPage />} />
+          {/* Games */}
+          <Route path="/games" element={<MainLayout />}>
+            <Route path="word-search" element={<WordSearchPage />} />
+            <Route path="quiz" element={<QuizPage />} />
             <Route
-              path="games/interactive-story"
+              path="interactive-story"
               element={<InteractiveStoryPage />}
             />
-            <Route path="games/fill-in-blanks" element={<FillInBlanksPage />} />
-            <Route path="games/true-false" element={<TrueFalsePage />} />
-            <Route
-              path="/games/score-dashboard"
-              element={<ScoreDashboardPage />}
-            />
+            <Route path="fill-in-blanks" element={<FillInBlanksPage />} />
+            <Route path="true-false" element={<TrueFalsePage />} />
+            <Route path="score-dashboard" element={<ScoreDashboardPage />} />
             ScoreDashboardPage
           </Route>
-
-          {/* Admin paths */}
-          <Route path="/adminfaq" element={<AdminFAQ />} />
-          <Route path="/adminuser" element={<AdminUser />} />
         </Routes>
       </AuthProvider>
     </Router>

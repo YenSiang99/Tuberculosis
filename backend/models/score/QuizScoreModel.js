@@ -20,6 +20,10 @@ const quizScoreSchema = new mongoose.Schema(
       type: Number, // in seconds
       required: true,
     },
+    timeLimitPerQuestion: {
+      type: Number, // in seconds
+      required: true,
+    },
     score: {
       type: Number, // Number of correct answers
       required: true,

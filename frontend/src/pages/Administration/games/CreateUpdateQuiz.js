@@ -97,7 +97,7 @@ export default function CreateUpdateQuiz() {
       axios
         .put(`/quizzes/${id}`, quiz)
         .then(() => {
-          navigate("/quizzes");
+          navigate("/admin/quizzes");
         })
         .catch((error) => {
           console.error("Error updating quiz", error);
@@ -107,7 +107,7 @@ export default function CreateUpdateQuiz() {
       axios
         .post("/quizzes", quiz)
         .then(() => {
-          navigate("/quizzes");
+          navigate("/admin/quizzes");
         })
         .catch((error) => {
           console.error("Error creating quiz", error);

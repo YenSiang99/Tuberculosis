@@ -56,7 +56,7 @@ export default function FillBlanksTable() {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => navigate("/blanks/create")}
+        onClick={() => navigate("/admin/blanks/create")}
         sx={{ marginBottom: 2 }}
       >
         Create New Fill in the Blanks Set
@@ -86,7 +86,7 @@ export default function FillBlanksTable() {
                 </TableCell>
                 <TableCell>
                   <IconButton
-                    onClick={() => navigate(`/blanks/${fillBlank._id}`)}
+                    onClick={() => navigate(`/admin/blanks/${fillBlank._id}`)}
                   >
                     <EditIcon />
                   </IconButton>

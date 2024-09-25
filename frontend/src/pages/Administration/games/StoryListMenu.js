@@ -53,7 +53,7 @@ export default function StoryListMenu() {
       </Typography>
       <Button
         variant="contained"
-        onClick={() => navigate("/story/create")}
+        onClick={() => navigate("/admin/story/create")}
         sx={{ marginBottom: 2 }}
       >
         Create New Story
@@ -83,7 +83,7 @@ export default function StoryListMenu() {
                 </TableCell>
                 <TableCell>
                   <IconButton
-                    onClick={() => navigate(`/story/edit/${story._id}`)}
+                    onClick={() => navigate(`/admin/story/edit/${story._id}`)}
                   >
                     <EditIcon />
                   </IconButton>

@@ -255,32 +255,30 @@ export default function MainLayout() {
           <Collapse in={adminOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               <ListItemButton
-                onClick={() => navigateTo("/wordsearchmenu")}
-                selected={location.pathname === "/wordsearchmenu"}
+                onClick={() => navigateTo("/admin/wordsearchmenu")}
+                selected={location.pathname === "/admin/wordsearchmenu"}
                 sx={{ pl: 4 }}
               >
                 <ListItemText primary="Word Search" />
               </ListItemButton>
               {/* Add more submenus here if needed */}
               <ListItemButton
-                onClick={() => navigateTo("/quizzes")}
-                selected={location.pathname === "/quizzes"}
+                onClick={() => navigateTo("/admin/quizzes")}
+                selected={location.pathname === "/admin/quizzes"}
                 sx={{ pl: 4 }}
               >
                 <ListItemText primary="Quizzes" />
               </ListItemButton>
-
               <ListItemButton
-                onClick={() => navigateTo("/storymenu")}
-                selected={location.pathname === "/storymenu"}
+                onClick={() => navigateTo("/admin/storymenu")}
+                selected={location.pathname === "/admin/storymenu"}
                 sx={{ pl: 4 }}
               >
                 <ListItemText primary="Interactive Story" />
               </ListItemButton>
-
               <ListItemButton
-                onClick={() => navigateTo("/blanks")}
-                selected={location.pathname === "/blanks"}
+                onClick={() => navigateTo("/admin/blanks")}
+                selected={location.pathname === "/admin/blanks"}
                 sx={{ pl: 4 }}
               >
                 <ListItemText primary="Fill in the blanks" />

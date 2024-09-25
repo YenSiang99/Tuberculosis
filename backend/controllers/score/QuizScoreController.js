@@ -44,6 +44,7 @@ exports.submitQuizScore = async (req, res) => {
     const totalPossibleScore = activeQuiz.questions.length;
     const accuracyRate = (score / totalPossibleScore) * 100;
     const averageTimePerQuestion = totalTimeTaken / totalPossibleScore;
+    const timeLimitPerQuestion = activeQuiz.timeLimitPerQuestion;
 
     // Create a new score entry
     const newScore = new QuizScore({
@@ -51,6 +52,7 @@ exports.submitQuizScore = async (req, res) => {
       quiz: activeQuiz._id,
       totalTimeTaken,
       averageTimePerQuestion,
+      timeLimitPerQuestion, // Include the time limit per question
       score,
       totalPossibleScore,
       accuracyRate,
@@ -70,7 +72,7 @@ exports.getUserQuizScores = async (req, res) => {
   try {
     const userId = req.user.userId;
     const scores = await QuizScore.find({ user: userId })
-      .populate("quiz", "name description")
+      .populate("quiz", "name description") // We don't need timeLimitPerQuestion here as it's stored directly in the score
       .sort({ createdAt: -1 });
 
     res.status(200).json(scores);
@@ -78,7 +80,6 @@ exports.getUserQuizScores = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 // Admin: Get all users' historical quiz scores
 exports.getAllQuizScores = async (req, res) => {
   try {

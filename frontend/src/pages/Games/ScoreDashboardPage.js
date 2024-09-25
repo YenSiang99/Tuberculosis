@@ -110,16 +110,15 @@ export default function GamePerformanceDashboard() {
         headers = [
           "Quiz Name",
           "Score",
-          "Total Possible Score",
           "Accuracy Rate",
           "Average Time per Question",
+          "Time Limit per Question",
           "Completion Status",
           "Date",
         ];
         rows = scores.map((score) => ({
           quizName: score.quiz?.name || "N/A",
           score: `${score.score} out of ${score.totalPossibleScore}`,
-          totalPossibleScore: score.totalPossibleScore,
           accuracyRate:
             typeof score.accuracyRate === "number"
               ? `${score.accuracyRate.toFixed(2)}%`
@@ -128,6 +127,8 @@ export default function GamePerformanceDashboard() {
             typeof score.averageTimePerQuestion === "number"
               ? `${score.averageTimePerQuestion.toFixed(2)} seconds`
               : "N/A",
+          timeLimitPerQuestion: `${score.timeLimitPerQuestion} seconds`,
+
           completionStatus: score.completionStatus,
           date: new Date(score.createdAt).toLocaleString(),
         }));
@@ -149,15 +150,30 @@ export default function GamePerformanceDashboard() {
         break;
 
       case "Fill in the Blanks":
-        headers = ["Game Name", "Total Time Taken (sec)", "Score", "Date"];
+        headers = [
+          "Game Name",
+          "Score",
+          "Total Possible Score",
+          "Accuracy Rate",
+          "Total Time Taken",
+          "Total Game Time",
+          "Completion Status",
+          "Date",
+        ];
         rows = scores.map((score) => ({
           gameName: score.fillBlank?.name || "N/A",
-          totalTimeTaken: score.totalTimeTaken,
-          score: score.score,
+          score: `${score.score} out of ${score.totalPossibleScore}`,
+          totalPossibleScore: score.totalPossibleScore,
+          accuracyRate:
+            typeof score.accuracyRate === "number"
+              ? `${score.accuracyRate.toFixed(2)}%`
+              : "N/A",
+          totalTimeTaken: `${score.totalTimeTaken} seconds`,
+          totalGameTime: `${score.totalGameTime} seconds`,
+          completionStatus: score.completionStatus,
           date: new Date(score.createdAt).toLocaleString(),
         }));
         break;
-
       default:
         break;
     }

@@ -51,7 +51,7 @@ export default function CreateUpdateWordSearchList() {
       axios
         .put(`/wordLists/${id}`, wordList)
         .then(() => {
-          navigate("/wordsearchmenu");
+          navigate("/admin/wordsearchmenu");
         })
         .catch((error) => {
           console.error("Error updating word list", error);
@@ -61,7 +61,7 @@ export default function CreateUpdateWordSearchList() {
       axios
         .post("/wordLists", wordList)
         .then(() => {
-          navigate("/wordsearchmenu");
+          navigate("/admin/wordsearchmenu");
         })
         .catch((error) => {
           console.error("Error creating word list", error);

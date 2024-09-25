@@ -58,7 +58,7 @@ export default function WordSearchMenu() {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => navigate("/wordsearchlist")}
+        onClick={() => navigate("/admin/wordsearchlist")}
         sx={{ marginBottom: 2 }}
       >
         Create New Word List
@@ -88,7 +88,9 @@ export default function WordSearchMenu() {
                 </TableCell>
                 <TableCell>
                   <IconButton
-                    onClick={() => navigate(`/wordsearchlist/${wordList._id}`)}
+                    onClick={() =>
+                      navigate(`/admin/wordsearchlist/${wordList._id}`)
+                    }
                   >
                     <EditIcon />
                   </IconButton>

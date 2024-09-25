@@ -61,7 +61,7 @@ export default function CreateUpdateFillBlank() {
       axios
         .put(`/fillBlanks/${id}`, fillBlank)
         .then(() => {
-          navigate("/blanks");
+          navigate("/admin/blanks");
         })
         .catch((error) => {
           console.error("Error updating fillBlank", error);
@@ -71,7 +71,7 @@ export default function CreateUpdateFillBlank() {
       axios
         .post("/fillBlanks", fillBlank)
         .then(() => {
-          navigate("/blanks");
+          navigate("/admin/blanks");
         })
         .catch((error) => {
           console.error("Error creating fillBlank", error);
