@@ -18,6 +18,7 @@ import {
   Divider,
   CssBaseline,
   Collapse,
+  Badge,
 } from "@mui/material";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -34,12 +35,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Outlet } from "react-router-dom"; // To render child routes
 import GamesIcon from "@mui/icons-material/Games";
+import axios from "../components/axios";
 
 export default function MainLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
   const [userData, setUserData] = useState({});
+  const [userRole, setUserRole] = useState([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,24 +52,15 @@ export default function MainLayout() {
   const drawerWidth = 240;
 
   const [adminOpen, setAdminOpen] = useState(true);
+  const [openGames, setOpenGames] = useState(true);
 
   const handleAdminClick = () => {
     setAdminOpen(!adminOpen);
   };
 
-  const [openGames, setOpenGames] = useState(true);
-
   const handleGamesClick = () => {
     setOpenGames(!openGames);
   };
-
-  useEffect(() => {
-    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
-    if (storedUserData && storedUserData.roles) {
-      setUserRole(storedUserData.roles); // roles is an array now
-      setUserData(storedUserData);
-    }
-  }, []);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -86,12 +81,45 @@ export default function MainLayout() {
   };
 
   const fetchUnreadNotificationsCount = async () => {
-    // Implement API call to fetch notifications count
-    // setUnreadNotificationsCount(response.data.count);
+    console.log("fetch notifications func called in main layout");
+    try {
+      const response = await axios.get("/notifications");
+      const unreadCount = response.data.filter(
+        (notification) => notification.status === "unread"
+      ).length;
+      setUnreadNotificationsCount(unreadCount);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
   };
 
   useEffect(() => {
+    // Fetch user data from sessionStorage or localStorage
+    const storedUserData =
+      JSON.parse(sessionStorage.getItem("userData")) ||
+      JSON.parse(localStorage.getItem("userData"));
+
+    if (storedUserData) {
+      setUserData(storedUserData);
+      setUserRole(storedUserData.roles || []);
+    }
+
+    // Fetch unread notifications count
     fetchUnreadNotificationsCount();
+
+    // Listen for custom events
+    window.addEventListener(
+      "notificationsUpdated",
+      fetchUnreadNotificationsCount
+    );
+
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener(
+        "notificationsUpdated",
+        fetchUnreadNotificationsCount
+      );
+    };
   }, []);
 
   // Sidebar content based on role
@@ -148,11 +176,14 @@ export default function MainLayout() {
             <ListItemText primary="Profile" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => navigateTo("/healthcarenotification")}
+            key="Notifications"
+            onClick={() => navigate("/healthcarenotification")}
             selected={location.pathname === "/healthcarenotification"}
           >
             <ListItemIcon>
-              <NotificationsIcon />
+              <Badge badgeContent={unreadNotificationsCount} color="error">
+                <NotificationsIcon />
+              </Badge>
             </ListItemIcon>
             <ListItemText primary="Notifications" />
           </ListItemButton>
@@ -210,11 +241,14 @@ export default function MainLayout() {
             <ListItemText primary="Profile" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => navigateTo("/patientnotification")}
+            key="Notifications"
+            onClick={() => navigate("/patientnotification")}
             selected={location.pathname === "/patientnotification"}
           >
             <ListItemIcon>
-              <NotificationsIcon />
+              <Badge badgeContent={unreadNotificationsCount} color="error">
+                <NotificationsIcon />
+              </Badge>
             </ListItemIcon>
             <ListItemText primary="Notifications" />
           </ListItemButton>
@@ -405,13 +439,26 @@ export default function MainLayout() {
                   src={userData.profilePicture}
                   sx={{ width: 56, height: 56, marginBottom: 1 }}
                 />
-                <Typography variant="h6">{`${userData.firstName} ${userData.lastName}`}</Typography>
+                <Typography variant="h6">
+                  {`${userData.firstName} ${userData.lastName}`}
+                </Typography>
+              </Box>
+              <Divider />
+              <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+                <List>{renderDrawerContent()}</List>
               </Box>
               <Divider />
               <List>
-                {renderDrawerContent()}
-                {/* Notifications */}
-                {/* <ListItemButton
+                <ListItemButton onClick={handleLogout}>
+                  <ListItemIcon>
+                    <ExitToAppIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItemButton>
+              </List>
+
+              {/* Notifications */}
+              {/* <ListItemButton
             onClick={() => navigateTo("/notifications")}
             selected={location.pathname === "/notifications"}
           >
@@ -422,8 +469,8 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Notifications" />
           </ListItemButton> */}
-                {/* Settings */}
-                {/* <ListItemButton
+              {/* Settings */}
+              {/* <ListItemButton
             onClick={() => navigateTo("/settings")}
             selected={location.pathname === "/settings"}
           >
@@ -432,14 +479,7 @@ export default function MainLayout() {
             </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton> */}
-                {/* Logout */}
-                <ListItemButton onClick={handleLogout}>
-                  <ListItemIcon>
-                    <ExitToAppIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Logout" />
-                </ListItemButton>
-              </List>
+              {/* Logout */}
             </Drawer>
           </Box>
           <Box

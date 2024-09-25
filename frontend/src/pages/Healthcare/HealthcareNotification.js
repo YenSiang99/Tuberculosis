@@ -27,6 +27,7 @@ const NotificationItem = ({ notification }) => {
       try {
         await axios.patch(`/notifications/${notification._id}/read`); // Adjust your API endpoint accordingly
         setIsRead(true);
+        window.dispatchEvent(new Event("notificationsUpdated"));
       } catch (error) {
         console.error("Failed to mark notification as read", error);
       }
@@ -97,6 +98,7 @@ export default function HealthcareNotification() {
   const deleteAllNotifications = async () => {
     try {
       await axios.delete("/notifications/deleteAll");
+      window.dispatchEvent(new Event("notificationsUpdated"));
       setNotifications([]);
     } catch (error) {
       console.error("Failed to delete notifications", error);

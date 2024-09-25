@@ -29,7 +29,6 @@ export default function HealthcareSidebar() {
   const [healthcareData, setHealthcareData] = useState({});
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
-
   const [user, setUser] = useState({ fullname: "User", profilePicture: "" });
   useEffect(() => {
     // Attempt to fetch user data from session storage or local storage
@@ -84,33 +83,34 @@ export default function HealthcareSidebar() {
   useEffect(() => {
     fetchHealthcareData();
   }, []);
-  
 
   useEffect(() => {
     const handleProfileUpdate = () => {
       fetchHealthcareData();
     };
-  
-    window.addEventListener('profileUpdated', handleProfileUpdate);
-  
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
     return () => {
-      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
   }, []);
 
   const fetchUnreadNotificationsCount = async () => {
     try {
-      const response = await axios.get("/notifications"); 
-      const unreadCount = response.data.filter(notification => notification.status === 'unread').length;
-      setUnreadNotificationsCount(unreadCount); 
+      const response = await axios.get("/notifications");
+      const unreadCount = response.data.filter(
+        (notification) => notification.status === "unread"
+      ).length;
+      setUnreadNotificationsCount(unreadCount);
     } catch (error) {
       console.error("Failed to fetch notifications", error);
     }
   };
-  
+
   useEffect(() => {
     fetchUnreadNotificationsCount();
-  }, []); 
+  }, []);
 
   return (
     <Drawer
@@ -136,74 +136,14 @@ export default function HealthcareSidebar() {
           padding: 2,
         }}
       >
-         <Avatar
+        <Avatar
           src={healthcareData.profilePicture}
           sx={{ width: 56, height: 56, marginBottom: 1 }}
         />
-<Typography variant="h6">{`${healthcareData.firstName} ${healthcareData.lastName}`}</Typography>
+        <Typography variant="h6">{`${healthcareData.firstName} ${healthcareData.lastName}`}</Typography>
       </Box>
       <Divider />
       <List>
-        {/* All Patients */}
-        <ListItemButton
-          key="AllPatients"
-          onClick={() => navigateTo("/healthcarepatient")}
-          selected={isAllPatients}
-        >
-          <ListItemIcon>
-            <GroupIcon />
-          </ListItemIcon>
-          <ListItemText primary="All Patients" />
-        </ListItemButton>
-
-        {/* Review Video */}
-        <ListItemButton
-          key="ReviewVideo"
-          onClick={() => navigateTo("/healthcarevideo")}
-          selected={isReviewVideo}
-        >
-          <ListItemIcon>
-            <VideoCameraFrontIcon />
-          </ListItemIcon>
-          <ListItemText primary="Review Video" />
-        </ListItemButton>
-
-        {/* Review Side Effect */}
-        <ListItemButton
-          key="ReviewSideEffect"
-          onClick={() => navigateTo("/healthcaresideeffect")}
-          selected={isReviewSideEffect}
-        >
-          <ListItemIcon>
-            <ReportProblemIcon />
-          </ListItemIcon>
-          <ListItemText primary="Review Side Effect" />
-        </ListItemButton>
-
-        {/* Appointment */}
-        <ListItemButton
-          key="Appointment"
-          onClick={() => navigateTo("/healthcareappointment")}
-          selected={isAppointment}
-        >
-          <ListItemIcon>
-            <EventAvailableIcon />
-          </ListItemIcon>
-          <ListItemText primary="Appointment" />
-        </ListItemButton>
-
-        {/* Profile */}
-        <ListItemButton
-          key="Profile"
-          onClick={() => navigateTo("/healthcareprofile")}
-          selected={isProfile}
-        >
-          <ListItemIcon>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Profile" />
-        </ListItemButton>
-
         {/* Notifications */}
         <ListItemButton
           key="Notifications"

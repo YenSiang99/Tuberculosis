@@ -94,17 +94,19 @@ export default function PatientSidebar() {
 
   const fetchUnreadNotificationsCount = async () => {
     try {
-      const response = await axios.get("/notifications"); 
-      const unreadCount = response.data.filter(notification => notification.status === 'unread').length;
-      setUnreadNotificationsCount(unreadCount); 
+      const response = await axios.get("/notifications");
+      const unreadCount = response.data.filter(
+        (notification) => notification.status === "unread"
+      ).length;
+      setUnreadNotificationsCount(unreadCount);
     } catch (error) {
       console.error("Failed to fetch notifications", error);
     }
   };
-  
+
   useEffect(() => {
     fetchUnreadNotificationsCount();
-  }, []); 
+  }, []);
 
   return (
     <Drawer
@@ -138,67 +140,6 @@ export default function PatientSidebar() {
       </Box>
       <Divider />
       <List>
-        {/* Video Upload */}
-        <ListItemButton
-          key="VideoUpload"
-          onClick={() => navigateTo("/patientvideo")}
-          selected={isVideo}
-        >
-          <ListItemIcon>
-            <VideoCameraFrontIcon />
-          </ListItemIcon>
-          <ListItemText primary="Upload Video" />
-        </ListItemButton>
-
-        {/* Side Effect Reporting */}
-        <ListItemButton
-          key="SideEffects"
-          onClick={() => navigateTo("/patientsideeffect")}
-          selected={isSideEffect}
-        >
-          <ListItemIcon>
-            <ReportProblemIcon />
-          </ListItemIcon>
-          <ListItemText primary="Report Side Effects" />
-        </ListItemButton>
-
-        {/* Book Appointment */}
-        <ListItemButton
-          key="BookAppointment"
-          onClick={() => navigateTo("/patientappointment")}
-          selected={isAppointment}
-        >
-          <ListItemIcon>
-            <EventAvailableIcon />
-          </ListItemIcon>
-          <ListItemText primary="Appointment" />
-        </ListItemButton>
-
-        {/* My Calendar */}
-        <ListItemButton
-          key="MyCalendar"
-          onClick={() => navigateTo("/patientcalendar")}
-          selected={location.pathname === "/patientcalendar"}
-        >
-          <ListItemIcon>
-            <CalendarTodayIcon />
-          </ListItemIcon>
-          <ListItemText primary="Progress Tracker" />
-        </ListItemButton>
-
-        {/* Profile */}
-        <ListItemButton
-          key="Profile"
-          onClick={() => navigateTo("/patientprofile")}
-          selected={isProfile}
-        >
-          <ListItemIcon>
-            <PersonIcon />
-          </ListItemIcon>
-          <ListItemText primary="Profile" />
-        </ListItemButton>
-
-        {/* Notifications */}
         <ListItemButton
           key="Notifications"
           onClick={() => navigateTo("/patientnotification")}
@@ -210,26 +151,6 @@ export default function PatientSidebar() {
             </Badge>
           </ListItemIcon>
           <ListItemText primary="Notifications" />
-        </ListItemButton>
-
-        {/* Setting */}
-        <ListItemButton
-          key="Settings"
-          onClick={() => navigateTo("/patientsettings")}
-          selected={isSettings}
-        >
-          <ListItemIcon>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Settings" />
-        </ListItemButton>
-
-        {/* Logout */}
-        <ListItemButton key="Logout" onClick={handleLogout}>
-          <ListItemIcon>
-            <ExitToAppIcon />
-          </ListItemIcon>
-          <ListItemText primary="Logout" />
         </ListItemButton>
       </List>
     </Drawer>
