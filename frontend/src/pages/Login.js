@@ -62,11 +62,6 @@ export default function Login() {
     setOpenRoleSelect(!openRoleSelect);
   };
 
-  // Navigate to registration with the selected role
-  const navigateToRegister = (role) => {
-    navigate(`/register/${role}`);
-  };
-
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -125,6 +120,8 @@ export default function Login() {
           navigate("/patientvideo");
         } else if (decoded.roles.includes("healthcare")) {
           navigate("/healthcarepatient");
+        } else if (decoded.roles.includes("user")) {
+          navigate("/games/score-dashboard");
         } else {
           setAuth(false);
           console.log("User role not recognized or unauthorized");
@@ -347,15 +344,21 @@ export default function Login() {
         <List>
           <ListItemButton
             style={listItemStyle}
-            onClick={() => navigateToRegister("patient")}
+            onClick={() => navigate("/register/patient")}
           >
             <ListItemText primary="Patient" />
           </ListItemButton>
           <ListItemButton
             style={listItemStyle}
-            onClick={() => navigateToRegister("healthcare")}
+            onClick={() => navigate("/register/healthcare")}
           >
             <ListItemText primary="Healthcare Professional" />
+          </ListItemButton>
+          <ListItemButton
+            style={listItemStyle}
+            onClick={() => navigate("/register")}
+          >
+            <ListItemText primary="Normal User" />
           </ListItemButton>
         </List>
       </Dialog>

@@ -1,64 +1,85 @@
 // controllers/auth/registerController.js
-const User = require('../../models/User');
-const bcrypt = require('bcrypt');
-require('dotenv').config();
-
-
+const User = require("../../models/User");
+const bcrypt = require("bcrypt");
+require("dotenv").config();
 
 exports.register = async (req, res) => {
   try {
     const { email, password, firstName, lastName, group, mcpId } = req.body;
-    const profilePicture = req.file ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}` : undefined;
+    const profilePicture = req.file
+      ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}`
+      : undefined;
 
-    let roles = ['doctor', 'nurse', 'medical assistant'].includes(group) ? ['healthcare'] : [];
+    let roles = ["doctor", "nurse", "medical assistant"].includes(group)
+      ? ["healthcare"]
+      : [];
 
-    if (roles.includes('healthcare') && (!firstName || !lastName || !group || !mcpId)) {
-      return res.status(400).send('Missing healthcare registration details');
+    if (
+      roles.includes("healthcare") &&
+      (!firstName || !lastName || !group || !mcpId)
+    ) {
+      return res.status(400).send("Missing healthcare registration details");
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).send('Email already registered');
+      return res.status(409).send("Email already registered");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ 
-      email, 
-      password: hashedPassword, 
-      roles, 
-      firstName, 
-      lastName, 
-      group, 
-      mcpId, 
-      profilePicture 
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      roles,
+      firstName,
+      lastName,
+      group,
+      mcpId,
+      profilePicture,
     });
     await newUser.save();
 
-    res.status(201).send('User registered successfully');
+    res.status(201).send("User registered successfully");
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error registering user');
+    res.status(500).send("Error registering user");
   }
 };
 
 exports.registerPatient = async (req, res) => {
-  console.log(req.body); 
+  console.log(req.body);
   try {
     // req.body will contain text fields
     const {
-      email, password, firstName, lastName, gender, phoneNumber, country,
-      passportNumber, nricNumber, age, diagnosis, currentTreatment,
-      numberOfTablets, diagnosisDate, treatmentStartDate, treatmentDuration, profilePicture
+      email,
+      password,
+      firstName,
+      lastName,
+      gender,
+      phoneNumber,
+      country,
+      passportNumber,
+      nricNumber,
+      age,
+      diagnosis,
+      currentTreatment,
+      numberOfTablets,
+      diagnosisDate,
+      treatmentStartDate,
+      treatmentDuration,
+      profilePicture,
     } = req.body;
-    const profilePicturePath = req.file ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}` : "";
+    const profilePicturePath = req.file
+      ? `${process.env.BASE_URL}/media/profiles/${req.file.filename}`
+      : "";
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let patientFields = {
       email,
       password: hashedPassword,
-      roles: ['patient'],
-      group: 'patient',
+      roles: ["patient"],
+      group: "patient",
       firstName,
       lastName,
       gender,
@@ -72,28 +93,30 @@ exports.registerPatient = async (req, res) => {
       treatmentStartDate,
       treatmentDuration,
       profilePicture: profilePicturePath,
-      careStatus: 'Continue VOTS',
-      videoUploadAlert: true ,
+      careStatus: "Continue VOTS",
+      videoUploadAlert: true,
       reminderTime: new Date().setHours(22, 0, 0, 0),
-      reminderFrequency: 60 ,  
+      reminderFrequency: 60,
     };
 
     // Add passportNumber or nricNumber based on the country
-    if (country !== 'Malaysia') {
+    if (country !== "Malaysia") {
       if (!passportNumber) {
-        return res.status(400).send('Passport number is required for non-Malaysians');
+        return res
+          .status(400)
+          .send("Passport number is required for non-Malaysians");
       }
       patientFields.passportNumber = passportNumber;
     } else {
       if (!nricNumber) {
-        return res.status(400).send('NRIC number is required for Malaysians');
+        return res.status(400).send("NRIC number is required for Malaysians");
       }
       patientFields.nricNumber = nricNumber;
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).send('Email already registered');
+      return res.status(409).send("Email already registered");
     }
 
     const newUser = new User(patientFields);
@@ -105,5 +128,43 @@ exports.registerPatient = async (req, res) => {
   }
 };
 
+exports.registerUser = async (req, res) => {
+  try {
+    console.log("this is called");
+    console.log("this is req.body", req.body);
 
+    const { email, password, firstName, lastName } = req.body;
 
+    // Check required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).send("Missing required registration details");
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send("Email already registered");
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      roles: ["user"],
+      group: "user",
+      firstName,
+      lastName,
+    });
+
+    // Save the user
+    await newUser.save();
+
+    res.status(201).send("User registered successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error registering user");
+  }
+};
