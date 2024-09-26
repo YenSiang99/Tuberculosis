@@ -80,13 +80,25 @@ exports.getUserQuizScores = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 // Admin: Get all users' historical quiz scores
 exports.getAllQuizScores = async (req, res) => {
   try {
     const scores = await QuizScore.find()
-      .populate("user", "username")
-      .populate("quiz", "name description") // Populate quiz details
-      .sort({ createdAt: -1 });
+      .populate("user", "email firstName lastName")
+      .populate("quiz", "name description timeLimitPerQuestion questions")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Include totalPossibleScore if not stored in score
+    scores.forEach((score) => {
+      if (!score.totalPossibleScore && score.quiz?.questions) {
+        score.totalPossibleScore = score.quiz.questions.length;
+      }
+      if (!score.timeLimitPerQuestion && score.quiz?.timeLimitPerQuestion) {
+        score.timeLimitPerQuestion = score.quiz.timeLimitPerQuestion;
+      }
+    });
 
     res.status(200).json(scores);
   } catch (error) {

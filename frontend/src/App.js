@@ -34,6 +34,8 @@ import TrueFalsePage from "./pages/Games/TrueFalsePage";
 import ScoreDashboardPage from "./pages/Games/ScoreDashboardPage";
 
 // Admin pages
+import AdminScoreDashboardPage from "./pages/Administration/AdminScoreDashboardPage";
+
 import WordSearchMenu from "./pages/Administration/games/WordSearchMenu";
 import CreateUpdateWordSearchList from "./pages/Administration/games/CreateUpdateWordSearchList";
 
@@ -225,6 +227,10 @@ function App() {
 
           {/* Admin  */}
           <Route path="/admin" element={<MainLayout />}>
+            <Route
+              path="scoredashboard"
+              element={<AdminScoreDashboardPage />}
+            />
             <Route path="wordsearchmenu" element={<WordSearchMenu />} />
             <Route
               path="wordsearchlist"

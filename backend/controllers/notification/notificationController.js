@@ -20,12 +20,12 @@ exports.createNotification = async (req, res) => {
 exports.getNotifications = async (req, res) => {
   try {
     const userId = req.user.userId; // Adjusted based on the correct way to access userId
-    console.log("Fetching notifications for user ID:", userId); // Debugging
+    // console.log("Fetching notifications for user ID:", userId); // Debugging
 
     const notifications = await Notification.find({ recipient: userId }).sort({
       timestamp: -1,
     });
-    console.log("Found notifications:", notifications); // Debugging
+    // console.log("Found notifications:", notifications); // Debugging
 
     res.json(notifications);
   } catch (error) {

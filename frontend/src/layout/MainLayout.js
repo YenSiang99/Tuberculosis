@@ -289,6 +289,13 @@ export default function MainLayout() {
           <Collapse in={adminOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               <ListItemButton
+                onClick={() => navigateTo("/admin/scoredashboard")}
+                selected={location.pathname === "/admin/scoredashboard"}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText primary="Score Dashboard" />
+              </ListItemButton>
+              <ListItemButton
                 onClick={() => navigateTo("/admin/wordsearchmenu")}
                 selected={location.pathname === "/admin/wordsearchmenu"}
                 sx={{ pl: 4 }}

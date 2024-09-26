@@ -58,9 +58,17 @@ exports.getUserFillBlankScores = async (req, res) => {
 exports.getAllFillBlankScores = async (req, res) => {
   try {
     const scores = await FillBlankScore.find()
-      .populate("user", "username")
-      .populate("fillBlank", "name description")
-      .sort({ createdAt: -1 });
+      .populate("user", "email firstName lastName")
+      .populate("fillBlank", "name description totalGameTime questions")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Include totalPossibleScore if not stored in score
+    scores.forEach((score) => {
+      if (!score.totalPossibleScore && score.fillBlank?.questions) {
+        score.totalPossibleScore = score.fillBlank.questions.length;
+      }
+    });
 
     res.status(200).json(scores);
   } catch (error) {

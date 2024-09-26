@@ -47,9 +47,10 @@ exports.getUserStoryScores = async (req, res) => {
 exports.getAllStoryScores = async (req, res) => {
   try {
     const scores = await InteractiveStoryScore.find()
-      .populate("user", "username")
-      .populate("story", "title description") // Populate story details
-      .sort({ createdAt: -1 });
+      .populate("user", "email firstName lastName")
+      .populate("story", "title description")
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.status(200).json(scores);
   } catch (error) {
