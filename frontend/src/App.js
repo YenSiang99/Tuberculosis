@@ -174,9 +174,9 @@ function App() {
             />
           </Route>
           {/* Healthcare */}
-          <Route path="/" element={<MainLayout />}>
+          <Route path="/healthcare" element={<MainLayout />}>
             <Route
-              path="/healthcarepatient"
+              path="patient"
               element={
                 <ProtectedRoute>
                   <HealthcarePatient />
@@ -184,7 +184,7 @@ function App() {
               }
             />
             <Route
-              path="/healthcarevideo"
+              path="video"
               element={
                 <ProtectedRoute>
                   <HealthcareVideo />
@@ -192,7 +192,7 @@ function App() {
               }
             />
             <Route
-              path="/healthcaresideeffect"
+              path="sideeffect"
               element={
                 <ProtectedRoute>
                   <HealthcareSideEffect />
@@ -200,7 +200,7 @@ function App() {
               }
             />
             <Route
-              path="/healthcareappointment"
+              path="appointment"
               element={
                 <ProtectedRoute>
                   <HealthcareAppointment />
@@ -208,7 +208,7 @@ function App() {
               }
             />
             <Route
-              path="/healthcareprofile"
+              path="profile"
               element={
                 <ProtectedRoute>
                   <HealthcareProfile />
@@ -216,7 +216,7 @@ function App() {
               }
             />
             <Route
-              path="/healthcarenotification"
+              path="notification"
               element={
                 <ProtectedRoute>
                   <HealthcareNotification />

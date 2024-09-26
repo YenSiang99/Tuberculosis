@@ -119,7 +119,7 @@ export default function Login() {
         if (decoded.roles.includes("patient")) {
           navigate("/patientvideo");
         } else if (decoded.roles.includes("healthcare")) {
-          navigate("/healthcarepatient");
+          navigate("/healthcare/patient");
         } else if (decoded.roles.includes("user")) {
           navigate("/games/score-dashboard");
         } else {

@@ -131,8 +131,8 @@ export default function MainLayout() {
       menuItems.push(
         <>
           <ListItemButton
-            onClick={() => navigateTo("/healthcarepatient")}
-            selected={location.pathname === "/healthcarepatient"}
+            onClick={() => navigateTo("/healthcare/patient")}
+            selected={location.pathname === "/healthcare/patient"}
           >
             <ListItemIcon>
               <PersonIcon />
@@ -140,8 +140,8 @@ export default function MainLayout() {
             <ListItemText primary="All Patients" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => navigateTo("/healthcarevideo")}
-            selected={location.pathname === "/healthcarevideo"}
+            onClick={() => navigateTo("/healthcare/video")}
+            selected={location.pathname === "/healthcare/video"}
           >
             <ListItemIcon>
               <VideoCameraFrontIcon />
@@ -149,8 +149,8 @@ export default function MainLayout() {
             <ListItemText primary="Review Videos" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => navigateTo("/healthcaresideeffect")}
-            selected={location.pathname === "/healthcaresideeffect"}
+            onClick={() => navigateTo("/healthcare/sideeffect")}
+            selected={location.pathname === "/healthcare/sideeffect"}
           >
             <ListItemIcon>
               <ReportProblemIcon />
@@ -158,8 +158,8 @@ export default function MainLayout() {
             <ListItemText primary="Review Side Effects" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => navigateTo("/healthcareappointment")}
-            selected={location.pathname === "/healthcareappointment"}
+            onClick={() => navigateTo("/healthcare/appointment")}
+            selected={location.pathname === "/healthcare/appointment"}
           >
             <ListItemIcon>
               <EventAvailableIcon />
@@ -167,8 +167,8 @@ export default function MainLayout() {
             <ListItemText primary="Appointment" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => navigateTo("/healthcareprofile")}
-            selected={location.pathname === "/healthcareprofile"}
+            onClick={() => navigateTo("/healthcare/profile")}
+            selected={location.pathname === "/healthcare/profile"}
           >
             <ListItemIcon>
               <SettingsIcon />
@@ -177,8 +177,8 @@ export default function MainLayout() {
           </ListItemButton>
           <ListItemButton
             key="Notifications"
-            onClick={() => navigate("/healthcarenotification")}
-            selected={location.pathname === "/healthcarenotification"}
+            onClick={() => navigate("/healthcare/notification")}
+            selected={location.pathname === "/healthcare/notification"}
           >
             <ListItemIcon>
               <Badge badgeContent={unreadNotificationsCount} color="error">
