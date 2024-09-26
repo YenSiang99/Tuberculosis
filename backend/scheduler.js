@@ -39,7 +39,7 @@ async function remindPatientsToUploadVideo() {
         const notification = new Notification({
           recipient: patient._id,
           message,
-          targetUrl: "/patientvideo",
+          targetUrl: "/patient/video",
         });
         await notification.save();
         console.log(`Notification saved for patient ID: ${patient._id}`);

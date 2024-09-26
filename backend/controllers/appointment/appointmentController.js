@@ -83,7 +83,7 @@ exports.updateAppointment = async (req, res) => {
     const notification = new Notification({
       recipient: appointment.patient,
       message: message,
-      targetUrl: "/patientappointment", // Adjust this URL to where patients view their appointments
+      targetUrl: "/patient/appointment", // Adjust this URL to where patients view their appointments
     });
     await notification.save();
 
@@ -268,7 +268,7 @@ exports.deleteAppointment = async (req, res) => {
     } else {
       // If healthcare staff is deleting the appointment, notify the patient
       notificationMessage = `Your appointment has been cancelled by healthcare stuff.`;
-      targetUrl = "/patientappointment";
+      targetUrl = "/patient/appointment";
       const notification = new Notification({
         recipient: appointment.patient,
         message: notificationMessage,

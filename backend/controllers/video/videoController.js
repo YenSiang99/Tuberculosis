@@ -93,7 +93,7 @@ exports.updateVideoStatus = async (req, res) => {
       const notification = new Notification({
         recipient: patient._id,
         message: message,
-        targetUrl: "/patientvideo",
+        targetUrl: "/patient/video",
       });
       await notification.save();
     }
@@ -288,12 +288,10 @@ exports.uploadVideoForDates = async (req, res) => {
   if (videoRecords.length > 0) {
     res.status(201).json(videoRecords);
   } else {
-    res
-      .status(200)
-      .json({
-        message:
-          "No new video records were created. They either already exist or are before the diagnosis date.",
-      });
+    res.status(200).json({
+      message:
+        "No new video records were created. They either already exist or are before the diagnosis date.",
+    });
   }
 };
 

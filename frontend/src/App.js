@@ -114,9 +114,9 @@ function App() {
             <Route path="about" element={<AboutTBCompanionPage />} />
           </Route>
           {/* Patient */}
-          <Route path="/" element={<MainLayout />}>
+          <Route path="/patient" element={<MainLayout />}>
             <Route
-              path="/patientvideo"
+              path="video"
               element={
                 <ProtectedRoute>
                   <PatientVideo />
@@ -124,7 +124,7 @@ function App() {
               }
             />
             <Route
-              path="/patientsideeffect"
+              path="sideeffect"
               element={
                 <ProtectedRoute>
                   <PatientSideEffect />
@@ -132,7 +132,7 @@ function App() {
               }
             />
             <Route
-              path="/patientappointment"
+              path="appointment"
               element={
                 <ProtectedRoute>
                   <PatientAppointment />
@@ -140,7 +140,7 @@ function App() {
               }
             />
             <Route
-              path="/patientcalendar"
+              path="calendar"
               element={
                 <ProtectedRoute>
                   <PatientCalendar />
@@ -148,7 +148,7 @@ function App() {
               }
             />
             <Route
-              path="/patientprofile"
+              path="profile"
               element={
                 <ProtectedRoute>
                   <PatientProfile />
@@ -157,7 +157,7 @@ function App() {
             />
 
             <Route
-              path="/patientnotification"
+              path="notification"
               element={
                 <ProtectedRoute>
                   <PatientNotification />
@@ -165,7 +165,7 @@ function App() {
               }
             />
             <Route
-              path="/patientsettings"
+              path="settings"
               element={
                 <ProtectedRoute>
                   <PatientSetting />

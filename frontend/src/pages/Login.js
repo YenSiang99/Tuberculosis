@@ -117,7 +117,7 @@ export default function Login() {
       // Check if roles is defined and is an array
       if (decoded.roles) {
         if (decoded.roles.includes("patient")) {
-          navigate("/patientvideo");
+          navigate("/patient/video");
         } else if (decoded.roles.includes("healthcare")) {
           navigate("/healthcare/patient");
         } else if (decoded.roles.includes("user")) {
