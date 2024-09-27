@@ -33,10 +33,22 @@ const InfographicsPage = () => {
       type: "single",
     },
     {
-      name: "Infographic_6",
-      type: "multi",
-      pages: ["Page1.png", "Page2.png"],
+      name: "Infographic_6.png",
+      type: "single",
     },
+    {
+      name: "Infographic_7.png",
+      type: "single",
+    },
+    {
+      name: "Infographic_8.png",
+      type: "single",
+    },
+    // {
+    //   name: "Infographic_6",
+    //   type: "multi",
+    //   pages: ["Page1.png", "Page2.png"],
+    // },
   ];
 
   const [currentInfographicIndex, setCurrentInfographicIndex] = useState(0);
@@ -56,9 +68,9 @@ const InfographicsPage = () => {
 
   const getInfographicSrc = (folder, file) => {
     if (file) {
-      return require(`../../infographics/${folder}/${file}`);
+      return `./infographics/${folder}/${file}`;
     } else {
-      return require(`../../infographics/${folder}`);
+      return `./infographics/${folder}`;
     }
   };
 

@@ -8,7 +8,7 @@ import {
   styled,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import demoMedicineVideo from "../../videos/Presentation1.mp4";
+// import demoMedicineVideo from "../../videos/Presentation1.mp4";
 import { useTheme } from "@mui/material/styles";
 
 const AboutTBCompanionPage = () => {
@@ -221,7 +221,7 @@ const AboutTBCompanionPage = () => {
             {/* Embedding the video */}
             <div style={{ width: "100%", overflow: "hidden" }}>
               <video width="20%" height="40%" controls>
-                <source src={demoMedicineVideo} type="video/mp4" />
+                <source src="./videos/Presentation1.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
