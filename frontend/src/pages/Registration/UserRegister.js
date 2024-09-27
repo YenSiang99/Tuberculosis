@@ -284,11 +284,7 @@ export default function UserRegister() {
             >
               Register
             </Button>
-            <Button
-              variant="text"
-              onClick={() => navigate("/login")}
-              sx={{ mt: 1 }}
-            >
+            <Button variant="text" onClick={() => navigate("/")} sx={{ mt: 1 }}>
               Back to Login
             </Button>
           </Box>
