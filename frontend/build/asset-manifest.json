@@ -1,26 +1,16 @@
 {
   "files": {
     "main.css": "/Tuberculosis/static/css/main.9bb26bea.css",
-    "main.js": "/Tuberculosis/static/js/main.6d23e214.js",
+    "main.js": "/Tuberculosis/static/js/main.b93049a0.js",
     "static/js/453.d855a71b.chunk.js": "/Tuberculosis/static/js/453.d855a71b.chunk.js",
-    "static/media/Presentation1.mp4": "/Tuberculosis/static/media/Presentation1.1b8517cd916185c6b256.mp4",
-    "static/media/TBInfographic_Sample_2.png": "/Tuberculosis/static/media/TBInfographic_Sample_2.a570c9b2ecbc8dacb951.png",
-    "static/media/TBInfographic_Sample_1.png": "/Tuberculosis/static/media/TBInfographic_Sample_1.03455f0d54a3af7a4b99.png",
-    "static/media/Infographic_1.png": "/Tuberculosis/static/media/Infographic_1.b46fb6fddde01ccf4494.png",
-    "static/media/Infographic_2.png": "/Tuberculosis/static/media/Infographic_2.442f71457b723ec8b060.png",
-    "static/media/Page1.png": "/Tuberculosis/static/media/Page1.b597b61a9adbb97c3f1f.png",
-    "static/media/Page2.png": "/Tuberculosis/static/media/Page2.069a9021c9ae7b896238.png",
-    "static/media/Infographic_3.png": "/Tuberculosis/static/media/Infographic_3.a2e5672c049ff4b11ec8.png",
-    "static/media/Infographic_5.png": "/Tuberculosis/static/media/Infographic_5.2176fe23676103f2c793.png",
-    "static/media/Infographic_4.png": "/Tuberculosis/static/media/Infographic_4.d0be6c72ca9cbd7c62e6.png",
     "static/media/cover.jpeg": "/Tuberculosis/static/media/cover.db181c746b0405b4039b.jpeg",
     "index.html": "/Tuberculosis/index.html",
     "main.9bb26bea.css.map": "/Tuberculosis/static/css/main.9bb26bea.css.map",
-    "main.6d23e214.js.map": "/Tuberculosis/static/js/main.6d23e214.js.map",
+    "main.b93049a0.js.map": "/Tuberculosis/static/js/main.b93049a0.js.map",
     "453.d855a71b.chunk.js.map": "/Tuberculosis/static/js/453.d855a71b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.9bb26bea.css",
-    "static/js/main.6d23e214.js"
+    "static/js/main.b93049a0.js"
   ]
 }
