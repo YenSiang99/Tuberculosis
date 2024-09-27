@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   Typography,
   Button,
@@ -9,12 +7,10 @@ import {
   Divider,
   Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   Paper,
   IconButton,
-  useMediaQuery,
   Alert,
   Dialog,
   Chip,
@@ -27,12 +23,8 @@ import {
   DialogContentText,
   DialogActions,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
-import MenuIcon from "@mui/icons-material/Menu";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -69,8 +61,6 @@ export default function PatientAppointment() {
   const [appointmentHistory, setAppointmentHistory] = useState([]);
 
   // Controllers
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
   const [alertInfo, setAlertInfo] = useState({
     show: false,
     type: "",
@@ -81,30 +71,32 @@ export default function PatientAppointment() {
 
   // Functions
   // Api fetching
-  const fetchAvailableSlots = async (year, month) => {
-    try {
-      const response = await axios.get(
-        `/appointments/availableSlots/?year=${year}&month=${month}`
-      );
-      setAvailableDateTimeSlots(response.data);
+  const fetchAvailableSlots = useCallback(
+    async (year, month) => {
+      try {
+        const response = await axios.get(
+          `/appointments/availableSlots/?year=${year}&month=${month}`
+        );
+        setAvailableDateTimeSlots(response.data);
 
-      // Automatically select the current date's available slots if any, for initial load or when changing months
-      const formattedSelectedDateString = `${year}-${("0" + month).slice(
-        -2
-      )}-${("0" + selectedDate.getDate()).slice(-2)}`;
-      const dayInfo = response.data.find((d) =>
-        d.day.startsWith(formattedSelectedDateString)
-      );
-      if (dayInfo) {
-        setAvailableTimeSlots(dayInfo.availableTimeSlotList);
-      } else {
-        setAvailableTimeSlots([]);
+        const formattedSelectedDateString = `${year}-${("0" + month).slice(
+          -2
+        )}-${("0" + selectedDate.getDate()).slice(-2)}`;
+        const dayInfo = response.data.find((d) =>
+          d.day.startsWith(formattedSelectedDateString)
+        );
+
+        if (dayInfo) {
+          setAvailableTimeSlots(dayInfo.availableTimeSlotList);
+        } else {
+          setAvailableTimeSlots([]);
+        }
+      } catch (error) {
+        console.error("Error fetching Available Date Time Slots:", error);
       }
-    } catch (error) {
-      console.error("Error fetching Available Date Time Slots:", error);
-      // Handle the error as needed
-    }
-  };
+    },
+    [selectedDate]
+  );
   const fetchPatientAppointments = async () => {
     try {
       const response = await axios.get("appointments/patientAppointments");
@@ -126,9 +118,7 @@ export default function PatientAppointment() {
     }
   };
   // Controller function
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -201,7 +191,7 @@ export default function PatientAppointment() {
         cursor: "not-allowed",
       };
     } else {
-      console.log('Date',date)
+      console.log("Date", date);
 
       const dateString = [
         date.getFullYear(),
@@ -222,6 +212,9 @@ export default function PatientAppointment() {
             break;
           case "Fully Booked":
             style.backgroundColor = "#2196f3"; // Even darker blue for fully booked
+            break;
+          default:
+            style.backgroundColor = "#f5f5f5"; // Default color if no status matches
             break;
         }
       }
@@ -244,8 +237,7 @@ export default function PatientAppointment() {
       setAlertInfo({
         show: true,
         type: "error",
-        message:
-          "No available slots.",
+        message: "No available slots.",
       });
       return;
     }
@@ -296,7 +288,7 @@ export default function PatientAppointment() {
         backgroundColor = "#2196f3";
         break;
       default:
-        backgroundColor = "#f5f5f5"; 
+        backgroundColor = "#f5f5f5";
     }
 
     const style = {
@@ -379,7 +371,7 @@ export default function PatientAppointment() {
     const month = selectedDate.getMonth() + 1; // JavaScript months are 0-indexed
     fetchAvailableSlots(year, month);
     fetchPatientAppointments();
-  }, [selectedDate]);
+  }, [selectedDate, fetchAvailableSlots]);
 
   const promptCancelAppointment = (appointmentId) => {
     setAppointmentIdToCancel(appointmentId);
@@ -387,263 +379,212 @@ export default function PatientAppointment() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {useMediaQuery(theme.breakpoints.down("sm")) && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      {/* book your appointment */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          component="div"
           sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
+            fontWeight: "bold",
+            fontSize: "1.5rem",
           }}
         >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={
-          useMediaQuery(theme.breakpoints.down("sm"))
-            ? "temporary"
-            : "permanent"
-        }
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-        }}
-      >
-        <Container>
-          {/* book your appointment */}
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+          Book Your Appointment
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Grid container spacing={3}>
+              {/* Calender picker */}
+              <Grid item xs={12} md={7}>
+                <TitleWithBackground gutterBottom>
+                  Step 1: Select a Date
+                </TitleWithBackground>
+                <Calendar
+                  localizer={localizer}
+                  startAccessor="start"
+                  endAccessor="end"
+                  style={{ height: 400 }}
+                  dayPropGetter={dayPropGetter}
+                  onSelectSlot={handleSelectSlot}
+                  selectable
+                  views={{ month: true }}
+                  eventPropGetter={eventStyleGetter}
+                  components={{
+                    toolbar: (props) => (
+                      <CustomToolbar
+                        {...props}
+                        onMonthChange={handleMonthChange}
+                      />
+                    ),
+                    event: EventComponent,
+                  }}
+                />
+                <Legend />
+              </Grid>
+
+              {/* Divider */}
+              <Grid
+                item
+                sm={1}
+                md={1}
+                style={{ display: "flex" }}
+                hidden={{ xsDown: true }}
+              >
+                {/* The Divider will be hidden on extra-small (xs) screens */}
+                <Divider orientation="vertical" flexItem />
+              </Grid>
+
+              {/* Time slot */}
+              <Grid item xs={12} md={4}>
+                <TitleWithBackground gutterBottom>
+                  Step 2: Select a Time Slot
+                </TitleWithBackground>
+                {availableTimeSlots.length > 0 ? (
+                  <List>
+                    {availableTimeSlots.map((timeSlot, index) => {
+                      const timeSlotString = formatTimeSlot(timeSlot);
+                      return (
+                        <ListItemButton
+                          key={index}
+                          selected={selectedTime === timeSlot}
+                          onClick={() => setSelectedTime(timeSlot)}
+                        >
+                          <ListItemText primary={timeSlotString} />
+                        </ListItemButton>
+                      );
+                    })}
+                  </List>
+                ) : (
+                  <Typography>
+                    No time slots available for this date.
+                  </Typography>
+                )}
+              </Grid>
+            </Grid>
+          </LocalizationProvider>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!selectedTime}
+            sx={{ mt: 4, display: "block", width: "100%" }}
+          >
+            Book Appointment
+          </Button>
+        </Box>
+      </Paper>
+      {/* Pending Appointments */}
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 2 }}>
             <Typography
               variant="h5"
               gutterBottom
-              component="div"
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-              }}
+              sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
             >
-              Book Your Appointment
+              Pending Appointments
             </Typography>
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 2 }}
-            >
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Grid container spacing={3}>
-                  {/* Calender picker */}
-                  <Grid item xs={12} md={7}>
-                    <TitleWithBackground gutterBottom>
-                      Step 1: Select a Date
-                    </TitleWithBackground>
-                    <Calendar
-                      localizer={localizer}
-                      startAccessor="start"
-                      endAccessor="end"
-                      style={{ height: 400 }}
-                      dayPropGetter={dayPropGetter}
-                      onSelectSlot={handleSelectSlot}
-                      selectable
-                      views={{ month: true }}
-                      eventPropGetter={eventStyleGetter}
-                      components={{
-                        toolbar: (props) => (
-                          <CustomToolbar
-                            {...props}
-                            onMonthChange={handleMonthChange}
-                          />
-                        ),
-                        event: EventComponent,
-                      }}
-                    />
-                    <Legend />
-                  </Grid>
-
-                  {/* Divider */}
-                  <Grid
-                    item
-                    sm={1}
-                    md={1}
-                    style={{ display: "flex" }}
-                    hidden={{ xsDown: true }}
-                  >
-                    {/* The Divider will be hidden on extra-small (xs) screens */}
-                    <Divider orientation="vertical" flexItem />
-                  </Grid>
-
-                  {/* Time slot */}
-                  <Grid item xs={12} md={4}>
-                    <TitleWithBackground gutterBottom>
-                      Step 2: Select a Time Slot
-                    </TitleWithBackground>
-                    {availableTimeSlots.length > 0 ? (
-                      <List>
-                        {availableTimeSlots.map((timeSlot, index) => {
-                          const timeSlotString = formatTimeSlot(timeSlot);
-                          return (
-                            <ListItemButton
-                              key={index}
-                              selected={selectedTime === timeSlot}
-                              onClick={() => setSelectedTime(timeSlot)}
-                            >
-                              <ListItemText primary={timeSlotString} />
-                            </ListItemButton>
-                          );
-                        })}
-                      </List>
-                    ) : (
-                      <Typography>
-                        No time slots available for this date.
-                      </Typography>
-                    )}
-                  </Grid>
-                </Grid>
-              </LocalizationProvider>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={!selectedTime}
-                sx={{ mt: 4, display: "block", width: "100%" }}
-              >
-                Book Appointment
-              </Button>
-            </Box>
+            {appointmentHistory
+              .filter(
+                (appointment) =>
+                  !appointment.healthcare ||
+                  appointment.healthcare ===
+                    "No Healthcare Provider Assigned Yet"
+              )
+              .map((appointment, index) => (
+                <Card
+                  key={index}
+                  sx={{ mb: 2, borderLeft: "6px solid orange" }}
+                >
+                  <CardHeader
+                    avatar={
+                      <Avatar sx={{ bgcolor: "orange" }}>
+                        <PendingActionsIcon />
+                      </Avatar>
+                    }
+                    title={`Appointment on ${appointment.date}`}
+                    subheader={`Status: ${appointment.status}`}
+                  />
+                  <CardContent>
+                    <Typography variant="body2">
+                      <b>Time Slot:</b> {appointment.timeslot}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      <b>Status:</b> Awaiting Healthcare Assignment
+                    </Typography>
+                    {/* Cancel Button */}
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      onClick={() => promptCancelAppointment(appointment.id)}
+                      sx={{ mt: 2 }}
+                    >
+                      Cancel Appointment
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
           </Paper>
-          {/* Pending Appointments */}
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Paper elevation={3} sx={{ p: 2 }}>
-                <Typography
-                  variant="h5"
-                  gutterBottom
-                  sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-                >
-                  Pending Appointments
-                </Typography>
-                {appointmentHistory
-                  .filter(
-                    (appointment) =>
-                      !appointment.healthcare ||
-                      appointment.healthcare ===
-                        "No Healthcare Provider Assigned Yet"
-                  )
-                  .map((appointment, index) => (
-                    <Card
-                      key={index}
-                      sx={{ mb: 2, borderLeft: "6px solid orange" }}
+        </Grid>
+        {/* Your Appointments */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography
+              variant="h5"
+              gutterBottom
+              sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+            >
+              Confirmed Appointments
+            </Typography>
+            {appointmentHistory
+              .filter(
+                (appointment) =>
+                  appointment.healthcare &&
+                  appointment.healthcare !==
+                    "No Healthcare Provider Assigned Yet"
+              )
+              .map((appointment, index) => (
+                <Card key={index} sx={{ mb: 2, borderLeft: "6px solid green" }}>
+                  <CardHeader
+                    avatar={
+                      <Avatar sx={{ bgcolor: "green" }}>
+                        <CheckCircleOutlineIcon />
+                      </Avatar>
+                    }
+                    title={`Appointment on ${appointment.date}`}
+                    subheader={`With Healthcare: ${
+                      appointment.healthcare
+                        ? `${appointment.healthcare.firstName} ${appointment.healthcare.lastName}`
+                        : "No Healthcare Provider Assigned Yet"
+                    }`}
+                  />
+                  <CardContent>
+                    <Typography variant="body2">
+                      <b>Time Slot:</b> {appointment.timeslot}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      <b>Status:</b> Confirmed
+                    </Typography>
+                    {/* Cancel Button */}
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      onClick={() => promptCancelAppointment(appointment.id)}
+                      sx={{ mt: 2 }}
                     >
-                      <CardHeader
-                        avatar={
-                          <Avatar sx={{ bgcolor: "orange" }}>
-                            <PendingActionsIcon />
-                          </Avatar>
-                        }
-                        title={`Appointment on ${appointment.date}`}
-                        subheader={`Status: ${appointment.status}`}
-                      />
-                      <CardContent>
-                        <Typography variant="body2">
-                          <b>Time Slot:</b> {appointment.timeslot}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mt: 1 }}>
-                          <b>Status:</b> Awaiting Healthcare Assignment
-                        </Typography>
-                        {/* Cancel Button */}
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          onClick={() =>
-                            promptCancelAppointment(appointment.id)
-                          }
-                          sx={{ mt: 2 }}
-                        >
-                          Cancel Appointment
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </Paper>
-            </Grid>
-            {/* Your Appointments */}
-            <Grid item xs={12} md={6}>
-              <Paper elevation={3} sx={{ p: 2 }}>
-                <Typography
-                  variant="h5"
-                  gutterBottom
-                  sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-                >
-                  Confirmed Appointments
-                </Typography>
-                {appointmentHistory
-                  .filter(
-                    (appointment) =>
-                      appointment.healthcare &&
-                      appointment.healthcare !==
-                        "No Healthcare Provider Assigned Yet"
-                  )
-                  .map((appointment, index) => (
-                    <Card
-                      key={index}
-                      sx={{ mb: 2, borderLeft: "6px solid green" }}
-                    >
-                      <CardHeader
-                        avatar={
-                          <Avatar sx={{ bgcolor: "green" }}>
-                            <CheckCircleOutlineIcon />
-                          </Avatar>
-                        }
-                        title={`Appointment on ${appointment.date}`}
-                        subheader={`With Healthcare: ${
-                          appointment.healthcare
-                            ? `${appointment.healthcare.firstName} ${appointment.healthcare.lastName}`
-                            : "No Healthcare Provider Assigned Yet"
-                        }`}
-                      />
-                      <CardContent>
-                        <Typography variant="body2">
-                          <b>Time Slot:</b> {appointment.timeslot}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mt: 1 }}>
-                          <b>Status:</b> Confirmed
-                        </Typography>
-                                                {/* Cancel Button */}
-                                                <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          onClick={() =>
-                            promptCancelAppointment(appointment.id)
-                          }
-                          sx={{ mt: 2 }}
-                        >
-                          Cancel Appointment
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+                      Cancel Appointment
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+          </Paper>
+        </Grid>
+      </Grid>
       <CustomDialog
         open={alertInfo.show}
         onClose={handleCloseAlert}
@@ -677,6 +618,6 @@ export default function PatientAppointment() {
           </Button>
         </DialogActions>
       </Dialog>
-    </ThemeProvider>
+    </Container>
   );
 }

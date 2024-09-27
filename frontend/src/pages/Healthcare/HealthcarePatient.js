@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   List,
@@ -10,7 +8,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useMediaQuery,
   Grid,
   Paper,
   Container,
@@ -33,8 +30,6 @@ import {
   Alert,
   styled,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
 import FaceIcon from "@mui/icons-material/Face";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
@@ -44,7 +39,6 @@ import Avatar from "@mui/material/Avatar";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
 import { format, isValid, parseISO } from "date-fns";
 import axios from "../../components/axios";
@@ -65,8 +59,6 @@ export default function HealthcarePatient() {
   const [dateState, setDateState] = useState(new Date());
   const [editTreatmentInfo, setEditTreatmentInfo] = useState(false);
   const [tempTreatmentInfo, setTempTreatmentInfo] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [patients, setPatients] = useState([]);
   const [videoStatuses, setVideoStatuses] = useState([]);
   const [inactivePatients, setInactivePatients] = useState([]);
   const [activePatients, setActivePatients] = useState([]);
@@ -95,14 +87,21 @@ export default function HealthcarePatient() {
       const updatedPatients = response.data.map((patient) => ({
         ...patient,
         // Determine if the patient's treatment is considered ended either by date or by specific care statuses
-        isTreatmentEnded: new Date(patient.treatmentEndDate) < new Date() || 
-                           ["Switch to DOTS", "Appointment to see doctor"].includes(patient.careStatus),
+        isTreatmentEnded:
+          new Date(patient.treatmentEndDate) < new Date() ||
+          ["Switch to DOTS", "Appointment to see doctor"].includes(
+            patient.careStatus
+          ),
       }));
-  
+
       // Categorize patients based on the modified isTreatmentEnded flag
-      const activePatients = updatedPatients.filter((patient) => !patient.isTreatmentEnded);
-      const inactivePatients = updatedPatients.filter((patient) => patient.isTreatmentEnded);
-  
+      const activePatients = updatedPatients.filter(
+        (patient) => !patient.isTreatmentEnded
+      );
+      const inactivePatients = updatedPatients.filter(
+        (patient) => patient.isTreatmentEnded
+      );
+
       // Update state to reflect categorized patients
       setActivePatients(activePatients);
       setInactivePatients(inactivePatients);
@@ -110,17 +109,12 @@ export default function HealthcarePatient() {
       console.error("Error fetching patients", error);
     }
   };
-  
+
   useEffect(() => {
     fetchAndCategorizePatients();
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const openManageDialog = (patient) => {
     console.log("Patient", patient);
@@ -321,158 +315,115 @@ export default function HealthcarePatient() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
       >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
-      >
-        <Container>
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+        <Box sx={{ p: 3 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            component="div"
+            sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
           >
-            <Box sx={{ p: 3 }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-              >
-                Patient List
-              </Typography>
+            Patient List
+          </Typography>
 
-              <List>
-                {activePatients.map((patient) => (
-                  <Card
-                    key={patient.id}
-                    sx={{ mb: 2, bgcolor: "neutral.light" }}
-                  >
-                    <CardContent>
-                      <ListItem>
-                        <Avatar
-                          src={patient.profilePicture}
-                          alt={`${patient.firstName} ${patient.lastName}`}
-                          sx={{ mr: 2 }}
-                        />
-                        <ListItemText
-                          primary={`${patient.firstName} ${patient.lastName}`}
-                          secondary={
-                            <Typography
-                              component="span"
-                              variant="body2"
-                              color="textSecondary"
-                            >
-                              Status:{" "}
-                              {patient.isTreatmentEnded
-                                ? "Treatment Ended"
-                                : patient.careStatus}
-                            </Typography>
-                          }
-                        />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => openManageDialog(patient)}
+          <List>
+            {activePatients.map((patient) => (
+              <Card key={patient.id} sx={{ mb: 2, bgcolor: "neutral.light" }}>
+                <CardContent>
+                  <ListItem>
+                    <Avatar
+                      src={patient.profilePicture}
+                      alt={`${patient.firstName} ${patient.lastName}`}
+                      sx={{ mr: 2 }}
+                    />
+                    <ListItemText
+                      primary={`${patient.firstName} ${patient.lastName}`}
+                      secondary={
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="textSecondary"
                         >
-                          Manage
-                        </Button>
-                      </ListItem>
-                    </CardContent>
-                  </Card>
-                ))}
-              </List>
-            </Box>
-          </Paper>
-        </Container>
-
-        <Container>
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+                          Status:{" "}
+                          {patient.isTreatmentEnded
+                            ? "Treatment Ended"
+                            : patient.careStatus}
+                        </Typography>
+                      }
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openManageDialog(patient)}
+                    >
+                      Manage
+                    </Button>
+                  </ListItem>
+                </CardContent>
+              </Card>
+            ))}
+          </List>
+        </Box>
+      </Paper>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            component="div"
+            sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
           >
-                        <Box sx={{ p: 3 }}>
-            <Typography
-              variant="h5"
-              gutterBottom
-              component="div"
-              sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-            >
-              Inactive Patients
-            </Typography>
-            <List>
+            Inactive Patients
+          </Typography>
+          <List>
             {inactivePatients.map((patient) => (
-  <Card key={patient.id} sx={{ mb: 2, bgcolor: "neutral.light" }}>
-    <CardContent>
-      <ListItem>
-        <Avatar
-          src={patient.profilePicture}
-          alt={`${patient.firstName} ${patient.lastName}`}
-          sx={{ mr: 2 }}
-        />
-        <ListItemText
-          primary={`${patient.firstName} ${patient.lastName}`}
-          secondary={
-            <Typography
-              component="span"
-              variant="body2"
-              color="textSecondary"
-            >
-              Status: {
-                ["Switch to DOTS", "Appointment to see doctor"].includes(patient.careStatus) 
-                ? patient.careStatus 
-                : "Treatment Ended"
-              }
-            </Typography>
-          }
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => openManageDialog(patient)}
-        >
-          View Profile
-        </Button>
-      </ListItem>
-    </CardContent>
-  </Card>
-))}
-
-            </List>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-
+              <Card key={patient.id} sx={{ mb: 2, bgcolor: "neutral.light" }}>
+                <CardContent>
+                  <ListItem>
+                    <Avatar
+                      src={patient.profilePicture}
+                      alt={`${patient.firstName} ${patient.lastName}`}
+                      sx={{ mr: 2 }}
+                    />
+                    <ListItemText
+                      primary={`${patient.firstName} ${patient.lastName}`}
+                      secondary={
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="textSecondary"
+                        >
+                          Status:{" "}
+                          {[
+                            "Switch to DOTS",
+                            "Appointment to see doctor",
+                          ].includes(patient.careStatus)
+                            ? patient.careStatus
+                            : "Treatment Ended"}
+                        </Typography>
+                      }
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openManageDialog(patient)}
+                    >
+                      View Profile
+                    </Button>
+                  </ListItem>
+                </CardContent>
+              </Card>
+            ))}
+          </List>
+        </Box>
+      </Paper>
       <Dialog
         open={Boolean(selectedPatient)}
         onClose={closeManageDialog}
@@ -854,6 +805,6 @@ export default function HealthcarePatient() {
           {alertInfo.message}
         </Alert>
       </CustomDialog>
-    </ThemeProvider>
+    </Container>
   );
 }

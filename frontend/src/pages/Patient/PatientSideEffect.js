@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  ThemeProvider,
   Box,
   Typography,
   Button,
@@ -13,9 +12,7 @@ import {
   styled,
   TextField,
   Grid,
-  useMediaQuery,
   IconButton,
-  Drawer,
   Table,
   TableBody,
   TableCell,
@@ -28,14 +25,11 @@ import {
   DialogContent,
 } from "@mui/material";
 import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
-import { isValid, parseISO, format } from "date-fns";
+import { parseISO, format } from "date-fns";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
-import MenuIcon from "@mui/icons-material/Menu";
 import InfoIcon from "@mui/icons-material/Info";
 import axios from "../../components/axios";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 
 const StyledRadioGroup = styled(RadioGroup)(({ theme }) => ({
   flexDirection: "row",
@@ -110,8 +104,6 @@ export default function PatientSideEffectReport() {
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [selectedSideEffects, setSelectedSideEffects] = useState([]);
   const [sideEffectDetails, setSideEffectDetails] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [otherDescription, setOtherDescription] = useState("");
   const [alertInfo, setAlertInfo] = useState({
     show: false,
@@ -193,14 +185,14 @@ export default function PatientSideEffectReport() {
   };
 
   const fetchSideEffectHistory = async () => {
-      try {
-        const response = await axios.get(`/sideEffects/patient`);
-        setSideEffectHistory(response.data); // Update the side effect history state
-      } catch (error) {
-        console.error(
-          "Error fetching side effect history:",
-          error.response?.data || error.message
-        );
+    try {
+      const response = await axios.get(`/sideEffects/patient`);
+      setSideEffectHistory(response.data); // Update the side effect history state
+    } catch (error) {
+      console.error(
+        "Error fetching side effect history:",
+        error.response?.data || error.message
+      );
     }
   };
 
@@ -277,10 +269,6 @@ export default function PatientSideEffectReport() {
     }
   };
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
   const handleOtherDescriptionChange = (event) => {
     setOtherDescription(event.target.value);
   };
@@ -294,243 +282,197 @@ export default function PatientSideEffectReport() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-        }}
-      >
-        <Container>
-          <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 2 }}
-            >
-              <SectionTitle
-                variant="h5"
-                component="h2"
-                sx={{ fontWeight: "bold" }}
-              >
-                Report Side Effects
-              </SectionTitle>
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 5 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+          <SectionTitle variant="h5" component="h2" sx={{ fontWeight: "bold" }}>
+            Report Side Effects
+          </SectionTitle>
 
-              <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
-                When did these symptoms start?
-              </TitleWithBackground>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                  <Grid item xs={12}>
-                    <DateTimePicker
-                      label="Select Date and Time"
-                      value={selectedDateTime}
-                      onChange={setSelectedDateTime}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-              </LocalizationProvider>
+          <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
+            When did these symptoms start?
+          </TitleWithBackground>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid item xs={12}>
+                <DateTimePicker
+                  label="Select Date and Time"
+                  value={selectedDateTime}
+                  onChange={setSelectedDateTime}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+              </Grid>
+            </Grid>
+          </LocalizationProvider>
 
-              <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
-                Symptoms (Choose all that apply)
-              </TitleWithBackground>
-              <IconButton onClick={handleGradeInfoClick} size="big">
-                <InfoIcon sx={{ fontSize: "1.5rem" }} />
-              </IconButton>
+          <TitleWithBackground variant="subtitle1" sx={{ mt: 2 }}>
+            Symptoms (Choose all that apply)
+          </TitleWithBackground>
+          <IconButton onClick={handleGradeInfoClick} size="big">
+            <InfoIcon sx={{ fontSize: "1.5rem" }} />
+          </IconButton>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
+            <Box sx={{ my: 2 }}>
               <Box
                 sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mt: 2,
+                  mb: 2,
                 }}
               >
-                <Box sx={{ my: 2 }}>
+                {["Mild", "Moderate", "Serious"].map((grade, index) => (
                   <Box
+                    key={grade}
                     sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mt: 2,
-                      mb: 2,
+                      flexDirection: "column",
+                      alignItems:
+                        index === 0
+                          ? "flex-start"
+                          : index === 1
+                          ? "center"
+                          : "flex-end",
+                      width: "33%",
                     }}
                   >
-                    {["Mild", "Moderate", "Serious"].map((grade, index) => (
-                      <Box
-                        key={grade}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
                         sx={{
-                          flexDirection: "column",
-                          alignItems:
+                          fontWeight: "bold",
+                          fontSize: "0.875rem",
+                          color:
                             index === 0
-                              ? "flex-start"
+                              ? "#4caf50"
                               : index === 1
-                              ? "center"
-                              : "flex-end",
-                          width: "33%",
+                              ? "#ff9800"
+                              : "#f44336",
                         }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: "bold",
-                              fontSize: "0.875rem",
-                              color:
-                                index === 0
-                                  ? "#4caf50"
-                                  : index === 1
-                                  ? "#ff9800"
-                                  : "#f44336",
-                            }}
-                          >
-                            Grade {index + 1}: {grade}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))}
+                        Grade {index + 1}: {grade}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-                <Grid container spacing={2}>
-                  {/* First Column */}
-                  <Grid item xs={12} md={6}>
-                    {firstHalfOptions.map((sideEffect) => (
-                      <Box key={sideEffect}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedSideEffects.includes(sideEffect)}
-                              onChange={handleCheckboxChange}
-                              name={sideEffect}
-                            />
-                          }
-                          label={sideEffect}
-                        />
-                        {selectedSideEffects.includes(sideEffect) &&
-                          sideEffect !== "Others (Please Describe)" && (
-                            <StyledRadioGroup
-                              aria-label={`grade-${sideEffect}`}
-                              name={`grade-${sideEffect}`}
-                              value={sideEffectDetails[sideEffect]?.grade || ""}
-                              onChange={(e) => handleRadioChange(e, sideEffect)}
-                            >
-                              <FormControlLabel
-                                value="1"
-                                control={<Radio />}
-                                label="Grade 1"
-                              />
-                              <FormControlLabel
-                                value="2"
-                                control={<Radio />}
-                                label="Grade 2"
-                              />
-                              <FormControlLabel
-                                value="3"
-                                control={<Radio />}
-                                label="Grade 3"
-                              />
-                            </StyledRadioGroup>
-                          )}
-                      </Box>
-                    ))}
-                  </Grid>
-
-                  {/* Second Column */}
-                  <Grid item xs={12} md={6}>
-                    {secondHalfOptions.map((sideEffect) => (
-                      <Box key={sideEffect}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedSideEffects.includes(sideEffect)}
-                              onChange={handleCheckboxChange}
-                              name={sideEffect}
-                            />
-                          }
-                          label={sideEffect}
-                        />
-                        {selectedSideEffects.includes(sideEffect) &&
-                          sideEffect === "Others (Please Describe)" && (
-                            <TextField
-                              label="Please describe"
-                              value={otherDescription}
-                              onChange={handleOtherDescriptionChange}
-                              margin="normal"
-                              fullWidth
-                            />
-                          )}
-                        {selectedSideEffects.includes(sideEffect) &&
-                          sideEffect !== "Others (Please Describe)" && (
-                            <StyledRadioGroup
-                              aria-label={`grade-${sideEffect}`}
-                              name={`grade-${sideEffect}`}
-                              value={sideEffectDetails[sideEffect]?.grade || ""}
-                              onChange={(e) => handleRadioChange(e, sideEffect)}
-                            >
-                              <FormControlLabel
-                                value="1"
-                                control={<Radio />}
-                                label="Grade 1"
-                              />
-                              <FormControlLabel
-                                value="2"
-                                control={<Radio />}
-                                label="Grade 2"
-                              />
-                              <FormControlLabel
-                                value="3"
-                                control={<Radio />}
-                                label="Grade 3"
-                              />
-                            </StyledRadioGroup>
-                          )}
-                      </Box>
-                    ))}
-                  </Grid>
-                </Grid>
+                ))}
               </Box>
-
-              <Button type="submit" variant="contained" sx={{ mt: 4 }}>
-                Submit
-              </Button>
             </Box>
-          </Paper>
-          <div ref={historyRef}>
-            <SideEffectHistory history={sideEffectHistory} />
-          </div>
-        </Container>
-      </Box>
+            <Grid container spacing={2}>
+              {/* First Column */}
+              <Grid item xs={12} md={6}>
+                {firstHalfOptions.map((sideEffect) => (
+                  <Box key={sideEffect}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedSideEffects.includes(sideEffect)}
+                          onChange={handleCheckboxChange}
+                          name={sideEffect}
+                        />
+                      }
+                      label={sideEffect}
+                    />
+                    {selectedSideEffects.includes(sideEffect) &&
+                      sideEffect !== "Others (Please Describe)" && (
+                        <StyledRadioGroup
+                          aria-label={`grade-${sideEffect}`}
+                          name={`grade-${sideEffect}`}
+                          value={sideEffectDetails[sideEffect]?.grade || ""}
+                          onChange={(e) => handleRadioChange(e, sideEffect)}
+                        >
+                          <FormControlLabel
+                            value="1"
+                            control={<Radio />}
+                            label="Grade 1"
+                          />
+                          <FormControlLabel
+                            value="2"
+                            control={<Radio />}
+                            label="Grade 2"
+                          />
+                          <FormControlLabel
+                            value="3"
+                            control={<Radio />}
+                            label="Grade 3"
+                          />
+                        </StyledRadioGroup>
+                      )}
+                  </Box>
+                ))}
+              </Grid>
+
+              {/* Second Column */}
+              <Grid item xs={12} md={6}>
+                {secondHalfOptions.map((sideEffect) => (
+                  <Box key={sideEffect}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedSideEffects.includes(sideEffect)}
+                          onChange={handleCheckboxChange}
+                          name={sideEffect}
+                        />
+                      }
+                      label={sideEffect}
+                    />
+                    {selectedSideEffects.includes(sideEffect) &&
+                      sideEffect === "Others (Please Describe)" && (
+                        <TextField
+                          label="Please describe"
+                          value={otherDescription}
+                          onChange={handleOtherDescriptionChange}
+                          margin="normal"
+                          fullWidth
+                        />
+                      )}
+                    {selectedSideEffects.includes(sideEffect) &&
+                      sideEffect !== "Others (Please Describe)" && (
+                        <StyledRadioGroup
+                          aria-label={`grade-${sideEffect}`}
+                          name={`grade-${sideEffect}`}
+                          value={sideEffectDetails[sideEffect]?.grade || ""}
+                          onChange={(e) => handleRadioChange(e, sideEffect)}
+                        >
+                          <FormControlLabel
+                            value="1"
+                            control={<Radio />}
+                            label="Grade 1"
+                          />
+                          <FormControlLabel
+                            value="2"
+                            control={<Radio />}
+                            label="Grade 2"
+                          />
+                          <FormControlLabel
+                            value="3"
+                            control={<Radio />}
+                            label="Grade 3"
+                          />
+                        </StyledRadioGroup>
+                      )}
+                  </Box>
+                ))}
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Button type="submit" variant="contained" sx={{ mt: 4 }}>
+            Submit
+          </Button>
+        </Box>
+      </Paper>
+      <div ref={historyRef}>
+        <SideEffectHistory history={sideEffectHistory} />
+      </div>
       <CustomDialog
         open={alertInfo.show}
         onClose={handleCloseAlert}
@@ -548,42 +490,67 @@ export default function PatientSideEffectReport() {
             : alertInfo.message}
         </Alert>
       </CustomDialog>
-      <Dialog open={openGradeInfo} onClose={handleGradeInfoClose} fullWidth maxWidth="sm">
-  <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold', textAlign: 'center' }}>
-    Grade Explanations
-    <IconButton
-      aria-label="close"
-      onClick={handleGradeInfoClose}
-      sx={{
-        position: 'absolute',
-        right: 8,
-        top: 8,
-        color: (theme) => theme.palette.grey[500],
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
- <DialogContent sx={{ pt: 2 }}>
-  {[
-    { grade: "Grade 1: Mild", description: "Effects are mild and generally not bothersome.", color: "#4caf50" },
-    { grade: "Grade 2: Moderate", description: "Effects are bothersome and may interfere with doing some activities but are not dangerous.", color: "#ff9800" },
-    { grade: "Grade 3: Serious", description: "Effects are serious and interfere with a person's ability to do basic things like eat or get dressed.", color: "#f44336" }
-  ].map((item, index) => (
-    <Box key={index} sx={{ mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Typography variant="h6" sx={{ color: item.color, fontWeight: 'bold' }}>
-          {item.grade}
-        </Typography>
-      </Box>
-      <Typography variant="body2" sx={{ ml: 3 }}>
-        {item.description}
-      </Typography>
-    </Box>
-  ))}
-</DialogContent>
-
-</Dialog>
-    </ThemeProvider>
+      <Dialog
+        open={openGradeInfo}
+        onClose={handleGradeInfoClose}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle
+          sx={{ m: 0, p: 2, fontWeight: "bold", textAlign: "center" }}
+        >
+          Grade Explanations
+          <IconButton
+            aria-label="close"
+            onClick={handleGradeInfoClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {[
+            {
+              grade: "Grade 1: Mild",
+              description: "Effects are mild and generally not bothersome.",
+              color: "#4caf50",
+            },
+            {
+              grade: "Grade 2: Moderate",
+              description:
+                "Effects are bothersome and may interfere with doing some activities but are not dangerous.",
+              color: "#ff9800",
+            },
+            {
+              grade: "Grade 3: Serious",
+              description:
+                "Effects are serious and interfere with a person's ability to do basic things like eat or get dressed.",
+              color: "#f44336",
+            },
+          ].map((item, index) => (
+            <Box key={index} sx={{ mb: 4 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ color: item.color, fontWeight: "bold" }}
+                >
+                  {item.grade}
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ ml: 3 }}>
+                {item.description}
+              </Typography>
+            </Box>
+          ))}
+        </DialogContent>
+      </Dialog>
+    </Container>
   );
 }

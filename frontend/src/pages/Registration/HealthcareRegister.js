@@ -38,31 +38,34 @@ export default function HealthcareRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null); 
-  const [passwordError, setPasswordError] = useState({valid: true, message: "",});
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [passwordError, setPasswordError] = useState({
+    valid: true,
+    message: "",
+  });
   const [emailError, setEmailError] = useState({ valid: true, message: "" });
 
   const handleRegister = async (event) => {
     event.preventDefault();
     // Create a FormData object
     const formData = new FormData();
-    formData.append('firstName', firstName);
-    formData.append('lastName', lastName);
-    formData.append('group', group);
-    formData.append('mcpId', mcpId);
-    formData.append('email', email);
-    formData.append('password', password);
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("group", group);
+    formData.append("mcpId", mcpId);
+    formData.append("email", email);
+    formData.append("password", password);
     // Append the profile picture file if selected
     if (selectedFile) {
-      formData.append('profilePicture', selectedFile);
+      formData.append("profilePicture", selectedFile);
     }
-  
+
     try {
       // Send a POST request with FormData
       const response = await axios.post("/auth/register", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // Important for processing files
-        }
+          "Content-Type": "multipart/form-data", // Important for processing files
+        },
       });
       navigate("/register/success");
     } catch (error) {
@@ -71,19 +74,18 @@ export default function HealthcareRegister() {
         setAlertInfo({
           show: true,
           type: "error",
-          message: "Email already registered."
+          message: "Email already registered.",
         });
       } else {
         // General error handling
         setAlertInfo({
           show: true,
           type: "error",
-          message: "An unexpected error occurred. Please try again."
+          message: "An unexpected error occurred. Please try again.",
         });
       }
     }
   };
-  
 
   const handleCloseAlert = () => {
     setAlertInfo({ show: false, type: "", message: "" });
@@ -95,13 +97,12 @@ export default function HealthcareRegister() {
       overflow: "visible",
     },
   }));
-  
+
   const handleProfilePictureUpload = async (event) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setProfilePicture(URL.createObjectURL(file)); // Set the profile picture for preview
-      setSelectedFile(file); 
-
+      setSelectedFile(file);
     }
   };
 
@@ -139,10 +140,7 @@ export default function HealthcareRegister() {
   };
 
   const isFormValid = () => {
-    return (
-      emailError.valid &&
-      passwordError.valid
-    );
+    return emailError.valid && passwordError.valid;
   };
 
   return (
@@ -177,11 +175,7 @@ export default function HealthcareRegister() {
           <Typography component="h1" variant="h5">
             Healthcare Registration
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleRegister}
-            sx={{ mt: 1 }}
-          >
+          <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
             <Grid container spacing={2}>
               <Grid item sm={12}>
                 {/* Profile picture upload section */}
@@ -312,55 +306,53 @@ export default function HealthcareRegister() {
                 />
               </Grid>
               <Grid item xs={12}>
-              <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={handleEmailChange}
-                    error={!emailError.valid}
-                    helperText={emailError.valid ? "" : emailError.message}
-                  />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={handleEmailChange}
+                  error={!emailError.valid}
+                  helperText={emailError.valid ? "" : emailError.message}
+                />
               </Grid>
               <Grid item xs={12}>
-              <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onBlur={handlePasswordChange}
-                    error={!passwordError.valid}
-                    helperText={
-                      passwordError.valid ? "" : passwordError.message
-                    }
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                          >
-                            {showPassword ? (
-                              <VisibilityOffIcon />
-                            ) : (
-                              <VisibilityIcon />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onBlur={handlePasswordChange}
+                  error={!passwordError.valid}
+                  helperText={passwordError.valid ? "" : passwordError.message}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? (
+                            <VisibilityOffIcon />
+                          ) : (
+                            <VisibilityIcon />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Grid>
             </Grid>
             <Button

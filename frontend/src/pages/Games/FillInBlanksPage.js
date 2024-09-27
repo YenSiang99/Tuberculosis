@@ -11,53 +11,44 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useMediaQuery,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import axios from "../../components/axios"; // Adjust with your axios instance
 
 const FillInBlanksPage = () => {
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      text: "Tuberculosis (TB) is caused by the bacterium ____.",
-      answer: "Mycobacterium tuberculosis",
-      answerChoice: "",
-    },
-    {
-      id: 2,
-      text: "The primary organ affected by tuberculosis is the ____.",
-      answer: "lungs",
-      answerChoice: "",
-    },
-    {
-      id: 3,
-      text: "TB is typically spread through ____ from an infected person.",
-      answer: "airborne droplets",
-      answerChoice: "",
-    },
-    {
-      id: 4,
-      text: "A common symptom of TB is a persistent ____ lasting more than three weeks.",
-      answer: "cough",
-      answerChoice: "",
-    },
-    {
-      id: 5,
-      text: "The test used to diagnose TB is called the ____ test.",
-      answer: "Mantoux",
-      answerChoice: "",
-    },
-  ]);
-  const [selectedBlankId, setSelectedBlankId] = useState(1);
+  const [questions, setQuestions] = useState([]);
+  const [selectedBlankId, setSelectedBlankId] = useState(null);
   const [usedWords, setUsedWords] = useState([]);
+  const [gameTime, setGameTime] = useState(null);
+  const [gameTimer, setGameTimer] = useState(null);
 
-  const [gameTimer, setGameTimer] = useState(30);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
 
-  const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [gameOver, setGameOver] = useState(false);
+
+  const submitFillBlankScore = async () => {
+    console.log("submit called...");
+    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+
+    if (!storedUserData) return; // Only submit score if user is logged in
+
+    const totalTimeTaken =
+      gameTime !== null && gameTimer !== null ? gameTime - gameTimer : 0;
+
+    const payload = {
+      totalTimeTaken, // Total time taken to complete the game
+      score: calculateScore(), // Calculate the user's score
+    };
+
+    try {
+      const response = await axios.post("/score/fillblank/submit", payload, {});
+      console.log("Score submitted successfully", response.data);
+    } catch (error) {
+      console.error("Error submitting fill-in-the-blank score", error);
+    }
+  };
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
@@ -66,7 +57,7 @@ const FillInBlanksPage = () => {
   const handleWordSelect = (word) => {
     if (!usedWords.includes(word)) {
       const updatedQuestions = questions.map((q) =>
-        q.id === selectedBlankId ? { ...q, answerChoice: word } : q
+        q._id === selectedBlankId ? { ...q, answerChoice: word } : q
       );
       setQuestions(updatedQuestions);
       setUsedWords([...usedWords, word]);
@@ -75,7 +66,7 @@ const FillInBlanksPage = () => {
         (q) => q.answerChoice === ""
       );
       if (nextEmptyField) {
-        setSelectedBlankId(nextEmptyField.id);
+        setSelectedBlankId(nextEmptyField._id);
       } else {
         setSelectedBlankId(null);
       }
@@ -87,21 +78,17 @@ const FillInBlanksPage = () => {
   };
 
   const handleBlankRemove = (id) => {
-    const wordToRemove = questions.find((q) => q.id === id).answerChoice;
+    const wordToRemove = questions.find((q) => q._id === id).answerChoice;
     const updatedQuestions = questions.map((q) =>
-      q.id === id ? { ...q, answerChoice: "" } : q
+      q._id === id ? { ...q, answerChoice: "" } : q
     );
     setQuestions(updatedQuestions);
     setUsedWords(usedWords.filter((word) => word !== wordToRemove));
     setSelectedBlankId(id);
   };
 
-  const handleShowResults = () => {
-    setShowResult(true);
-  };
-
   const calculateScore = () => {
-    let score = 0; // Initialize score counter
+    let score = 0;
 
     // Loop through each question to compare the user's answerChoice with the correct answer
     questions.forEach((question) => {
@@ -109,46 +96,83 @@ const FillInBlanksPage = () => {
         question.answerChoice.toLowerCase().trim() ===
         question.answer.toLowerCase().trim()
       ) {
-        score += 1; // Increment score if the answer is correct
+        score += 1;
       }
     });
 
-    return score; // Return the total score
+    return score;
+  };
+
+  const endGame = () => {
+    if (!gameOver) {
+      setGameOver(true);
+      const finalScore = calculateScore();
+      setScore(finalScore);
+      setShowResult(true);
+      submitFillBlankScore();
+    }
   };
 
   const handleSubmit = () => {
-    //handle submit
-    setGameTimer(0);
-    setShowResult(true);
+    endGame();
   };
 
   const handleReset = () => {
-    // Reset each question's answerChoice to an empty string
     const resetQuestions = questions.map((question) => ({
       ...question,
       answerChoice: "",
     }));
 
-    setQuestions(resetQuestions); // Update the questions state with reset questions
-    setUsedWords([]); // Clear the used words array
-    setGameTimer(30); // Reset the timer to 30 seconds or any other initial value
-    setShowResult(false); // Hide the result display
-    setScore(0); // Reset the score to 0
+    setQuestions(resetQuestions);
+    setUsedWords([]);
+    if (gameTime !== null) {
+      setGameTimer(gameTime); // Reset the game timer
+    }
+    setShowResult(false);
+    setScore(0);
+
+    // Automatically set focus to the first blank (if it exists)
+    if (resetQuestions.length > 0) {
+      setSelectedBlankId(resetQuestions[0]._id);
+    }
+
+    setGameOver(false);
   };
 
   useEffect(() => {
-    if (!openInstructionDialog) {
+    if (!openInstructionDialog && !gameOver && gameTimer !== null) {
       if (gameTimer > 0) {
         const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
         return () => clearTimeout(countdown);
-      }
-      if (gameTimer === 0) {
-        const finalScore = calculateScore(); // Calculate the final score
-        setScore(finalScore); // Update the score state
-        handleShowResults();
+      } else if (gameTimer === 0) {
+        endGame();
       }
     }
-  }, [gameTimer, openInstructionDialog]);
+  }, [gameTimer, openInstructionDialog, gameOver]);
+
+  useEffect(() => {
+    axios
+      .get("/fillBlanks/active")
+      .then((response) => {
+        const data = response.data;
+
+        setGameTime(data.totalGameTime);
+        setGameTimer(data.totalGameTime);
+        const questionsWithAnswers = response.data.questions.map((q) => ({
+          ...q,
+          answerChoice: "", // Add empty answerChoice field to each question
+        }));
+        setQuestions(questionsWithAnswers);
+
+        // Automatically select the first blank by setting the selectedBlankId
+        if (questionsWithAnswers.length > 0) {
+          setSelectedBlankId(questionsWithAnswers[0]._id);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching questions:", error);
+      });
+  }, []);
 
   return (
     <Container sx={{ padding: 2 }}>
@@ -158,7 +182,6 @@ const FillInBlanksPage = () => {
 
       {!showResult ? (
         <Grid container spacing={2}>
-          {/* title */}
           <Grid item>
             <Typography variant="subtitle1">Choose a word:</Typography>
           </Grid>
@@ -186,8 +209,15 @@ const FillInBlanksPage = () => {
             ))}
           </Grid>
           <Grid item xs={12} sx={{ textAlign: "center" }}>
-            <Typography variant="h7">Time left: {gameTimer} seconds</Typography>
+            {gameTimer !== null ? (
+              <Typography variant="h7">
+                Time left: {gameTimer} seconds
+              </Typography>
+            ) : (
+              <Typography variant="h7">Loading...</Typography>
+            )}
           </Grid>
+
           {/* Questions blanks */}
           <Grid item container spacing={2}>
             {questions.map((question, index) => (
@@ -195,11 +225,11 @@ const FillInBlanksPage = () => {
                 item
                 container
                 sx={{ alignItems: "center" }}
-                key={question.id}
+                key={question._id}
               >
                 <Grid item xs={12}>
                   <Typography variant="body1" display="inline">
-                    {index + 1 + ") " + question.text.split("____")[0]}
+                    {index + 1 + ") " + question.textBefore}
                   </Typography>
                   <TextField
                     size="small"
@@ -207,8 +237,8 @@ const FillInBlanksPage = () => {
                     value={question.answerChoice}
                     onClick={() =>
                       question.answerChoice
-                        ? handleBlankRemove(question.id)
-                        : handleBlankSelect(question.id)
+                        ? handleBlankRemove(question._id)
+                        : handleBlankSelect(question._id)
                     }
                     InputProps={{
                       readOnly: true,
@@ -216,7 +246,7 @@ const FillInBlanksPage = () => {
                     sx={{ width: "150px", verticalAlign: "middle" }}
                   />
                   <Typography variant="body1" display="inline">
-                    {question.text.split("____")[1]}
+                    {question.textAfter}
                   </Typography>
                 </Grid>
               </Grid>
@@ -227,7 +257,7 @@ const FillInBlanksPage = () => {
             container
             sx={{ justifyContent: "flex-end", alignItems: "center" }}
           >
-            <Button variant="outlined" onClick={() => handleSubmit()}>
+            <Button variant="outlined" onClick={handleSubmit}>
               Submit
             </Button>
           </Grid>
@@ -241,11 +271,10 @@ const FillInBlanksPage = () => {
             Summary of Questions:
           </Typography>
           {questions.map((question, index) => (
-            <Box key={question.id} sx={{ mb: 4 }}>
-              {/* Question answer */}
+            <Box key={question._id} sx={{ mb: 4 }}>
               <Typography variant="h7" sx={{ textAlign: "left" }}>
                 {index + 1 + ") "}
-                {question.text.split("____")[0]}{" "}
+                {question.textBefore}{" "}
                 <span
                   style={{
                     color:
@@ -261,29 +290,26 @@ const FillInBlanksPage = () => {
                       : question.answerChoice + " (Wrong)"
                     : "No answer"}
                 </span>{" "}
-                {question.text.split("____")[1]}
+                {question.textAfter}
               </Typography>
-              {/* Show Correct answer if answer is wrong. */}
               {question.answerChoice !== question.answer ? (
                 <Typography
                   variant="h7"
                   display="block"
-                  sx={{
-                    color: "green",
-                  }}
+                  sx={{ color: "green" }}
                 >
                   {`Answer: ${question.answer}`}
                 </Typography>
               ) : null}
             </Box>
           ))}
-          <Button variant="outlined" onClick={() => handleReset()}>
+          <Button variant="outlined" onClick={handleReset}>
             Reset Game
           </Button>
         </Box>
       )}
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
@@ -312,8 +338,9 @@ const FillInBlanksPage = () => {
             <br />
             <br />
             4. <strong>Time Limit:</strong> <br />
-            You have a limited amount of time to fill in all the blanks. Keep an
-            eye on the timer at the top of the screen.
+            You have {gameTime !== null ? gameTime : "a limited amount of"}{" "}
+            seconds to fill in all the blanks. Keep an eye on the timer at the
+            top of the screen.
             <br />
             <br />
             5. <strong>Submit Your Answers:</strong> <br />

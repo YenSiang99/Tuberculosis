@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   List,
@@ -10,7 +8,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useMediaQuery,
   Grid,
   Paper,
   Container,
@@ -27,16 +24,13 @@ import {
   TableCell,
   TableBody,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import SideEffectIcon from "@mui/icons-material/ReportProblem";
 import CalendarIcon from "@mui/icons-material/CalendarToday";
-import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
 import FaceIcon from "@mui/icons-material/Face";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import { makeStyles } from "@mui/styles";
 import { format, isValid, parseISO } from "date-fns";
 import axios from "../../components/axios";
@@ -61,11 +55,8 @@ const useStyles = makeStyles((theme) => ({
 export default function HealthcareSideEffect() {
   const classes = useStyles();
   const [dateState, setDateState] = useState(new Date());
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [sideEffects, setSideEffects] = useState([]);
-  const [patients, setPatients] = useState([]);
   const [videoStatuses, setVideoStatuses] = useState([]);
 
   const fetchSideEffects = async () => {
@@ -82,45 +73,23 @@ export default function HealthcareSideEffect() {
       console.error("Failed to fetch side effects", error);
     }
   };
-  
 
   useEffect(() => {
     fetchSideEffects();
   }, []);
 
-
-
-  const fetchPatients = async () => {
-    try {
-      const response = await axios.get("/users/patients");
-      setPatients(response.data);
-      console.log(patients);
-    } catch (error) {
-      console.error("Error fetching patients", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPatients();
-  }, []);
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
   const openPatientProfile = (patient) => {
     console.log("Patient", patient);
     setSelectedPatient(patient);
     setVideoStatuses([]);
-    const patientId = patient._id; 
+    const patientId = patient._id;
     if (patientId) {
       fetchSideEffectsForPatient(patientId);
       fetchVideoStatusForPatient(patientId);
     } else {
-      console.error("Patient ID is undefined",patient._id);
+      console.error("Patient ID is undefined", patient._id);
     }
   };
-  
 
   const closePatientProfile = () => {
     setSelectedPatient(null);
@@ -220,7 +189,11 @@ export default function HealthcareSideEffect() {
         setVideoStatuses([]);
       }
     } catch (error) {
-      console.error("Error fetching video statuses for patient ID:", patientId, error);
+      console.error(
+        "Error fetching video statuses for patient ID:",
+        patientId,
+        error
+      );
       setVideoStatuses([]);
     }
   };
@@ -228,141 +201,98 @@ export default function HealthcareSideEffect() {
   useEffect(() => {
     console.log("Selected Patient updated", selectedPatient);
   }, [selectedPatient]);
-  
+
   useEffect(() => {
     console.log("Video statuses updated", videoStatuses);
   }, [videoStatuses]);
-  
-  
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
       >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
-      >
-        <Container>
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+        <Box sx={{ p: 3 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            component="div"
+            sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
           >
-            <Box sx={{ p: 3 }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-              >
-                Review Side Effect
-              </Typography>
-              <List>
-                {sideEffects.map((sideEffect, index) => (
-                  <Card key={index} sx={{ mb: 2, bgcolor: "neutral.light" }}>
-                    <CardContent>
-                      <ListItem alignItems="flex-start">
-                        <Avatar
-                          alt={sideEffect.patient?.firstName}
-                          src={sideEffect.patient?.profilePicture}
-                          sx={{ mr: 2 }}
-                        />
-                        <ListItemText
-                          primary={
-                            <Typography className={classes.boldText}>
-                              {sideEffect.patient?.firstName}{" "}
-                              {sideEffect.patient?.lastName}
-                            </Typography>
-                          }
-                          secondary={
-                            <>
+            Review Side Effect
+          </Typography>
+          <List>
+            {sideEffects.map((sideEffect, index) => (
+              <Card key={index} sx={{ mb: 2, bgcolor: "neutral.light" }}>
+                <CardContent>
+                  <ListItem alignItems="flex-start">
+                    <Avatar
+                      alt={sideEffect.patient?.firstName}
+                      src={sideEffect.patient?.profilePicture}
+                      sx={{ mr: 2 }}
+                    />
+                    <ListItemText
+                      primary={
+                        <Typography className={classes.boldText}>
+                          {sideEffect.patient?.firstName}{" "}
+                          {sideEffect.patient?.lastName}
+                        </Typography>
+                      }
+                      secondary={
+                        <>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="textPrimary"
+                          >
+                            {format(
+                              parseISO(sideEffect.datetime),
+                              "d MMMM yyyy, h:mm a"
+                            )}
+                          </Typography>
+                          <br />
+                          {"Side Effects: "}
+                          {sideEffect.sideEffects
+                            .map((effect, index) => (
                               <Typography
+                                key={index}
                                 component="span"
-                                variant="body2"
-                                color="textPrimary"
+                                className={
+                                  effect.grade >= 2 ? classes.highlightRed : ""
+                                }
+                                style={{ display: "inline" }}
                               >
-                                {format(
-                                  parseISO(sideEffect.datetime),
-                                  "d MMMM yyyy, h:mm a"
-                                )}
+                                {effect.effect === "Others (Please Describe)"
+                                  ? effect.description
+                                  : `${effect.effect} (Grade ${effect.grade})`}
                               </Typography>
-                              <br />
-                              {"Side Effects: "}
-                              {sideEffect.sideEffects
-                                .map((effect, index) => (
-                                  <Typography
-                                    key={index}
-                                    component="span"
-                                    className={
-                                      effect.grade >= 2
-                                        ? classes.highlightRed
-                                        : ""
-                                    }
-                                    style={{ display: "inline" }}
-                                  >
-                                    {effect.effect ===
-                                    "Others (Please Describe)"
-                                      ? effect.description
-                                      : `${effect.effect} (Grade ${effect.grade})`}
-                                  </Typography>
-                                ))
-                                .reduce(
-                                  (prev, curr, index) => [
-                                    ...prev,
-                                    index > 0 ? ", " : "",
-                                    curr,
-                                  ],
-                                  []
-                                )}
-                            </>
-                          }
-                        />
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => openPatientProfile(sideEffect.patient)}
-                          sx={{ mt: 2 }}
-                        >
-                          View profile
-                        </Button>
-                      </ListItem>
-                    </CardContent>
-                  </Card>
-                ))}
-              </List>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-
+                            ))
+                            .reduce(
+                              (prev, curr, index) => [
+                                ...prev,
+                                index > 0 ? ", " : "",
+                                curr,
+                              ],
+                              []
+                            )}
+                        </>
+                      }
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openPatientProfile(sideEffect.patient)}
+                      sx={{ mt: 2 }}
+                    >
+                      View profile
+                    </Button>
+                  </ListItem>
+                </CardContent>
+              </Card>
+            ))}
+          </List>
+        </Box>
+      </Paper>
       <Dialog
         open={Boolean(selectedPatient)}
         onClose={closePatientProfile}
@@ -580,6 +510,6 @@ export default function HealthcareSideEffect() {
           </Grid>
         </DialogContent>
       </Dialog>
-    </ThemeProvider>
+    </Container>
   );
 }

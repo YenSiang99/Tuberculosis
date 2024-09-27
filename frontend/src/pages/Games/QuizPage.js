@@ -16,84 +16,19 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import axios from "../../components/axios";
+import DataViewer from "../../components/reusable/DataViewer";
 
 const QuizPage = () => {
   const test = false;
 
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      questionText: "What is Tuberculosis?",
-      options: [
-        { id: "q1o1", optionText: "A bacterial infection", isCorrect: true },
-        { id: "q1o2", optionText: "A viral infection", isCorrect: false },
-        { id: "q1o3", optionText: "A fungal infection", isCorrect: false },
-        { id: "q1o4", optionText: "None of the above", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 2,
-      questionText: "How is Tuberculosis spread?",
-      options: [
-        {
-          id: "q2o1",
-          optionText: "Through contaminated water",
-          isCorrect: false,
-        },
-        {
-          id: "q2o2",
-          optionText:
-            "Through the air when an infected person coughs or sneezes",
-          isCorrect: true,
-        },
-        { id: "q2o3", optionText: "Through insect bites", isCorrect: false },
-        {
-          id: "q2o4",
-          optionText: "By touching infected surfaces",
-          isCorrect: false,
-        },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 3,
-      questionText: "Which organ is primarily affected by Tuberculosis?",
-      options: [
-        { id: "q3o1", optionText: "Liver", isCorrect: false },
-        { id: "q3o2", optionText: "Heart", isCorrect: false },
-        { id: "q3o3", optionText: "Lungs", isCorrect: true },
-        { id: "q3o4", optionText: "Kidneys", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 4,
-      questionText: "What is the standard treatment duration for Tuberculosis?",
-      options: [
-        { id: "q4o1", optionText: "1 week", isCorrect: false },
-        { id: "q4o2", optionText: "2 months", isCorrect: false },
-        { id: "q4o3", optionText: "6 to 9 months", isCorrect: true },
-        { id: "q4o4", optionText: "1 year", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-    {
-      id: 5,
-      questionText: "What is the vaccine used to prevent Tuberculosis?",
-      options: [
-        { id: "q5o1", optionText: "BCG vaccine", isCorrect: true },
-        { id: "q5o2", optionText: "Hepatitis B vaccine", isCorrect: false },
-        { id: "q5o3", optionText: "MMR vaccine", isCorrect: false },
-        { id: "q5o4", optionText: "Polio vaccine", isCorrect: false },
-      ],
-      selectedOption: null,
-    },
-  ]);
+  const [questions, setQuestions] = useState([]); // Initialize as empty array
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   // Timer variables
-  const [questionTimer, setQuestionTimer] = useState(10);
+  const [questionTime, setQuestionTime] = useState(null);
+  const [questionTimer, setQuestionTimer] = useState(null);
   const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
   // Asnwer Feedback for each question and summary
   const [answerFeedback, setFeedback] = useState(null);
@@ -103,15 +38,41 @@ const QuizPage = () => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [totalTimeTaken, setTotalTimeTaken] = useState(0);
+
+  const submitQuizScore = async () => {
+    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+
+    if (!storedUserData) return; // Only submit score if user is logged in
+
+    const payload = {
+      totalTimeTaken: totalTimeTaken, // Total time taken to answer the quiz
+      score: score, // User's score
+      completionStatus: score === questions.length ? "Completed" : "Incomplete",
+    };
+
+    try {
+      const response = await axios.post("/score/quizzes/submit", payload);
+      console.log("Score submitted successfully", response.data);
+    } catch (error) {
+      console.error("Error submitting quiz score", error);
+    }
+  };
+
   const handleOptionClick = (option, questionId) => {
     // Set user selection option
+
+    const timeSpentOnQuestion = questionTime - questionTimer; // Time taken to answer the current question
+    setTotalTimeTaken((prevTime) => prevTime + timeSpentOnQuestion); // Accumulate time spent
+
     setQuestions((prevQuestions) =>
       prevQuestions.map((question) =>
-        question.id === questionId
-          ? { ...question, selectedOption: option.id }
+        question._id === questionId
+          ? { ...question, selectedOption: option._id }
           : question
       )
     );
+
     // Let user know if they selected the right or wrong answer
     setFeedback(option.isCorrect ? "correct" : "wrong");
     if (option.isCorrect) setScore(score + 1);
@@ -128,18 +89,19 @@ const QuizPage = () => {
 
   const handleNoAnswer = () => {
     setFeedback("wrong");
-    setNextQuestionTimer(5); // Start the countdown to the next question
+    setTotalTimeTaken((prevTime) => prevTime + questionTime);
+    setNextQuestionTimer(5);
   };
 
   const goToNextQuestion = () => {
-    console.log("Hello this is go to next question");
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setQuestionTimer(10);
+      setQuestionTimer(questionTime);
       setFeedback(null);
       setNextQuestionTimer(0);
     } else {
       setShowResult(true);
+      submitQuizScore(); // Submit score when quiz is completed
     }
   };
 
@@ -171,7 +133,7 @@ const QuizPage = () => {
 
   // State to countdown next question timer
   useEffect(() => {
-    if (!test && !openInstructionDialog) {
+    if (!test && !openInstructionDialog && questionTimer !== null) {
       if (answerFeedback && nextQuestionTimer > 0) {
         const countdown = setTimeout(
           () => setNextQuestionTimer(nextQuestionTimer - 1),
@@ -185,6 +147,24 @@ const QuizPage = () => {
     }
   }, [nextQuestionTimer, answerFeedback, openInstructionDialog]);
 
+  useEffect(() => {
+    const fetchActiveQuiz = async () => {
+      try {
+        const response = await axios.get("/quizzes/active");
+        const data = response.data;
+        if (data && data.questions) {
+          setQuestions(data.questions); // Set the questions based on the API response
+          setQuestionTime(data.timeLimitPerQuestion);
+          setQuestionTimer(data.timeLimitPerQuestion);
+        }
+      } catch (error) {
+        console.error("Failed to fetch active quiz", error);
+      }
+    };
+
+    fetchActiveQuiz();
+  }, []);
+
   const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"]; // Dark Red, Dark Blue, Dark Yellow, Dark Green
 
   return (
@@ -196,7 +176,8 @@ const QuizPage = () => {
       >
         Quiz Time!
       </Typography>
-      {!showResult ? (
+      {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
+      {!showResult && questions.length > 0 ? (
         <Grid
           container
           justifyContent="center"
@@ -212,9 +193,13 @@ const QuizPage = () => {
           </Grid>
           {/* Time Countdown for question */}
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Typography variant="h7">
-              Time left: {questionTimer} seconds
-            </Typography>
+            {questionTimer !== null ? (
+              <Typography variant="h7">
+                Time left: {questionTimer} seconds
+              </Typography>
+            ) : (
+              <Typography variant="h7">Loading...</Typography>
+            )}
           </Grid>
           {/* Time Countdown interval to next question*/}
           {answerFeedback && (
@@ -236,13 +221,13 @@ const QuizPage = () => {
           {/* Answer Selection */}
           <Grid item container spacing={1}>
             {questions[currentQuestionIndex].options.map((option, index) => (
-              <Grid item xs={12} sm={12} md={6} lg={6} key={option.id}>
+              <Grid item xs={12} sm={12} md={6} lg={6} key={option._id}>
                 <Button
                   variant="contained"
                   onClick={() =>
                     handleOptionClick(
                       option,
-                      questions[currentQuestionIndex].id
+                      questions[currentQuestionIndex]._id
                     )
                   }
                   disabled={answerFeedback !== null}
@@ -306,55 +291,64 @@ const QuizPage = () => {
           <Typography variant="h4" gutterBottom>
             Summary of Questions:
           </Typography>
-          {questions.map((question) => (
-            <Box key={question.id} sx={{ mb: 4 }}>
-              <Typography
-                sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
-              >
-                {question.questionText}
-              </Typography>
-              <RadioGroup>
-                {question.options.map((option) => {
-                  const isUserSelection = question.selectedOption === option.id;
-                  const isCorrect = option.isCorrect;
-                  return (
-                    <FormControlLabel
-                      key={option.id}
-                      value={option.optionText}
-                      control={<Radio checked={isUserSelection} />}
-                      label={
-                        <span
-                          style={{
-                            color: isCorrect
-                              ? "green"
-                              : isUserSelection
-                              ? "red"
-                              : "black",
-                            fontWeight: isUserSelection ? "bold" : "normal",
+          {questions.length > 0 ? (
+            <>
+              {questions.map((question) => (
+                <Box key={question._id} sx={{ mb: 4 }}>
+                  <Typography
+                    sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
+                  >
+                    {question.questionText}
+                  </Typography>
+                  <RadioGroup>
+                    {question.options.map((option) => {
+                      const isUserSelection =
+                        question.selectedOption === option._id;
+                      const isCorrect = option.isCorrect;
+                      return (
+                        <FormControlLabel
+                          key={option._id}
+                          value={option.optionText}
+                          control={<Radio checked={isUserSelection} />}
+                          label={
+                            <span
+                              style={{
+                                color: isCorrect
+                                  ? "green"
+                                  : isUserSelection
+                                  ? "red"
+                                  : "black",
+                                fontWeight: isUserSelection ? "bold" : "normal",
+                              }}
+                            >
+                              {option.optionText}
+                              {isUserSelection &&
+                                !isCorrect &&
+                                " (Your Choice)"}
+                              {isCorrect && " (Correct)"}
+                            </span>
+                          }
+                          sx={{
+                            "& .MuiFormControlLabel-label": {
+                              color: isUserSelection
+                                ? isCorrect
+                                  ? "green"
+                                  : "red"
+                                : isCorrect
+                                ? "green"
+                                : "black",
+                            },
                           }}
-                        >
-                          {option.optionText}
-                          {isUserSelection && !isCorrect && " (Your Choice)"}
-                          {isCorrect && " (Correct)"}
-                        </span>
-                      }
-                      sx={{
-                        "& .MuiFormControlLabel-label": {
-                          color: isUserSelection
-                            ? isCorrect
-                              ? "green"
-                              : "red"
-                            : isCorrect
-                            ? "green"
-                            : "black",
-                        },
-                      }}
-                    />
-                  );
-                })}
-              </RadioGroup>
-            </Box>
-          ))}
+                        />
+                      );
+                    })}
+                  </RadioGroup>
+                </Box>
+              ))}
+            </>
+          ) : (
+            <Typography variant="h6">Loading quiz...</Typography> // Show loading message until data is fetched
+          )}
         </Box>
       )}
       <Dialog
@@ -378,7 +372,7 @@ const QuizPage = () => {
             <br />
             <br />
             3. <strong>Time Limit:</strong> <br />
-            You have 10 seconds to answer each question.
+            You have {questionTime} seconds to answer each question.
             <br />
             <br />
             4. <strong>Missed Answers:</strong> <br />

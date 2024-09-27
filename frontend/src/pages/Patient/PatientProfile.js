@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   Typography,
   IconButton,
@@ -11,7 +9,6 @@ import {
   Grid,
   TextField,
   Button,
-  useMediaQuery,
   Avatar,
   List,
   ListItem,
@@ -31,9 +28,6 @@ import {
   InputAdornment,
   MenuItem,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
-import PatientSidebar from "../../components/reusable/PatientBar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
@@ -45,8 +39,6 @@ import { format, isValid, parseISO } from "date-fns";
 import { CountryDropdown } from "react-country-region-selector";
 
 export default function PatientProfile() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [patientData, setPatientData] = useState({});
   const [sideEffectHistory, setSideEffectHistory] = useState([]);
@@ -167,10 +159,6 @@ export default function PatientProfile() {
       overflow: "visible",
     },
   }));
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const handleClickShowCurrentPassword = () => {
     setShowCurrentPassword(!showCurrentPassword);
@@ -301,7 +289,7 @@ export default function PatientProfile() {
     }
 
     try {
-      const response = await axios.post("/users/changePassword", {
+      await axios.post("/users/changePassword", {
         currentPassword,
         newPassword,
       });
@@ -429,7 +417,7 @@ export default function PatientProfile() {
     if (!nric || nric.length < 6) return "";
 
     const currentYear = new Date().getFullYear();
-    let birthYearPrefix = currentYear >= 2000 ? 19 : 20;
+    // let birthYearPrefix = currentYear >= 2000 ? 19 : 20;
     let birthYear = parseInt(nric.substring(0, 2), 10);
     birthYear += birthYear <= currentYear % 100 ? 2000 : 1900;
 
@@ -459,685 +447,613 @@ export default function PatientProfile() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <PatientSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
-      >
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Grid container spacing={3}>
-            {/* Patient Profile Section */}
-            <Grid item xs={12}>
-              <Paper
-                elevation={3}
-                sx={{ p: 3, display: "flex", alignItems: "center" }}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Grid container spacing={3}>
+        {/* Patient Profile Section */}
+        <Grid item xs={12}>
+          <Paper
+            elevation={3}
+            sx={{ p: 3, display: "flex", alignItems: "center" }}
+          >
+            <Box sx={{ position: "relative", marginRight: 3 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  width: 100,
+                  height: 100,
+                }}
               >
-                <Box sx={{ position: "relative", marginRight: 3 }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: "primary.main",
-                      width: 100,
-                      height: 100,
+                {patientData.profilePicture ? (
+                  <img
+                    src={patientData.profilePicture}
+                    alt="Profile"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
-                  >
-                    {patientData.profilePicture ? (
-                      <img
-                        src={patientData.profilePicture}
-                        alt="Profile"
+                  />
+                ) : (
+                  <AccountCircleIcon sx={{ fontSize: 100 }} />
+                )}
+              </Avatar>
+              <IconButton
+                color="primary"
+                component="label"
+                sx={{
+                  position: "absolute",
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "background.paper",
+                  "&:hover": {
+                    backgroundColor: "background.default",
+                  },
+                  borderRadius: "50%",
+                }}
+              >
+                <input
+                  hidden
+                  accept="image/*"
+                  type="file"
+                  onChange={handleProfilePictureChange}
+                />
+                <PhotoCamera />
+              </IconButton>
+            </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                {patientData.firstName} {patientData.lastName}
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{ color: "text.secondary", mb: 2, fontSize: "1rem" }}
+              >
+                {" "}
+                Status:{" "}
+                {hasTreatmentEnded()
+                  ? "Treatment Ended"
+                  : patientData.careStatus || "Not Set"}
+              </Typography>
+
+              <Divider sx={{ my: 2 }} />
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleOpenPasswordDialog}
+                sx={{ textTransform: "none" }}
+              >
+                Change Password
+              </Button>
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Personal Information */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Personal Information
+            </Typography>
+            {!editMode.personalInfo && (
+              <IconButton
+                size="small"
+                sx={{ position: "absolute", top: 8, right: 8 }}
+                onClick={() =>
+                  setEditMode({
+                    ...editMode,
+                    personalInfo: !editMode.personalInfo,
+                  })
+                }
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            <Divider sx={{ mb: 2 }} />
+            <List dense>
+              {/* First Name */}
+              <ListItem>
+                <ListItemText
+                  primary="First Name"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.firstName}
+                        onChange={(e) =>
+                          handleFieldChange("firstName", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      patientData.firstName || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+
+              {/* Last Name */}
+              <ListItem>
+                <ListItemText
+                  primary="Last Name"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.lastName}
+                        onChange={(e) =>
+                          handleFieldChange("lastName", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      patientData.lastName || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+
+              {/* Email */}
+              <ListItem>
+                <ListItemText
+                  primary="Email"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        error={!!errors.emailError}
+                        helperText={errors.emailError}
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.email}
+                        onChange={(e) =>
+                          handleFieldChange("email", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      patientData.email || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+
+              {/* Gender */}
+              <ListItem>
+                <ListItemText
+                  primary="Gender"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        select
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.gender}
+                        onChange={(e) =>
+                          handleFieldChange("gender", e.target.value)
+                        }
+                        fullWidth
+                      >
+                        <MenuItem value="male">Male</MenuItem>
+                        <MenuItem value="female">Female</MenuItem>
+                      </TextField>
+                    ) : (
+                      capitalizeFirstLetter(patientData.gender) || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+
+              {/* Phone Number */}
+              <ListItem>
+                <ListItemText
+                  primary="Phone Number"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.phoneNumber}
+                        onChange={(e) =>
+                          handleFieldChange("phoneNumber", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      patientData.phoneNumber || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+
+              {/* Country */}
+              <ListItem>
+                <ListItemText
+                  primary="Country"
+                  secondary={
+                    editMode.personalInfo ? (
+                      <CountryDropdown
+                        value={editableFields.country}
+                        onChange={(val) => handleFieldChange("country", val)}
                         style={{
                           width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
+                          height: "40px",
+                          borderRadius: "4px",
+                          backgroundColor: "white",
+                          border: "1px solid #ced4da",
+                          paddingLeft: "10px",
+                          paddingRight: "10px",
+                          paddingTop: "5px",
+                          paddingBottom: "5px",
                         }}
                       />
                     ) : (
-                      <AccountCircleIcon sx={{ fontSize: 100 }} />
-                    )}
-                  </Avatar>
-                  <IconButton
-                    color="primary"
-                    component="label"
-                    sx={{
-                      position: "absolute",
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: "background.paper",
-                      "&:hover": {
-                        backgroundColor: "background.default",
-                      },
-                      borderRadius: "50%",
-                    }}
-                  >
-                    <input
-                      hidden
-                      accept="image/*"
-                      type="file"
-                      onChange={handleProfilePictureChange}
-                    />
-                    <PhotoCamera />
-                  </IconButton>
-                </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{ fontWeight: 600 }}
-                  >
-                    {patientData.firstName} {patientData.lastName}
-                  </Typography>
+                      patientData.country || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  <Typography
-                    variant="body1"
-                    sx={{ color: "text.secondary", mb: 2, fontSize: "1rem" }}
-                  >
-                    {" "}
-                    Status:{" "}
-                    {hasTreatmentEnded()
-                      ? "Treatment Ended"
-                      : patientData.careStatus || "Not Set"}
-                  </Typography>
+              {/* Conditional Passport Number or NRIC Number */}
+              <ListItem>
+                <ListItemText
+                  primary={isMalaysian ? "NRIC Number" : "Passport Number"}
+                  secondary={
+                    editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={
+                          isMalaysian
+                            ? editableFields.nricNumber
+                            : editableFields.passportNumber
+                        }
+                        onChange={(e) =>
+                          handleFieldChange(
+                            isMalaysian ? "nricNumber" : "passportNumber",
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                      />
+                    ) : isMalaysian ? (
+                      patientData.nricNumber || "N/A"
+                    ) : (
+                      patientData.passportNumber || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  <Divider sx={{ my: 2 }} />
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={handleOpenPasswordDialog}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Change Password
-                  </Button>
-                </Box>
-              </Paper>
-            </Grid>
+              {/* Age */}
+              <ListItem>
+                <ListItemText
+                  primary="Age"
+                  secondary={
+                    isMalaysian ? (
+                      `${editableFields.age} `
+                    ) : editMode.personalInfo ? (
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.age}
+                        onChange={(e) =>
+                          handleFieldChange("age", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      `${patientData.age} `
+                    )
+                  }
+                />
+              </ListItem>
+            </List>
+            {editMode.personalInfo && (
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                <Button
+                  sx={{ mr: 1 }}
+                  variant="contained"
+                  onClick={() => {
+                    const fieldsToUpdate = {
+                      firstName: editableFields.firstName,
+                      lastName: editableFields.lastName,
+                      email: editableFields.email,
+                      gender: editableFields.gender,
+                      age: editableFields.age,
+                      phoneNumber: editableFields.phoneNumber,
+                      country: editableFields.country,
+                      ...(editableFields.passportNumber
+                        ? { passportNumber: editableFields.passportNumber }
+                        : {}),
+                      ...(editableFields.nricNumber
+                        ? { nricNumber: editableFields.nricNumber }
+                        : {}),
+                    };
 
-            {/* Personal Information */}
-            <Grid item xs={12} md={6}>
-              <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
+                    updateProfile(fieldsToUpdate);
+                    console.log(
+                      "Saving Personal Information...",
+                      fieldsToUpdate
+                    );
+                    setEditMode({ ...editMode, personalInfo: false });
+                  }}
+                  disabled={!!errors.emailError}
                 >
-                  Personal Information
-                </Typography>
-                {!editMode.personalInfo && (
-                  <IconButton
-                    size="small"
-                    sx={{ position: "absolute", top: 8, right: 8 }}
-                    onClick={() =>
-                      setEditMode({
-                        ...editMode,
-                        personalInfo: !editMode.personalInfo,
-                      })
-                    }
-                  >
-                    <EditIcon />
-                  </IconButton>
-                )}
-                <Divider sx={{ mb: 2 }} />
-                <List dense>
-                  {/* First Name */}
-                  <ListItem>
-                    <ListItemText
-                      primary="First Name"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.firstName}
-                            onChange={(e) =>
-                              handleFieldChange("firstName", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          patientData.firstName || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+                  Save
+                </Button>
 
-                  {/* Last Name */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Last Name"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.lastName}
-                            onChange={(e) =>
-                              handleFieldChange("lastName", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          patientData.lastName || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Email */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Email"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            error={!!errors.emailError}
-                            helperText={errors.emailError}
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.email}
-                            onChange={(e) =>
-                              handleFieldChange("email", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          patientData.email || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Gender */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Gender"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            select
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.gender}
-                            onChange={(e) =>
-                              handleFieldChange("gender", e.target.value)
-                            }
-                            fullWidth
-                          >
-                            <MenuItem value="male">Male</MenuItem>
-                            <MenuItem value="female">Female</MenuItem>
-                          </TextField>
-                        ) : (
-                          capitalizeFirstLetter(patientData.gender) || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Phone Number */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Phone Number"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.phoneNumber}
-                            onChange={(e) =>
-                              handleFieldChange("phoneNumber", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          patientData.phoneNumber || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Country */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Country"
-                      secondary={
-                        editMode.personalInfo ? (
-                          <CountryDropdown
-                            value={editableFields.country}
-                            onChange={(val) =>
-                              handleFieldChange("country", val)
-                            }
-                            style={{
-                              width: "100%",
-                              height: "40px",
-                              borderRadius: "4px",
-                              backgroundColor: "white",
-                              border: "1px solid #ced4da",
-                              paddingLeft: "10px",
-                              paddingRight: "10px",
-                              paddingTop: "5px",
-                              paddingBottom: "5px",
-                            }}
-                          />
-                        ) : (
-                          patientData.country || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Conditional Passport Number or NRIC Number */}
-                  <ListItem>
-                    <ListItemText
-                      primary={isMalaysian ? "NRIC Number" : "Passport Number"}
-                      secondary={
-                        editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={
-                              isMalaysian
-                                ? editableFields.nricNumber
-                                : editableFields.passportNumber
-                            }
-                            onChange={(e) =>
-                              handleFieldChange(
-                                isMalaysian ? "nricNumber" : "passportNumber",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                          />
-                        ) : isMalaysian ? (
-                          patientData.nricNumber || "N/A"
-                        ) : (
-                          patientData.passportNumber || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-
-                  {/* Age */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Age"
-                      secondary={
-                        isMalaysian ? (
-                          `${editableFields.age} `
-                        ) : editMode.personalInfo ? (
-                          <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.age}
-                            onChange={(e) =>
-                              handleFieldChange("age", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          `${patientData.age} `
-                        )
-                      }
-                    />
-                  </ListItem>
-                </List>
-                {editMode.personalInfo && (
-                  <Box
-                    sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
-                  >
-                    <Button
-                      sx={{ mr: 1 }}
-                      variant="contained"
-                      onClick={() => {
-                        const fieldsToUpdate = {
-                          firstName: editableFields.firstName,
-                          lastName: editableFields.lastName,
-                          email: editableFields.email,
-                          gender: editableFields.gender,
-                          age: editableFields.age,
-                          phoneNumber: editableFields.phoneNumber,
-                          country: editableFields.country,
-                          ...(editableFields.passportNumber
-                            ? { passportNumber: editableFields.passportNumber }
-                            : {}),
-                          ...(editableFields.nricNumber
-                            ? { nricNumber: editableFields.nricNumber }
-                            : {}),
-                        };
-
-                        updateProfile(fieldsToUpdate);
-                        console.log(
-                          "Saving Personal Information...",
-                          fieldsToUpdate
-                        );
-                        setEditMode({ ...editMode, personalInfo: false });
-                      }}
-                      disabled={!!errors.emailError}
-                    >
-                      Save
-                    </Button>
-
-                    <Button
-                      variant="outlined"
-                      onClick={() =>
-                        setEditMode({ ...editMode, personalInfo: false })
-                      }
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
-                )}
-              </Paper>
-            </Grid>
-
-            {/* Treatment Details */}
-            <Grid item xs={12} md={6}>
-              <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
+                <Button
+                  variant="outlined"
+                  onClick={() =>
+                    setEditMode({ ...editMode, personalInfo: false })
+                  }
                 >
-                  Treatment Details
-                </Typography>
-                {!editMode.treatmentDetails && (
-                  <IconButton
-                    size="small"
-                    sx={{ position: "absolute", top: 8, right: 8 }}
-                    onClick={() => toggleEditMode("treatmentDetails")}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                )}
-                <Divider sx={{ mb: 2 }} />
-                <List dense>
-                  {/* Diagnosis Dropdown */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Diagnosis"
-                      secondary={
-                        editMode.treatmentDetails ? (
-                          <TextField
-                            select
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.diagnosis}
-                            onChange={(e) =>
-                              handleFieldChange("diagnosis", e.target.value)
-                            }
-                            fullWidth
-                          >
-                            {Object.entries(diagnosisOptions).map(
-                              ([value, label]) => (
-                                <MenuItem key={value} value={value}>
-                                  {label}
-                                </MenuItem>
-                              )
-                            )}
-                          </TextField>
-                        ) : (
-                          diagnosisOptions[patientData.diagnosis] || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+                  Cancel
+                </Button>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
 
-                  {/* Current Treatment Dropdown */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Current Treatment"
-                      secondary={
-                        editMode.treatmentDetails ? (
-                          <TextField
-                            select
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.currentTreatment}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                "currentTreatment",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                          >
-                            {Object.entries(treatmentOptions).map(
-                              ([value, label]) => (
-                                <MenuItem key={value} value={value}>
-                                  {label}
-                                </MenuItem>
-                              )
-                            )}
-                          </TextField>
-                        ) : (
-                          treatmentOptions[patientData.currentTreatment] ||
-                          "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+        {/* Treatment Details */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3, position: "relative" }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Treatment Details
+            </Typography>
+            {!editMode.treatmentDetails && (
+              <IconButton
+                size="small"
+                sx={{ position: "absolute", top: 8, right: 8 }}
+                onClick={() => toggleEditMode("treatmentDetails")}
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            <Divider sx={{ mb: 2 }} />
+            <List dense>
+              {/* Diagnosis Dropdown */}
+              <ListItem>
+                <ListItemText
+                  primary="Diagnosis"
+                  secondary={
+                    editMode.treatmentDetails ? (
+                      <TextField
+                        select
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.diagnosis}
+                        onChange={(e) =>
+                          handleFieldChange("diagnosis", e.target.value)
+                        }
+                        fullWidth
+                      >
+                        {Object.entries(diagnosisOptions).map(
+                          ([value, label]) => (
+                            <MenuItem key={value} value={value}>
+                              {label}
+                            </MenuItem>
+                          )
+                        )}
+                      </TextField>
+                    ) : (
+                      diagnosisOptions[patientData.diagnosis] || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  {/* Number of Tablets Dropdown */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Number of Tablets"
-                      secondary={
-                        editMode.treatmentDetails ? (
-                          <TextField
-                            select
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.numberOfTablets}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                "numberOfTablets",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                          >
-                            {tabletOptions.map((value) => (
-                              <MenuItem key={value} value={value}>
-                                {value}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        ) : (
-                          patientData.numberOfTablets || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+              {/* Current Treatment Dropdown */}
+              <ListItem>
+                <ListItemText
+                  primary="Current Treatment"
+                  secondary={
+                    editMode.treatmentDetails ? (
+                      <TextField
+                        select
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.currentTreatment}
+                        onChange={(e) =>
+                          handleFieldChange("currentTreatment", e.target.value)
+                        }
+                        fullWidth
+                      >
+                        {Object.entries(treatmentOptions).map(
+                          ([value, label]) => (
+                            <MenuItem key={value} value={value}>
+                              {label}
+                            </MenuItem>
+                          )
+                        )}
+                      </TextField>
+                    ) : (
+                      treatmentOptions[patientData.currentTreatment] || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  {/* Diagnosis Date */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Diagnosis Date"
-                      secondary={
-                        editMode.treatmentDetails ? (
-                          <TextField
-                            type="date"
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.diagnosisDate || ""}
-                            onChange={(e) =>
-                              handleFieldChange("diagnosisDate", e.target.value)
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          formatDate(patientData.diagnosisDate) || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-                  {/* Treatment Start Date */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Treatment Start Date"
-                      secondary={
-                        editMode.treatmentDetails ? (
-                          <TextField
-                            type="date"
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.treatmentStartDate || ""}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                "treatmentStartDate",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          formatDate(patientData.treatmentStartDate) || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
+              {/* Number of Tablets Dropdown */}
+              <ListItem>
+                <ListItemText
+                  primary="Number of Tablets"
+                  secondary={
+                    editMode.treatmentDetails ? (
+                      <TextField
+                        select
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.numberOfTablets}
+                        onChange={(e) =>
+                          handleFieldChange("numberOfTablets", e.target.value)
+                        }
+                        fullWidth
+                      >
+                        {tabletOptions.map((value) => (
+                          <MenuItem key={value} value={value}>
+                            {value}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    ) : (
+                      patientData.numberOfTablets || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-                  {/* Treatment Duration Number Input */}
-                  <ListItem>
-                    <ListItemText
-                      primary="Treatment Duration (months)"
-                      secondary={
-                        editMode.treatmentDetails ? (
-                          <TextField
-                            type="number"
-                            variant="outlined"
-                            size="small"
-                            value={editableFields.treatmentDuration}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                "treatmentDuration",
-                                e.target.value
-                              )
-                            }
-                            fullWidth
-                          />
-                        ) : (
-                          patientData.treatmentDuration || "N/A"
-                        )
-                      }
-                    />
-                  </ListItem>
-                </List>
-                {editMode.treatmentDetails && (
-                  <Box
-                    sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{ mr: 1 }}
-                      onClick={() => {
-                        // Function to update the profile with treatment details
-                        updateProfile({
-                          diagnosis: editableFields.diagnosis,
-                          currentTreatment: editableFields.currentTreatment,
-                          numberOfTablets: editableFields.numberOfTablets,
-                          diagnosisDate: editableFields.diagnosisDate,
-                          treatmentStartDate: editableFields.treatmentStartDate,
-                          treatmentDuration: editableFields.treatmentDuration,
-                        });
-                        toggleEditMode("treatmentDetails");
-                      }}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={() => {
-                        toggleEditMode("treatmentDetails");
-                        // Optionally reset editable fields to initial values
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
-                )}
-              </Paper>
-            </Grid>
+              {/* Diagnosis Date */}
+              <ListItem>
+                <ListItemText
+                  primary="Diagnosis Date"
+                  secondary={
+                    editMode.treatmentDetails ? (
+                      <TextField
+                        type="date"
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.diagnosisDate || ""}
+                        onChange={(e) =>
+                          handleFieldChange("diagnosisDate", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      formatDate(patientData.diagnosisDate) || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+              {/* Treatment Start Date */}
+              <ListItem>
+                <ListItemText
+                  primary="Treatment Start Date"
+                  secondary={
+                    editMode.treatmentDetails ? (
+                      <TextField
+                        type="date"
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.treatmentStartDate || ""}
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "treatmentStartDate",
+                            e.target.value
+                          )
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      formatDate(patientData.treatmentStartDate) || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
 
-            {/* side effect history */}
-            <Grid item xs={12}>
-              <Paper elevation={3} sx={{ p: 3 }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{ fontWeight: "bold" }}
+              {/* Treatment Duration Number Input */}
+              <ListItem>
+                <ListItemText
+                  primary="Treatment Duration (months)"
+                  secondary={
+                    editMode.treatmentDetails ? (
+                      <TextField
+                        type="number"
+                        variant="outlined"
+                        size="small"
+                        value={editableFields.treatmentDuration}
+                        onChange={(e) =>
+                          handleFieldChange("treatmentDuration", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      patientData.treatmentDuration || "N/A"
+                    )
+                  }
+                />
+              </ListItem>
+            </List>
+            {editMode.treatmentDetails && (
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ mr: 1 }}
+                  onClick={() => {
+                    // Function to update the profile with treatment details
+                    updateProfile({
+                      diagnosis: editableFields.diagnosis,
+                      currentTreatment: editableFields.currentTreatment,
+                      numberOfTablets: editableFields.numberOfTablets,
+                      diagnosisDate: editableFields.diagnosisDate,
+                      treatmentStartDate: editableFields.treatmentStartDate,
+                      treatmentDuration: editableFields.treatmentDuration,
+                    });
+                    toggleEditMode("treatmentDetails");
+                  }}
                 >
-                  Side Effect History
-                </Typography>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: "#0046c0" }}>
-                        <TableCell sx={{ color: "white" }}>
-                          Date and Time
-                        </TableCell>
-                        <TableCell sx={{ color: "white" }}>
-                          Side Effects
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {sideEffectHistory.map((report, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            {format(
-                              parseISO(report.datetime),
-                              "d MMMM yyyy, h:mm a"
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {report.sideEffects
-                              ? report.sideEffects
-                                  .map((effect) =>
-                                    effect.effect === "Others (Please Describe)"
-                                      ? effect.description // Display description for "Others (Please Describe)"
-                                      : `${effect.effect} (Grade ${effect.grade})`
-                                  )
-                                  .join(", ")
-                              : "N/A"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    toggleEditMode("treatmentDetails");
+                    // Optionally reset editable fields to initial values
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* side effect history */}
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Side Effect History
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: "#0046c0" }}>
+                    <TableCell sx={{ color: "white" }}>Date and Time</TableCell>
+                    <TableCell sx={{ color: "white" }}>Side Effects</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sideEffectHistory.map((report, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        {format(
+                          parseISO(report.datetime),
+                          "d MMMM yyyy, h:mm a"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {report.sideEffects
+                          ? report.sideEffects
+                              .map((effect) =>
+                                effect.effect === "Others (Please Describe)"
+                                  ? effect.description // Display description for "Others (Please Describe)"
+                                  : `${effect.effect} (Grade ${effect.grade})`
+                              )
+                              .join(", ")
+                          : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Grid>
+      </Grid>
+
       <Dialog open={passwordDialogOpen} onClose={handleClosePasswordDialog}>
         <DialogTitle>
           Change Password
@@ -1278,6 +1194,6 @@ export default function PatientProfile() {
           </Button>
         </DialogActions>
       </Dialog>
-    </ThemeProvider>
+    </Container>
   );
 }

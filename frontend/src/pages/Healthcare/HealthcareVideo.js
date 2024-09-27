@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ThemeProvider,
-  Drawer,
   Box,
   IconButton,
   List,
@@ -10,7 +8,6 @@ import {
   Card,
   CardContent,
   Typography,
-  useMediaQuery,
   Grid,
   Paper,
   Container,
@@ -20,16 +17,11 @@ import {
   DialogContent,
   Avatar,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import theme from "../../components/reusable/Theme";
 import CloseIcon from "@mui/icons-material/Close";
-import HealthcareSidebar from "../../components/reusable/HealthcareBar";
 import axios from "../../components/axios";
 
-export default function HealthcarePatient() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+export default function HealthcareVideo() {
   const [patients, setPatients] = useState([]);
-  const [videos, setVideos] = useState([]);
 
   const fetchPatients = async () => {
     try {
@@ -47,11 +39,6 @@ export default function HealthcarePatient() {
   }, []);
 
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const openVideoDialog = async (patient) => {
     try {
@@ -104,123 +91,83 @@ export default function HealthcarePatient() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      {matchesSM && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            m: 1,
-            display: { sm: "block", md: "none" },
-          }}
+    <Container sx={{ padding: 0, margin: 0 }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
+      >
+        <Typography
+          variant="h5"
+          gutterBottom
+          component="div"
+          sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
         >
-          <MenuIcon />
-        </IconButton>
-      )}
-      <Drawer
-        variant={matchesSM ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <HealthcareSidebar handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          ml: { sm: "240px", md: "240px" },
-          backgroundColor: "background.default",
-        }}
-      >
-        <Container>
-          <Paper
-            elevation={3}
-            sx={{ p: 3, mb: 4, mt: 5, backgroundColor: "#f7f7f7" }}
-          >
-            <Box sx={{ p: 3 }}>
-              <Typography
-                variant="h5"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
-              >
-                Review Video
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                color="textSecondary"
-                gutterBottom
-                component="div"
-                sx={{ fontWeight: "normal", fontSize: "1rem", mt: 2 }}
-              >
-                Videos for {getTodaysDateFormatted()}
-              </Typography>
-
-              <List>
-                {patients.map((patient) => (
-                  <Card
-                    key={patient.id}
-                    sx={{
-                      mb: 2,
-                      bgcolor:
-                        patient.status === "approved"
-                          ? "#c8e6c9"
-                          : patient.status === "rejected"
-                          ? "#ffcdd2"
-                          : "neutral.light",
-                    }}
-                  >
-                    <CardContent>
-                      <ListItem>
-                        <Avatar
-                          src={patient.profilePicture}
-                          alt={`${patient.firstName} ${patient.lastName}`}
-                          sx={{ mr: 2 }}
-                        />
-                        <ListItemText primary={`${patient.patientName}`} />
-                        {patient.status === "approved" && (
-                          <Button
-                            variant="contained"
-                            disabled
-                            sx={{ bgcolor: "#c8e6c9" }}
-                          >
-                            Approved
-                          </Button>
-                        )}
-                        {patient.status === "rejected" && (
-                          <Button
-                            variant="contained"
-                            disabled
-                            sx={{ bgcolor: "#ffcdd2" }}
-                          >
-                            Rejected
-                          </Button>
-                        )}
-                        {patient.status === "pending approval" && (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => openVideoDialog(patient)}
-                          >
-                            Review video
-                          </Button>
-                        )}
-                      </ListItem>
-                    </CardContent>
-                  </Card>
-                ))}
-              </List>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
+          Review Video
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          color="textSecondary"
+          gutterBottom
+          component="div"
+          sx={{ fontWeight: "normal", fontSize: "1rem", mt: 2 }}
+        >
+          Videos for {getTodaysDateFormatted()}
+        </Typography>
+        <List>
+          {patients.map((patient) => (
+            <Card
+              key={patient.id}
+              sx={{
+                mb: 2,
+                bgcolor:
+                  patient.status === "approved"
+                    ? "#c8e6c9"
+                    : patient.status === "rejected"
+                    ? "#ffcdd2"
+                    : "neutral.light",
+              }}
+            >
+              <CardContent>
+                <ListItem>
+                  <Avatar
+                    src={patient.profilePicture}
+                    alt={`${patient.firstName} ${patient.lastName}`}
+                    sx={{ mr: 2 }}
+                  />
+                  <ListItemText primary={`${patient.patientName}`} />
+                  {patient.status === "approved" && (
+                    <Button
+                      variant="contained"
+                      disabled
+                      sx={{ bgcolor: "#c8e6c9" }}
+                    >
+                      Approved
+                    </Button>
+                  )}
+                  {patient.status === "rejected" && (
+                    <Button
+                      variant="contained"
+                      disabled
+                      sx={{ bgcolor: "#ffcdd2" }}
+                    >
+                      Rejected
+                    </Button>
+                  )}
+                  {patient.status === "pending approval" && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openVideoDialog(patient)}
+                    >
+                      Review video
+                    </Button>
+                  )}
+                </ListItem>
+              </CardContent>
+            </Card>
+          ))}
+        </List>
+      </Paper>
 
       <Dialog
         open={Boolean(selectedPatient)}
@@ -274,6 +221,6 @@ export default function HealthcarePatient() {
           </Box>
         </DialogContent>
       </Dialog>
-    </ThemeProvider>
+    </Container>
   );
 }

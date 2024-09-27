@@ -11,11 +11,58 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import axios from "../../components/axios";
 
 const InteractiveStoryPage = () => {
+  const [storyData, setStoryData] = useState({
+    title: "Journey of a TB Patient",
+    steps: [
+      {
+        content:
+          "John, a 30-year-old male, has been coughing for more than 3 weeks. What should John do?",
+        options: [
+          {
+            optionText: "Ignore it and hope it gets better.",
+            nextStep: "end2",
+          },
+          {
+            optionText: "Visit a healthcare professional.",
+            nextStep: "end1",
+          },
+        ],
+      },
+    ],
+    ends: [
+      {
+        content:
+          "Ignoring the symptoms, John's condition worsens, demonstrating the danger of neglecting early signs of TB.",
+        endType: "positive",
+      },
+      {
+        content:
+          "Fear leads to worse health outcomes. John's condition deteriorates because he didn't proceed with the necessary tests.",
+        endType: "negative",
+      },
+    ],
+  });
+  const [currentStepId, setCurrentStepId] = useState(
+    storyData.steps[0].content
+  );
+  const [loading, setLoading] = useState(true); // To handle loading state
+  const [error, setError] = useState(null); // For error handling
+
+  const [retries, setRetries] = useState(0);
+  const [startTime, setStartTime] = useState(null);
+  const currentStep =
+    storyData.steps.find((step) => step.content === currentStepId) ||
+    storyData.ends.find((end) => end.content === currentStepId);
+  const isEnd = currentStep && "endType" in currentStep;
+
+  const theme = useTheme();
+  const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
+
   // Function to generate image URLs based on the content
   const generateImageUrl = (content) => {
     const formattedContent = content
@@ -24,100 +71,6 @@ const InteractiveStoryPage = () => {
     return `https://image.pollinations.ai/prompt/${formattedContent}-kids-animation-16-by-9-image`;
   };
 
-  // Temporary hardcoded story data with dynamic image generation
-  const storyData = {
-    title: "Journey of a TB Patient",
-    storyId: "story1",
-    steps: [
-      {
-        stepId: "step1",
-        content:
-          "John, a 30-year-old male, has been coughing for more than 3 weeks. What should John do?",
-        options: [
-          {
-            optionText: "Ignore it and hope it gets better.",
-            nextStep: "end1",
-          },
-          {
-            optionText: "Visit a healthcare professional.",
-            nextStep: "step2",
-          },
-        ],
-      },
-      {
-        stepId: "step2",
-        content:
-          "John decides to visit a healthcare professional. The doctor suggests a TB test. Should John proceed with the test?",
-        options: [
-          {
-            optionText: "Decline the test due to fear of results.",
-            nextStep: "end2",
-          },
-          {
-            optionText: "Agree to the test to know for sure.",
-            nextStep: "step3",
-          },
-        ],
-      },
-      {
-        stepId: "step3",
-        content:
-          "John's test results come back positive for TB. The doctor suggests starting treatment immediately. Does John:",
-        options: [
-          {
-            optionText:
-              "Start treatment immediately, understanding the importance of addressing TB early.",
-            nextStep: "end3",
-          },
-          {
-            optionText:
-              "Decide to seek a second opinion before starting treatment.",
-            nextStep: "end4",
-          },
-        ],
-      },
-    ],
-    ends: [
-      {
-        endId: "end1",
-        content:
-          "Ignoring the symptoms, John's condition worsens, demonstrating the danger of neglecting early signs of TB.",
-        endType: "negative",
-      },
-      {
-        endId: "end2",
-        content:
-          "Fear leads to worse health outcomes. John's condition deteriorates because he didn't proceed with the necessary tests.",
-        endType: "negative",
-      },
-      {
-        endId: "end3",
-        content:
-          "By starting treatment early, John manages to recover fully, showing the importance of prompt medical response to TB.",
-        endType: "positive",
-      },
-      {
-        endId: "end4",
-        content:
-          "Seeking a second opinion delays John's treatment, complicating his recovery. Immediate treatment could have prevented complications.",
-        endType: "negative",
-      },
-    ],
-  };
-
-  const [currentStepId, setCurrentStepId] = useState(storyData.steps[0].stepId);
-  const [retries, setRetries] = useState(0);
-  const [startTime, setStartTime] = useState(null);
-  const [timeTaken, setTimeTaken] = useState(null);
-  const currentStep =
-    storyData.steps.find((step) => step.stepId === currentStepId) ||
-    storyData.ends.find((end) => end.endId === currentStepId);
-  const isEnd = currentStepId.startsWith("end");
-
-  const theme = useTheme();
-  const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
   };
@@ -125,27 +78,70 @@ const InteractiveStoryPage = () => {
   const handleRestartStory = () => {
     setRetries(0);
     setStartTime(Date.now());
-    setCurrentStepId(storyData.steps[0].stepId);
+    setCurrentStepId(storyData.steps[0].content);
   };
 
   const handleRetryStory = () => {
     setRetries(retries + 1);
-    setCurrentStepId(storyData.steps[0].stepId);
+    setCurrentStepId(storyData.steps[0].content);
   };
 
+  const calculateTimeTaken = () => {
+    return ((Date.now() - startTime) / 1000).toFixed(2); // returns time in seconds
+  };
+
+  const submitStoryScore = async () => {
+    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+
+    if (!storedUserData) return; // Only submit score if user is logged in
+
+    const payload = {
+      numberOfRetries: retries,
+      totalTimeTaken: calculateTimeTaken(),
+    };
+
+    try {
+      const response = await axios.post("/score/stories/submit", payload);
+      console.log("Score submitted successfully", response.data);
+    } catch (error) {
+      console.error("Failed to submit story score", error);
+    }
+  };
+
+  // Set start time to calculate total time taken
   useEffect(() => {
     if (!openInstructionDialog) {
       setStartTime(Date.now());
     }
-    if (isEnd) {
-      if (currentStep.endType === "positive") {
-        setTimeTaken(Date.now() - startTime);
-      }
+  }, [openInstructionDialog]);
+
+  // Fetch story api
+  useEffect(() => {
+    // Fetch active story from the API
+    axios
+      .get("/stories/active")
+      .then((response) => {
+        console.log("reading stories .. response.data", response.data);
+        setStoryData(response.data);
+        setCurrentStepId(response.data.steps[0].content); // Set initial step to the first step
+        setLoading(false); // Stop loading once data is fetched
+      })
+      .catch((err) => {
+        setError("Failed to load the story.");
+        setLoading(false);
+      });
+  }, []);
+
+  // Determine whether the user reaches the correct ending
+  useEffect(() => {
+    if (isEnd && currentStep.endType === "positive") {
+      submitStoryScore(); // Automatically submit the score on positive ending
     }
-  }, [isEnd, startTime, openInstructionDialog]);
+  }, [isEnd, currentStep]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
+      {" "}
       <Typography
         variant="h6"
         gutterBottom
@@ -212,6 +208,7 @@ const InteractiveStoryPage = () => {
                   <Button
                     variant="outlined"
                     onClick={() => setCurrentStepId(option.nextStep)}
+                    sx={{ width: "100%" }}
                   >
                     {option.optionText}
                   </Button>
@@ -228,29 +225,14 @@ const InteractiveStoryPage = () => {
                     spacing={1}
                     sx={{ justifyContent: "center", alignItems: "center" }}
                   >
+                    {/* Negative ending content */}
                     <Grid item>
                       <Typography variant="h6" sx={{ color: "red" }}>
                         Oh no! Wrong Move! Please start the story from the
                         beginning and try again!...
                       </Typography>
                     </Grid>
-                    <Grid
-                      item
-                      container
-                      xs={12}
-                      sx={{
-                        textAlign: "left",
-                        alignItems: "center",
-                        width: "100%",
-                      }}
-                    >
-                      <Grid item xs={6}>
-                        <Typography variant="h6">Number of retries</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">: {retries}</Typography>
-                      </Grid>
-                    </Grid>
+                    {/* Retry the story */}
                     <Grid item>
                       <Button
                         variant="contained"
@@ -270,43 +252,35 @@ const InteractiveStoryPage = () => {
                     spacing={1}
                     sx={{ justifyContent: "center", alignItems: "center" }}
                   >
+                    {/* Positive ending content */}
                     <Grid item xs={12}>
                       <Typography variant="h6" color="green">
                         Congratulations! You've reached the end of the story!
                       </Typography>
                     </Grid>
-                    <Grid
-                      item
-                      container
-                      xs={12}
-                      sx={{
-                        textAlign: "left",
-                        alignItems: "center",
-                        width: "100%",
-                      }}
-                    >
-                      <Grid item xs={6}>
-                        <Typography variant="h6">Number of retries</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">: {retries}</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">Total time taken</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="h6">
-                          : {(timeTaken / 1000).toFixed(2)} seconds
-                        </Typography>
-                      </Grid>
+                    {/* Display retries and total time */}
+                    <Grid item xs={6}>
+                      <Typography variant="h6">Number of retries</Typography>
                     </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="h6">: {retries}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="h6">Total time taken</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="h6">
+                        : {calculateTimeTaken()} seconds
+                      </Typography>
+                    </Grid>
+                    {/* Call the API to submit the score */}
                     <Grid item>
                       <Button
                         variant="contained"
                         color="primary"
                         onClick={handleRestartStory}
                       >
-                        Restart Story
+                        Restart Story!
                       </Button>
                     </Grid>
                   </Grid>
@@ -317,7 +291,7 @@ const InteractiveStoryPage = () => {
         </Grid>
       </Grid>
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
