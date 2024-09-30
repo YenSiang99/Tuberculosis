@@ -153,7 +153,6 @@ export default function GamePerformanceDashboard() {
         headers = [
           "Game Name",
           "Score",
-          "Total Possible Score",
           "Accuracy Rate",
           "Total Time Taken",
           "Total Game Time",
@@ -163,7 +162,6 @@ export default function GamePerformanceDashboard() {
         rows = scores.map((score) => ({
           gameName: score.fillBlank?.name || "N/A",
           score: `${score.score} out of ${score.totalPossibleScore}`,
-          totalPossibleScore: score.totalPossibleScore,
           accuracyRate:
             typeof score.accuracyRate === "number"
               ? `${score.accuracyRate.toFixed(2)}%`
