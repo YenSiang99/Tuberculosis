@@ -32,7 +32,10 @@ const QuizPage = () => {
   const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
   // Asnwer Feedback for each question and summary
   const [answerFeedback, setFeedback] = useState(null);
-  const [showResult, setShowResult] = useState(false);
+
+  const [gameEnd, setGameEnd] = useState(false);
+  const [gameStart, setGameStart] = useState(false);
+  const [gamePause, setGamePause] = useState(false);
 
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
   const theme = useTheme();
@@ -83,7 +86,7 @@ const QuizPage = () => {
       setQuestionTimer(0);
       setNextQuestionTimer(5);
     } else {
-      setShowResult(true);
+      setGameEnd(true);
     }
   };
 
@@ -100,7 +103,7 @@ const QuizPage = () => {
       setFeedback(null);
       setNextQuestionTimer(0);
     } else {
-      setShowResult(true);
+      setGameEnd(true);
       submitQuizScore(); // Submit score when quiz is completed
     }
   };
@@ -113,11 +116,20 @@ const QuizPage = () => {
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
+    setGameStart(true);
+    if (gamePause) {
+      setGamePause(false);
+    }
+  };
+
+  const handleOpenInstructionDialog = () => {
+    setOpenInstructionDialog(true);
+    setGamePause(true);
   };
 
   // State to countdown question timer
   useEffect(() => {
-    if (!test && !openInstructionDialog) {
+    if (!test && gameStart && !gamePause) {
       if (questionTimer > 0 && answerFeedback === null) {
         const countdown = setTimeout(
           () => setQuestionTimer(questionTimer - 1),
@@ -129,11 +141,11 @@ const QuizPage = () => {
         handleNoAnswer();
       }
     }
-  }, [questionTimer, answerFeedback, openInstructionDialog]);
+  }, [questionTimer, answerFeedback, gameStart, gamePause]);
 
   // State to countdown next question timer
   useEffect(() => {
-    if (!test && !openInstructionDialog && questionTimer !== null) {
+    if (!test && gameStart && !gamePause && questionTimer !== null) {
       if (answerFeedback && nextQuestionTimer > 0) {
         const countdown = setTimeout(
           () => setNextQuestionTimer(nextQuestionTimer - 1),
@@ -145,7 +157,7 @@ const QuizPage = () => {
         goToNextQuestion();
       }
     }
-  }, [nextQuestionTimer, answerFeedback, openInstructionDialog]);
+  }, [nextQuestionTimer, answerFeedback, gameStart, gamePause]);
 
   useEffect(() => {
     const fetchActiveQuiz = async () => {
@@ -177,7 +189,7 @@ const QuizPage = () => {
         Quiz Time!
       </Typography>
       {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
-      {!showResult && questions.length > 0 ? (
+      {!gameEnd && questions.length > 0 ? (
         <Grid
           container
           justifyContent="center"
@@ -185,7 +197,24 @@ const QuizPage = () => {
           textAlign="center"
           spacing={1}
         >
+          {/* View instruction */}
+          <Grid
+            item
+            container
+            xs={12}
+            sx={{ justifyContent: "start", alignItems: "center" }}
+          >
+            <Button
+              variant="contained"
+              onClick={() => {
+                handleOpenInstructionDialog();
+              }}
+            >
+              View Instruction
+            </Button>
+          </Grid>
           {/* Title */}
+
           <Grid item xs={12} sm={12} md={12} lg={12}>
             <Typography variant="h4">
               {questions[currentQuestionIndex].questionText}
@@ -201,23 +230,6 @@ const QuizPage = () => {
               <Typography variant="h7">Loading...</Typography>
             )}
           </Grid>
-          {/* Time Countdown interval to next question*/}
-          {answerFeedback && (
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <Typography
-                variant="h6"
-                sx={{ color: answerFeedback === "correct" ? "green" : "red" }}
-              >
-                {answerFeedback === "correct" ? "Correct!" : "Wrong!"}
-              </Typography>
-              {nextQuestionTimer > 0 && (
-                <Typography variant="caption">
-                  Next question in: {nextQuestionTimer} seconds
-                </Typography>
-              )}
-            </Grid>
-          )}
-
           {/* Answer Selection */}
           <Grid item container spacing={1}>
             {questions[currentQuestionIndex].options.map((option, index) => (
@@ -246,6 +258,23 @@ const QuizPage = () => {
               </Grid>
             ))}
           </Grid>
+          {/* Time Countdown interval to next question*/}
+          {answerFeedback && (
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              <Typography
+                variant="h6"
+                sx={{ color: answerFeedback === "correct" ? "green" : "red" }}
+              >
+                {answerFeedback === "correct" ? "Correct!" : "Wrong!"}
+              </Typography>
+              {nextQuestionTimer > 0 && (
+                <Typography variant="caption">
+                  Next question in: {nextQuestionTimer} seconds
+                </Typography>
+              )}
+            </Grid>
+          )}
+
           {/* Next and Previous button */}
           {test && (
             <Grid

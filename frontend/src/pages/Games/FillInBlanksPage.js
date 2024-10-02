@@ -26,7 +26,9 @@ const FillInBlanksPage = () => {
 
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
 
-  const [gameOver, setGameOver] = useState(false);
+  const [gameStart, setGameStart] = useState(false);
+  const [gamePause, setGamePause] = useState(false);
+  const [gameEnd, setGameEnd] = useState(false);
 
   const submitFillBlankScore = async () => {
     console.log("submit called...");
@@ -52,6 +54,15 @@ const FillInBlanksPage = () => {
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
+    setGameStart(true);
+    if (gamePause) {
+      setGamePause(false);
+    }
+  };
+
+  const handleOpenInstructionDialog = () => {
+    setOpenInstructionDialog(true);
+    setGamePause(true);
   };
 
   const handleWordSelect = (word) => {
@@ -103,18 +114,26 @@ const FillInBlanksPage = () => {
     return score;
   };
 
-  const endGame = () => {
-    if (!gameOver) {
-      setGameOver(true);
+  // const endGame = () => {
+  //   if (!gameOver) {
+  //     setGameOver(true);
+  //     const finalScore = calculateScore();
+  //     setScore(finalScore);
+  //     setShowResult(true);
+  //     submitFillBlankScore();
+  //   }
+  // };
+
+  const handleSubmit = () => {
+    if (!gameEnd) {
+      setGameStart(false);
+      setGamePause(false);
+      setGameEnd(true);
       const finalScore = calculateScore();
       setScore(finalScore);
       setShowResult(true);
       submitFillBlankScore();
     }
-  };
-
-  const handleSubmit = () => {
-    endGame();
   };
 
   const handleReset = () => {
@@ -128,27 +147,31 @@ const FillInBlanksPage = () => {
     if (gameTime !== null) {
       setGameTimer(gameTime); // Reset the game timer
     }
-    setShowResult(false);
+    setGameEnd(false);
+    setGamePause(false);
+    setGameStart(true);
     setScore(0);
 
     // Automatically set focus to the first blank (if it exists)
     if (resetQuestions.length > 0) {
       setSelectedBlankId(resetQuestions[0]._id);
     }
-
-    setGameOver(false);
+    setGameEnd(false);
+    setGamePause(false);
+    setGameStart(true);
   };
 
   useEffect(() => {
-    if (!openInstructionDialog && !gameOver && gameTimer !== null) {
+    if (gameStart && !gamePause && gameTimer !== null) {
       if (gameTimer > 0) {
         const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
         return () => clearTimeout(countdown);
       } else if (gameTimer === 0) {
-        endGame();
+        setGameEnd(true);
+        submitFillBlankScore();
       }
     }
-  }, [gameTimer, openInstructionDialog, gameOver]);
+  }, [gameTimer, gameStart, gamePause]);
 
   useEffect(() => {
     axios
@@ -180,8 +203,22 @@ const FillInBlanksPage = () => {
         Fill in the blanks!
       </Typography>
 
-      {!showResult ? (
+      {gameStart ? (
         <Grid container spacing={2}>
+          <Grid
+            item
+            xs={12}
+            sx={{ justifyContent: "center", alignItems: "center" }}
+          >
+            <Button
+              variant="contained"
+              onClick={() => {
+                handleOpenInstructionDialog();
+              }}
+            >
+              View Instruction
+            </Button>
+          </Grid>
           <Grid item>
             <Typography variant="subtitle1">Choose a word:</Typography>
           </Grid>
@@ -257,7 +294,12 @@ const FillInBlanksPage = () => {
             container
             sx={{ justifyContent: "flex-end", alignItems: "center" }}
           >
-            <Button variant="outlined" onClick={handleSubmit}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                handleSubmit();
+              }}
+            >
               Submit
             </Button>
           </Grid>

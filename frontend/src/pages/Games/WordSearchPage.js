@@ -24,9 +24,13 @@ const WordSearchPage = () => {
 
   const [totalTime, setTotalTime] = useState(null);
   const [gameTimer, setGameTimer] = useState(null);
-  const [showResult, setShowResult] = useState(false);
 
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
+
+  const [gameStart, setGameStart] = useState(false);
+  const [gamePause, setGamePause] = useState(false);
+
+  const [gameEnd, setGameEnd] = useState(false);
 
   const submitScore = async () => {
     const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
@@ -328,6 +332,15 @@ const WordSearchPage = () => {
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
+    setGameStart(true);
+    if (gamePause) {
+      setGamePause(false);
+    }
+  };
+
+  const handleOpenInstructionDialog = () => {
+    setOpenInstructionDialog(true);
+    setGamePause(true);
   };
 
   const calculateAccuracyRate = () => {
@@ -342,16 +355,12 @@ const WordSearchPage = () => {
     );
   };
 
-  const handleShowResults = () => {
-    setShowResult(true);
-  };
-
   // countdown timer
   useEffect(() => {
-    if (!openInstructionDialog && gameTimer !== null) {
+    if (gameStart && !gamePause && gameTimer !== null) {
       if (gameTimer > 0) {
         if (foundWords.length === wordsToFind.length) {
-          handleShowResults();
+          setGameEnd(true);
           submitScore(); // Submit score when user finds all words
         } else {
           const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
@@ -359,11 +368,11 @@ const WordSearchPage = () => {
         }
       }
       if (gameTimer === 0) {
-        handleShowResults();
+        setGameEnd(true);
         submitScore(); // Submit score when timer runs out
       }
     }
-  }, [gameTimer, openInstructionDialog, foundWords]);
+  }, [gameTimer, gamePause, foundWords]);
 
   // fetch word list
   useEffect(() => {
@@ -393,7 +402,7 @@ const WordSearchPage = () => {
         <Typography variant="h4">Find the TB-related Words!</Typography>
       </Box>
       <Grid container direction="row">
-        {showResult ? (
+        {gameEnd ? (
           // Show the results if the timer is zero
           <>
             {/* Summary title */}
@@ -484,8 +493,10 @@ const WordSearchPage = () => {
                       wordsToFind
                     );
                     setGrid(gridWithWords);
-                    setGameTimer(totalTime); // Reset the timer
-                    setShowResult(false); // Go back to the game
+                    setGameTimer(totalTime);
+                    setGameEnd(false);
+                    setGamePause(false);
+                    setGameStart(true);
                   }}
                 >
                   Play Again
@@ -494,8 +505,21 @@ const WordSearchPage = () => {
             </Grid>
           </>
         ) : (
-          // Show the game grid if results are not being shown
           <>
+            <Grid
+              item
+              xs={12}
+              sx={{ justifyContent: "center", alignItems: "center" }}
+            >
+              <Button
+                variant="contained"
+                onClick={() => {
+                  handleOpenInstructionDialog();
+                }}
+              >
+                View Instruction
+              </Button>
+            </Grid>
             <Grid item xs={12} sx={{ textAlign: "center" }}>
               <Typography variant="h6">
                 Time left: {gameTimer} seconds
@@ -545,6 +569,10 @@ const WordSearchPage = () => {
                     wordsToFind
                   );
                   setGrid(gridWithWords);
+                  setGameTimer(totalTime);
+                  setGameEnd(false);
+                  setGamePause(false);
+                  setGameStart(true);
                 }}
               >
                 Reset Game

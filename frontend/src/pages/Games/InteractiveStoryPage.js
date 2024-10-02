@@ -60,6 +60,8 @@ const InteractiveStoryPage = () => {
     storyData.ends.find((end) => end.content === currentStepId);
   const isEnd = currentStep && "endType" in currentStep;
 
+  const [gameStart, setGameStart] = useState(false);
+
   const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
 
@@ -73,6 +75,11 @@ const InteractiveStoryPage = () => {
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
+    setGameStart(true);
+  };
+
+  const handleOpenInstructionDialog = () => {
+    setOpenInstructionDialog(true);
   };
 
   const handleRestartStory = () => {
@@ -110,10 +117,10 @@ const InteractiveStoryPage = () => {
 
   // Set start time to calculate total time taken
   useEffect(() => {
-    if (!openInstructionDialog) {
+    if (gameStart) {
       setStartTime(Date.now());
     }
-  }, [openInstructionDialog]);
+  }, [gameStart]);
 
   // Fetch story api
   useEffect(() => {
@@ -151,6 +158,21 @@ const InteractiveStoryPage = () => {
       </Typography>
       <Grid container spacing={1}>
         {/* Title */}
+        <Grid
+          item
+          container
+          xs={12}
+          sx={{ justifyContent: "start", alignItems: "center" }}
+        >
+          <Button
+            variant="contained"
+            onClick={() => {
+              handleOpenInstructionDialog();
+            }}
+          >
+            View Instruction
+          </Button>
+        </Grid>
         <Grid item xs={12}>
           <Typography variant="h4">{storyData.title}</Typography>
         </Grid>
