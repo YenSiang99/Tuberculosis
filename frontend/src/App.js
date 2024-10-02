@@ -224,6 +224,14 @@ function App() {
               }
             />
           </Route>
+          {/* Normal user info layout */}
+          <Route path="/" element={<MainLayout />}>
+            {" "}
+            <Route path="infographics" element={<InfographicsPage />} />
+            <Route path="videos" element={<VideosPage />} />
+            <Route path="faqs" element={<FAQsPage />} />
+            <Route path="about" element={<AboutTBCompanionPage />} />
+          </Route>
 
           {/* Admin  */}
           <Route path="/admin" element={<MainLayout />}>

@@ -30,6 +30,8 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
+import InfoIcon from "@mui/icons-material/Info";
+
 import theme from "../components/reusable/Theme";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -53,6 +55,7 @@ export default function MainLayout() {
 
   const [adminOpen, setAdminOpen] = useState(true);
   const [openGames, setOpenGames] = useState(true);
+  const [openAboutTB, setOpenAboutTB] = useState(true);
 
   const handleAdminClick = () => {
     setAdminOpen(!adminOpen);
@@ -78,6 +81,10 @@ export default function MainLayout() {
     if (handleDrawerToggle) {
       handleDrawerToggle();
     }
+  };
+
+  const handleAboutTBClick = () => {
+    setOpenAboutTB(!openAboutTB);
   };
 
   const fetchUnreadNotificationsCount = async () => {
@@ -330,6 +337,54 @@ export default function MainLayout() {
       );
     }
 
+    if (userRole?.length === 1 && userRole.includes("user")) {
+      menuItems.push(
+        <>
+          <ListItemButton onClick={handleAboutTBClick}>
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary="About TB" />
+            {openAboutTB ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openAboutTB} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/infographics");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/infographics"}
+              >
+                <ListItemText primary="Infographics" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/videos");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/videos"}
+              >
+                <ListItemText primary="Videos" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/faqs");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/faqs"}
+              >
+                <ListItemText primary="FAQs" />
+              </ListItemButton>
+            </List>
+          </Collapse>
+        </>
+      );
+    }
+
     menuItems.push(
       <>
         <ListItemButton onClick={handleGamesClick}>
@@ -457,6 +512,15 @@ export default function MainLayout() {
               </Box>
               <Divider />
               <List>
+                <ListItemButton
+                  onClick={() => {
+                    navigate("/about");
+                    // handleDrawerToggle();
+                  }}
+                  selected={location.pathname === "/about"}
+                >
+                  <ListItemText primary="About MyTBCompanion" />
+                </ListItemButton>
                 <ListItemButton onClick={handleLogout}>
                   <ListItemIcon>
                     <ExitToAppIcon />
