@@ -69,3 +69,38 @@ exports.login = async (req, res) => {
     res.status(500).send(`Error during login: ${error.message}`);
   }
 };
+
+exports.loginWithPhoneNumber = async (req, res) => {
+  try {
+    const { phoneNumber, password } = req.body;
+
+    // Find the user by phone number
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(401).send("Invalid phone number or password");
+    }
+
+    // Compare the provided password with the hashed password in the database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).send("Invalid phone number or password");
+    }
+
+    // If phone number and password are correct, generate a token
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        roles: user.roles,
+        group: user.group,
+        phoneNumber: user.phoneNumber,
+      },
+      "yourSecretKey", // Replace with your secret key
+      { expiresIn: "1h" }
+    );
+
+    // Send the token and user roles to the client
+    res.json({ token, roles: user.roles });
+  } catch (error) {
+    res.status(500).send(`Error during login: ${error.message}`);
+  }
+};

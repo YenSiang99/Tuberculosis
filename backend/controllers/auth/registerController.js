@@ -133,30 +133,29 @@ exports.registerUser = async (req, res) => {
     console.log("this is called");
     console.log("this is req.body", req.body);
 
-    const { email, password, firstName, lastName } = req.body;
+    const { phoneNumber } = req.body;
 
     // Check required fields
-    if (!firstName || !lastName || !email || !password) {
+    if (!phoneNumber) {
       return res.status(400).send("Missing required registration details");
     }
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email });
+    // Check if phone number already exists
+    const existingUser = await User.findOne({ phoneNumber });
     if (existingUser) {
-      return res.status(409).send("Email already registered");
+      return res.status(409).send("Phone number already registered");
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash the phone number as the password
+    const hashedPassword = await bcrypt.hash(phoneNumber, 10);
 
     // Create new user
     const newUser = new User({
-      email,
+      phoneNumber,
       password: hashedPassword,
-      roles: ["user"],
-      group: "user",
-      firstName,
-      lastName,
+      roles: ["user"], // Assign "user" role
+      group: "user", // Assign the "user" group
+      // firstName, lastName, email can be left undefined
     });
 
     // Save the user

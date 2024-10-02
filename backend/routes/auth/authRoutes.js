@@ -9,6 +9,7 @@ const {
 
 const router = express.Router();
 
+router.post("/login/user", loginController.loginWithPhoneNumber);
 router.post("/login", loginController.login);
 router.post("/register", uploadProfile, registerController.register);
 router.post(

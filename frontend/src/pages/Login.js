@@ -91,10 +91,104 @@ export default function Login() {
     padding: theme.spacing(2),
   };
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await axios.post("/auth/login", { email, password });
+  //     const { token } = response.data;
+
+  //     // Decode the token to get the roles
+  //     const decoded = jwtDecode(token);
+  //     console.log("Decoded JWT:", decoded);
+
+  //     // Store the token and user data based on the "Remember Me" selection
+  //     if (rememberMe) {
+  //       // Store in local storage if "Remember Me" is checked
+  //       localStorage.setItem("token", token);
+  //       localStorage.setItem("userData", JSON.stringify(decoded));
+  //     } else {
+  //       // Store in session storage if "Remember Me" is not checked
+  //       sessionStorage.setItem("token", token);
+  //       sessionStorage.setItem("userData", JSON.stringify(decoded));
+  //     }
+
+  //     setAuth(true);
+
+  //     // Check if roles is defined and is an array
+  //     if (decoded.roles) {
+  //       if (decoded.roles.includes("patient")) {
+  //         navigate("/patient/video");
+  //       } else if (decoded.roles.includes("healthcare")) {
+  //         navigate("/healthcare/patient");
+  //       } else if (decoded.roles.includes("user")) {
+  //         navigate("/games/score-dashboard");
+  //       } else {
+  //         setAuth(false);
+  //         console.log("User role not recognized or unauthorized");
+  //       }
+  //     } else {
+  //       console.log("Roles not defined or not an array");
+  //       // Handle case where roles is not defined or not in the expected format
+  //     }
+  //   } catch (error) {
+  //     setAuth(false);
+  //     console.error(
+  //       "Login error:",
+  //       error.response ? error.response.data : error
+  //     );
+  //     if (error.response && error.response.status === 401) {
+  //       // Show alert with error message
+  //       setAlertInfo({
+  //         show: true,
+  //         type: "error",
+  //         message: "Invalid email or password",
+  //       });
+  //     } else {
+  //       // Handle other kinds of errors
+  //       setAlertInfo({
+  //         show: true,
+  //         type: "error",
+  //         message: "An error occurred. Please try again later.",
+  //       });
+  //     }
+  //   }
+  // };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Regex for basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Regex for phone number validation (accepting digits, optional + and dashes)
+    const phoneRegex = /^\+?[0-9\s\-]+$/;
+
+    let apiUrl = "/auth/login"; // Default to email login
+    let payload = { email, password }; // Default payload for email login
+
+    // Detect whether the input is an email or phone number
+    if (emailRegex.test(email)) {
+      // If it's an email, the default login stays
+      apiUrl = "/auth/login";
+      payload = { email, password };
+      console.log("healthcare or patient login");
+    } else if (phoneRegex.test(email)) {
+      // If it's a phone number, use the phone number login API
+      apiUrl = "/auth/login/user";
+      payload = { phoneNumber: email, password };
+      console.log("normal user login");
+    } else {
+      // Show an alert if neither email nor phone number is valid
+      setAlertInfo({
+        show: true,
+        type: "error",
+        message: "Invalid email or phone number format",
+      });
+      return;
+    }
+
     try {
-      const response = await axios.post("/auth/login", { email, password });
+      const response = await axios.post(apiUrl, payload);
       const { token } = response.data;
 
       // Decode the token to get the roles
@@ -103,18 +197,16 @@ export default function Login() {
 
       // Store the token and user data based on the "Remember Me" selection
       if (rememberMe) {
-        // Store in local storage if "Remember Me" is checked
         localStorage.setItem("token", token);
         localStorage.setItem("userData", JSON.stringify(decoded));
       } else {
-        // Store in session storage if "Remember Me" is not checked
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("userData", JSON.stringify(decoded));
       }
 
       setAuth(true);
 
-      // Check if roles is defined and is an array
+      // Navigate based on user roles
       if (decoded.roles) {
         if (decoded.roles.includes("patient")) {
           navigate("/patient/video");
@@ -128,7 +220,6 @@ export default function Login() {
         }
       } else {
         console.log("Roles not defined or not an array");
-        // Handle case where roles is not defined or not in the expected format
       }
     } catch (error) {
       setAuth(false);
@@ -136,15 +227,14 @@ export default function Login() {
         "Login error:",
         error.response ? error.response.data : error
       );
+
       if (error.response && error.response.status === 401) {
-        // Show alert with error message
         setAlertInfo({
           show: true,
           type: "error",
-          message: "Invalid email or password",
+          message: "Invalid email, phone number, or password",
         });
       } else {
-        // Handle other kinds of errors
         setAlertInfo({
           show: true,
           type: "error",
@@ -244,8 +334,8 @@ export default function Login() {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
-                label="Email"
-                type="email"
+                label="Email / Phone Number"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 fullWidth
@@ -276,7 +366,7 @@ export default function Login() {
                 }}
               />
             </Grid>
-            <Grid
+            {/* <Grid
               container
               item
               xs={12}
@@ -305,7 +395,7 @@ export default function Login() {
                   Forgot password?
                 </Link>
               </Grid>
-            </Grid>
+            </Grid> */}
             {/* Login Button */}
             <Grid item xs={12}>
               <Button

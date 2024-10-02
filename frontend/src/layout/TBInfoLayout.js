@@ -54,106 +54,107 @@ const TBInfo = () => {
   };
 
   const drawer = (
-    <div>
+    <>
       <Toolbar />
       <Divider />
-      <List>
-        {/* About TB Section */}
-        <ListItemButton onClick={handleAboutTBClick}>
-          <ListItemIcon>
-            <InfoIcon />
-          </ListItemIcon>
-          <ListItemText primary="About TB" />
-          {openAboutTB ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={openAboutTB} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/infographics");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/tb-info/infographics"}
-            >
-              <ListItemText primary="Infographics" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/videos");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/tb-info/videos"}
-            >
-              <ListItemText primary="Videos" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/faqs");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/tb-info/faqs"}
-            >
-              <ListItemText primary="FAQs" />
-            </ListItemButton>
-          </List>
-        </Collapse>
+      <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+        <List>
+          {/* About TB Section */}
+          <ListItemButton onClick={handleAboutTBClick}>
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary="About TB" />
+            {openAboutTB ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openAboutTB} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/infographics");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/tb-info/infographics"}
+              >
+                <ListItemText primary="Infographics" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/videos");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/tb-info/videos"}
+              >
+                <ListItemText primary="Videos" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/faqs");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/tb-info/faqs"}
+              >
+                <ListItemText primary="FAQs" />
+              </ListItemButton>
+            </List>
+          </Collapse>
 
-        {/* Games Section */}
-        <ListItemButton onClick={handleGamesClick}>
-          <ListItemIcon>
-            <GamesIcon />
-          </ListItemIcon>
-          <ListItemText primary="Games" />
-          {openGames ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={openGames} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/games/word-search");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/tb-info/games/word-search"}
-            >
-              <ListItemText primary="Word Search" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/games/quiz");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/tb-info/games/quiz"}
-            >
-              <ListItemText primary="Quiz" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/games/interactive-story");
-                handleDrawerToggle();
-              }}
-              selected={
-                location.pathname === "/tb-info/games/interactive-story"
-              }
-            >
-              <ListItemText primary="Interactive Story" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/tb-info/games/fill-in-blanks");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/tb-info/games/fill-in-blanks"}
-            >
-              <ListItemText primary="Fill in the Blanks" />
-            </ListItemButton>
-            {/* <ListItemButton
+          {/* Games Section */}
+          <ListItemButton onClick={handleGamesClick}>
+            <ListItemIcon>
+              <GamesIcon />
+            </ListItemIcon>
+            <ListItemText primary="Games" />
+            {openGames ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openGames} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/games/word-search");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/tb-info/games/word-search"}
+              >
+                <ListItemText primary="Word Search" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/games/quiz");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/tb-info/games/quiz"}
+              >
+                <ListItemText primary="Quiz" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/games/interactive-story");
+                  handleDrawerToggle();
+                }}
+                selected={
+                  location.pathname === "/tb-info/games/interactive-story"
+                }
+              >
+                <ListItemText primary="Interactive Story" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => {
+                  navigate("/tb-info/games/fill-in-blanks");
+                  handleDrawerToggle();
+                }}
+                selected={location.pathname === "/tb-info/games/fill-in-blanks"}
+              >
+                <ListItemText primary="Fill in the Blanks" />
+              </ListItemButton>
+              {/* <ListItemButton
               sx={{ pl: 4 }}
               onClick={() => {
                 navigate("/tb-info/games/true-false");
@@ -163,9 +164,12 @@ const TBInfo = () => {
             >
               <ListItemText primary="True or False" />
             </ListItemButton> */}
-          </List>
-        </Collapse>
-
+            </List>
+          </Collapse>
+        </List>
+      </Box>
+      <Divider />
+      <List>
         {/* About MyTBCompanion */}
         <ListItemButton
           onClick={() => {
@@ -190,7 +194,7 @@ const TBInfo = () => {
           <ListItemText primary="About MyTBCompanion" />
         </ListItemButton>
       </List>
-    </div>
+    </>
   );
 
   return (
@@ -216,7 +220,7 @@ const TBInfo = () => {
               }}
             >
               <IconButton
-                color="inherit"
+                color="primary"
                 aria-label="open drawer"
                 edge="start"
                 onClick={handleDrawerToggle}
@@ -249,6 +253,8 @@ const TBInfo = () => {
               <LoginIcon
                 variant="contained"
                 onClick={() => navigate("/")}
+                color="primary"
+                // sx={{ color: "primary" }}
               ></LoginIcon>
             </Box>
           </Toolbar>

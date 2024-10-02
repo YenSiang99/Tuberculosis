@@ -40,27 +40,16 @@ export default function UserRegister() {
   });
   const [emailError, setEmailError] = useState({ valid: true, message: "" });
 
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   const handleRegister = async (event) => {
     event.preventDefault();
 
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setPasswordError({
-        valid: false,
-        message: "Passwords do not match.",
-      });
-      return;
-    }
-
     // Create the user data object
     const userData = {
-      firstName,
-      lastName,
-      email,
-      password,
-      roles: ["user"], // Assign the "user" role
+      phoneNumber,
+      password: phoneNumber,
     };
-
     try {
       // Send a POST request
       const response = await axios.post("/auth/register", userData);
@@ -95,38 +84,38 @@ export default function UserRegister() {
     },
   }));
 
-  const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      return {
-        valid: false,
-        message:
-          "Password must be at least 8 characters long and contain at least one letter and one number.",
-      };
-    }
-    return { valid: true, message: "" };
-  };
+  // const validateEmail = (email) => {
+  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //   if (!emailRegex.test(email)) {
+  //     return {
+  //       valid: false,
+  //       message: "Invalid email format.",
+  //     };
+  //   }
+  //   return { valid: true, message: "" };
+  // };
 
-  const handlePasswordChange = () => {
-    const validationResult = validatePassword(password);
-    setPasswordError(validationResult);
-  };
+  //  const validatePassword = (password) => {
+  //    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  //    if (!passwordRegex.test(password)) {
+  //      return {
+  //        valid: false,
+  //        message:
+  //          "Password must be at least 8 characters long and contain at least one letter and one number.",
+  //      };
+  //    }
+  //    return { valid: true, message: "" };
+  //  };
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return {
-        valid: false,
-        message: "Invalid email format.",
-      };
-    }
-    return { valid: true, message: "" };
-  };
+  //  const handlePasswordChange = () => {
+  //    const validationResult = validatePassword(password);
+  //    setPasswordError(validationResult);
+  //  };
 
-  const handleEmailChange = () => {
-    const validationResult = validateEmail(email);
-    setEmailError(validationResult);
-  };
+  // const handleEmailChange = () => {
+  //   const validationResult = validateEmail(email);
+  //   setEmailError(validationResult);
+  // };
 
   const isFormValid = () => {
     return emailError.valid && passwordError.valid;
@@ -164,9 +153,13 @@ export default function UserRegister() {
           <Typography component="h1" variant="h5">
             User Registration
           </Typography>
-          <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
+          <Box
+            component="form"
+            onSubmit={handleRegister}
+            sx={{ mt: 1, width: "100%" }}
+          >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              {/* <Grid item xs={12} sm={6}>
                 <TextField
                   margin="normal"
                   required
@@ -192,8 +185,8 @@ export default function UserRegister() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                 />
-              </Grid>
-              <Grid item xs={12}>
+              </Grid> */}
+              {/* <Grid item xs={12}>
                 <TextField
                   margin="normal"
                   required
@@ -241,8 +234,8 @@ export default function UserRegister() {
                     ),
                   }}
                 />
-              </Grid>
-              <Grid item xs={12}>
+              </Grid> */}
+              {/* <Grid item xs={12}>
                 <TextField
                   margin="normal"
                   required
@@ -273,6 +266,19 @@ export default function UserRegister() {
                     ),
                   }}
                 />
+              </Grid> */}
+              <Grid item xs={12}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="phoneNumber"
+                  label="Phone Number"
+                  name="phoneNumber"
+                  autoComplete="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                />
               </Grid>
             </Grid>
             <Button
@@ -283,9 +289,6 @@ export default function UserRegister() {
               disabled={!isFormValid()}
             >
               Register
-            </Button>
-            <Button variant="text" onClick={() => navigate("/")} sx={{ mt: 1 }}>
-              Back to Login
             </Button>
           </Box>
         </Box>

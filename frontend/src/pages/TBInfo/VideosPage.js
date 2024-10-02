@@ -12,7 +12,7 @@ const VideosPage = () => {
   // Define a list of videos with their filenames and titles
   const videos = [
     {
-      src: "./videos/Video 1_ Understanding the Basics_compressed",
+      src: "./videos/Video 1_ Understanding the Basics_compressed.mp4",
       title: "Understanding the Basics of Tuberculosis",
     },
     {

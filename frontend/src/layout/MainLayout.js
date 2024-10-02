@@ -434,10 +434,9 @@ export default function MainLayout() {
             >
               <Box
                 sx={{
-                  minHeight: 64,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  justifyContent: "flex-start",
                   flexDirection: "column",
                   padding: 2,
                 }}
@@ -447,7 +446,9 @@ export default function MainLayout() {
                   sx={{ width: 56, height: 56, marginBottom: 1 }}
                 />
                 <Typography variant="h6">
-                  {`${userData.firstName} ${userData.lastName}`}
+                  {userData.firstName && userData.lastName
+                    ? `${userData.firstName} ${userData.lastName}`
+                    : "Hello, User"}
                 </Typography>
               </Box>
               <Divider />
@@ -499,8 +500,11 @@ export default function MainLayout() {
               backgroundPosition: "center",
             }}
           >
-            <Toolbar />
-            <Container>
+            <Container
+              sx={{
+                marginTop: 2,
+              }}
+            >
               <Paper style={{ padding: theme.spacing(2) }}>
                 <Outlet />
               </Paper>
