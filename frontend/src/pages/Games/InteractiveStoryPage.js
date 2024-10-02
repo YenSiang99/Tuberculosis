@@ -55,12 +55,13 @@ const InteractiveStoryPage = () => {
 
   const [retries, setRetries] = useState(0);
   const [startTime, setStartTime] = useState(null);
+  const [finalTimeTaken, setFinalTimeTaken] = useState(null); // New state for final time
+  const [gameStarted, setGameStarted] = useState(false); // Track if the game has started
+
   const currentStep =
     storyData.steps.find((step) => step.content === currentStepId) ||
     storyData.ends.find((end) => end.content === currentStepId);
   const isEnd = currentStep && "endType" in currentStep;
-
-  const [gameStart, setGameStart] = useState(false);
 
   const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
@@ -75,7 +76,10 @@ const InteractiveStoryPage = () => {
 
   const handleCloseInstructionDialog = () => {
     setOpenInstructionDialog(false);
-    setGameStart(true);
+    if (!gameStarted) {
+      setStartTime(Date.now()); // Set start time only if the game hasn't started yet
+      setGameStarted(true); // Mark the game as started
+    }
   };
 
   const handleOpenInstructionDialog = () => {
@@ -85,11 +89,14 @@ const InteractiveStoryPage = () => {
   const handleRestartStory = () => {
     setRetries(0);
     setStartTime(Date.now());
+    setFinalTimeTaken(null); // Reset final time when restarting
     setCurrentStepId(storyData.steps[0].content);
+    setGameStarted(true); // Reset game start
   };
 
   const handleRetryStory = () => {
     setRetries(retries + 1);
+    setFinalTimeTaken(null); // Reset final time on retry
     setCurrentStepId(storyData.steps[0].content);
   };
 
@@ -97,14 +104,14 @@ const InteractiveStoryPage = () => {
     return ((Date.now() - startTime) / 1000).toFixed(2); // returns time in seconds
   };
 
-  const submitStoryScore = async () => {
+  const submitStoryScore = async (finalTime) => {
     const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
 
     if (!storedUserData) return; // Only submit score if user is logged in
 
     const payload = {
       numberOfRetries: retries,
-      totalTimeTaken: calculateTimeTaken(),
+      totalTimeTaken: finalTime || calculateTimeTaken(),
     };
 
     try {
@@ -115,16 +122,8 @@ const InteractiveStoryPage = () => {
     }
   };
 
-  // Set start time to calculate total time taken
+  // Fetch story API
   useEffect(() => {
-    if (gameStart) {
-      setStartTime(Date.now());
-    }
-  }, [gameStart]);
-
-  // Fetch story api
-  useEffect(() => {
-    // Fetch active story from the API
     axios
       .get("/stories/active")
       .then((response) => {
@@ -141,14 +140,17 @@ const InteractiveStoryPage = () => {
 
   // Determine whether the user reaches the correct ending
   useEffect(() => {
-    if (isEnd && currentStep.endType === "positive") {
-      submitStoryScore(); // Automatically submit the score on positive ending
+    if (isEnd) {
+      const finalTime = calculateTimeTaken();
+      setFinalTimeTaken(finalTime); // Freeze the final time when the game ends
+      if (currentStep.endType === "positive") {
+        submitStoryScore(finalTime); // Automatically submit the score on positive ending
+      }
     }
   }, [isEnd, currentStep]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
-      {" "}
       <Typography
         variant="h6"
         gutterBottom
@@ -164,23 +166,13 @@ const InteractiveStoryPage = () => {
           xs={12}
           sx={{ justifyContent: "start", alignItems: "center" }}
         >
-          <Button
-            variant="contained"
-            onClick={() => {
-              handleOpenInstructionDialog();
-            }}
-          >
+          <Button variant="contained" onClick={handleOpenInstructionDialog}>
             View Instruction
           </Button>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h4">{storyData.title}</Typography>
         </Grid>
-        {/* <Grid item xs={12}>
-          <Typography variant="h4">
-            Start Time: {new Date(startTime).toLocaleString()}
-          </Typography>
-        </Grid> */}
 
         <Grid
           item
@@ -292,7 +284,7 @@ const InteractiveStoryPage = () => {
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="h6">
-                        : {calculateTimeTaken()} seconds
+                        : {finalTimeTaken} seconds
                       </Typography>
                     </Grid>
                     {/* Call the API to submit the score */}
@@ -313,7 +305,6 @@ const InteractiveStoryPage = () => {
         </Grid>
       </Grid>
       <Dialog
-        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"

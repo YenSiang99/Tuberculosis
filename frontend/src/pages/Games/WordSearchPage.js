@@ -372,7 +372,7 @@ const WordSearchPage = () => {
         submitScore(); // Submit score when timer runs out
       }
     }
-  }, [gameTimer, gamePause, foundWords]);
+  }, [gameTimer, gameStart, gamePause, foundWords]);
 
   // fetch word list
   useEffect(() => {
