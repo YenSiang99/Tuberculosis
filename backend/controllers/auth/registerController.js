@@ -130,9 +130,6 @@ exports.registerPatient = async (req, res) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    console.log("this is called");
-    console.log("this is req.body", req.body);
-
     const { phoneNumber } = req.body;
 
     // Check required fields
@@ -146,13 +143,20 @@ exports.registerUser = async (req, res) => {
       return res.status(409).send("Phone number already registered");
     }
 
-    // Hash the phone number as the password
-    const hashedPassword = await bcrypt.hash(phoneNumber, 10);
+    // Remove the country prefix ('6') from the phone number for password
+    const localPhoneNumber = phoneNumber.startsWith("6")
+      ? phoneNumber.slice(1)
+      : phoneNumber;
 
-    // Create new user
+    console.log("local phone number", localPhoneNumber);
+
+    // Hash the phone number without the prefix as the password
+    const hashedPassword = await bcrypt.hash(localPhoneNumber, 10);
+
+    // Create new user with phone number (with prefix) but password hashed without the prefix
     const newUser = new User({
-      phoneNumber,
-      password: hashedPassword,
+      phoneNumber, // Save the phone number with the prefix
+      password: hashedPassword, // Save the hashed password without the prefix
       roles: ["user"], // Assign "user" role
       group: "user", // Assign the "user" group
       // firstName, lastName, email can be left undefined

@@ -157,38 +157,8 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Regex for basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Regex for phone number validation (accepting digits, optional + and dashes)
-    const phoneRegex = /^\+?[0-9\s\-]+$/;
-
-    let apiUrl = "/auth/login"; // Default to email login
-    let payload = { email, password }; // Default payload for email login
-
-    // Detect whether the input is an email or phone number
-    if (emailRegex.test(email)) {
-      // If it's an email, the default login stays
-      apiUrl = "/auth/login";
-      payload = { email, password };
-      console.log("healthcare or patient login");
-    } else if (phoneRegex.test(email)) {
-      // If it's a phone number, use the phone number login API
-      apiUrl = "/auth/login/user";
-      payload = { phoneNumber: email, password };
-      console.log("normal user login");
-    } else {
-      // Show an alert if neither email nor phone number is valid
-      setAlertInfo({
-        show: true,
-        type: "error",
-        message: "Invalid email or phone number format",
-      });
-      return;
-    }
-
     try {
-      const response = await axios.post(apiUrl, payload);
+      const response = await axios.post("/auth/login", { email, password });
       const { token } = response.data;
 
       // Decode the token to get the roles
@@ -334,7 +304,7 @@ export default function Login() {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
-                label="Email / Phone Number"
+                label="Email / Phone Number (eg 0123456789)"
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

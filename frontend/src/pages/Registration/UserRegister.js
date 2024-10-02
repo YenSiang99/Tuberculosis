@@ -20,6 +20,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import theme from "../../components/reusable/Theme";
 import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
+import PhoneInput from "react-phone-input-2";
 
 export default function UserRegister() {
   const navigate = useNavigate();
@@ -48,11 +49,10 @@ export default function UserRegister() {
     // Create the user data object
     const userData = {
       phoneNumber,
-      password: phoneNumber,
     };
     try {
       // Send a POST request
-      const response = await axios.post("/auth/register", userData);
+      const response = await axios.post("/auth/registerUser", userData);
       navigate("/register/success");
     } catch (error) {
       if (error.response && error.response.status === 409) {
@@ -268,16 +268,15 @@ export default function UserRegister() {
                 />
               </Grid> */}
               <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="phoneNumber"
-                  label="Phone Number"
-                  name="phoneNumber"
-                  autoComplete="tel"
+                <PhoneInput
+                  country={"my"}
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={setPhoneNumber}
+                  onlyCountries={["my"]}
+                  disableDropdown={true}
+                  countryCodeEditable={false}
+                  containerStyle={{ width: "100%" }}
+                  inputStyle={{ width: "100%", height: "56px" }}
                 />
               </Grid>
             </Grid>

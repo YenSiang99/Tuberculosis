@@ -9,8 +9,7 @@ const {
 
 const router = express.Router();
 
-router.post("/login/user", loginController.loginWithPhoneNumber);
-router.post("/login", loginController.login);
+// Registration
 router.post("/register", uploadProfile, registerController.register);
 router.post(
   "/registerPatient",
@@ -18,5 +17,8 @@ router.post(
   registerController.registerPatient
 );
 router.post("/registerUser", registerController.registerUser);
+
+//Login that handles both phone no login and email login
+router.post("/login", loginController.login);
 
 module.exports = router;
