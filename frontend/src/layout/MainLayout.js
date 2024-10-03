@@ -39,6 +39,8 @@ import { Outlet } from "react-router-dom"; // To render child routes
 import GamesIcon from "@mui/icons-material/Games";
 import axios from "../components/axios";
 
+import LanguageSelector from "../components/reusable/LanguageSelector"; // Import the new component
+
 export default function MainLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -487,6 +489,9 @@ export default function MainLayout() {
                 "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
               }}
             >
+              <Box sx={{ mt: "auto", p: 2 }}>
+                <LanguageSelector />
+              </Box>
               <Box
                 sx={{
                   display: "flex",

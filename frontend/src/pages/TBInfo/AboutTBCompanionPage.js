@@ -11,7 +11,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 // import demoMedicineVideo from "../../videos/Presentation1.mp4";
 import { useTheme } from "@mui/material/styles";
 
+import { useTranslation } from "react-i18next";
+
 const AboutTBCompanionPage = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const StyledAccordion = styled(Accordion)(({ theme }) => ({
     margin: "0.5rem 0",
@@ -47,6 +50,22 @@ const AboutTBCompanionPage = () => {
     padding: theme.spacing(2),
     borderTop: "1px solid rgba(0, 0, 0, .125)",
   }));
+
+  const faqKeys = [
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "q5",
+    "q6",
+    "q7",
+    "q8",
+    "q9",
+    "q10",
+    "q11",
+    "q12",
+    "q13",
+  ];
   return (
     <Box>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
@@ -63,195 +82,45 @@ const AboutTBCompanionPage = () => {
           Frequently Asked Questions (FAQ)
         </Typography>
 
-        {/* FAQ 1 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>What is MyTBCompanion?</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              MyTBCompanion is a mobile health application to improve the
-              Tuberculosis management among the patients and healthcare. Its
-              main feature is the Video Observed Therapy.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-        {/* FAQ 2 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>What can MyTBCompanion do?</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              <ul>
-                <li>Self-medication video upload</li>
-                <li>Side-effect reporting</li>
-                <li>Booking appointment</li>
-                <li>Progress monitoring</li>
-                <li>Reminders for medications and alerts</li>
-              </ul>
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 3 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>How should I register?</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Enter email, password, personal information and treatment
-              information.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 4 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>How do I record and upload the video?</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Click the ‘Upload Video’ button in the homepage. Record the video
-              then press “Upload” button.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 5 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              Is there any specification and requirement of the video?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>No</Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 6 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              How should I report the side effects of the medication?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Click the ‘Report Side Effects’ button in the homepage. Select the
-              date and time, then tick the checkbox on the symptoms that you are
-              experiencing. Then press ‘Submit’ button.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 7 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              How should I track the progress of my medication?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Go to Profile page and click the progress tracker.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 9 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              How should I make an appointment for online consultations?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Click the ‘Make Appointment’ button in the homepage. Then select
-              the date and time. Finally click the ‘Book” button.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 10 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              How should I set the reminder to remind me to take medications on
-              time?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Go to Profile page and click ‘Settings’. Then click ‘Reminder’.
-              Toggle the ‘Medication Reminder’ then set the time for the
-              reminder.{" "}
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 11 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              Where can I find information related to TB or the app?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              You may use Umi (chatbot) or explore the Materials section.
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 12 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>What should I record for the video?</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              You need to record your daily medication intake. Please watch this
-              video:
-            </Typography>
-            {/* Embedding the video */}
-            <div style={{ width: "100%", overflow: "hidden" }}>
-              <video width="20%" height="40%" controls>
-                <source src="./videos/Presentation1.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 13 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>How do I edit my profile ?</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>
-              Go to Profile page and click the ‘Pen’ icon on the top right
-              corner to edit your profile information.{" "}
-            </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
-
-        {/* FAQ 14 */}
-        <StyledAccordion>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>
-              How do I view the history of my appointment and side effects ?
-            </Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <Typography>Go to Profile page and click ‘History’. </Typography>
-          </StyledAccordionDetails>
-        </StyledAccordion>
+        {faqKeys.map((key, index) => (
+          <StyledAccordion key={index}>
+            {/* Title */}
+            <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>{t(`about.${key}.title`)}</Typography>
+            </StyledAccordionSummary>
+            {/* Content */}
+            <StyledAccordionDetails>
+              <Typography>
+                {/* If the content is an array, render a list */}
+                {Array.isArray(
+                  t(`about.${key}.content`, { returnObjects: true })
+                ) ? (
+                  <ul>
+                    {t(`about.${key}.content`, { returnObjects: true }).map(
+                      (item, idx) => (
+                        <li key={idx}>{item}</li>
+                      )
+                    )}
+                  </ul>
+                ) : (
+                  t(`about.${key}.content`)
+                )}
+                {/* Video embedding for specific FAQ (e.g., q11) */}
+                {key === "q11" && (
+                  <div style={{ width: "100%", overflow: "hidden" }}>
+                    <video width="20%" height="40%" controls>
+                      <source
+                        src="./videos/Presentation1.mp4"
+                        type="video/mp4"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+              </Typography>
+            </StyledAccordionDetails>
+          </StyledAccordion>
+        ))}
       </Box>
     </Box>
   );

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  ThemeProvider,
   Typography,
   Box,
   Container,
@@ -10,18 +9,13 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  AppBar,
-  Toolbar,
   TextField,
   Grid,
   IconButton,
-  Checkbox,
-  FormControlLabel,
   InputAdornment,
   Alert,
   styled,
 } from "@mui/material";
-import Avatar from "@mui/material/Avatar";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import theme from "../components/reusable/Theme";
@@ -32,12 +26,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../context/AuthContext";
 
+import LanguageSelector from "../components/reusable/LanguageSelector";
+import { useTranslation } from "react-i18next";
+
 export default function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [userRole, setUserRole] = useState("");
   const [openRoleSelect, setOpenRoleSelect] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [alertInfo, setAlertInfo] = useState({
@@ -90,69 +87,6 @@ export default function Login() {
     cursor: "pointer",
     padding: theme.spacing(2),
   };
-
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const response = await axios.post("/auth/login", { email, password });
-  //     const { token } = response.data;
-
-  //     // Decode the token to get the roles
-  //     const decoded = jwtDecode(token);
-  //     console.log("Decoded JWT:", decoded);
-
-  //     // Store the token and user data based on the "Remember Me" selection
-  //     if (rememberMe) {
-  //       // Store in local storage if "Remember Me" is checked
-  //       localStorage.setItem("token", token);
-  //       localStorage.setItem("userData", JSON.stringify(decoded));
-  //     } else {
-  //       // Store in session storage if "Remember Me" is not checked
-  //       sessionStorage.setItem("token", token);
-  //       sessionStorage.setItem("userData", JSON.stringify(decoded));
-  //     }
-
-  //     setAuth(true);
-
-  //     // Check if roles is defined and is an array
-  //     if (decoded.roles) {
-  //       if (decoded.roles.includes("patient")) {
-  //         navigate("/patient/video");
-  //       } else if (decoded.roles.includes("healthcare")) {
-  //         navigate("/healthcare/patient");
-  //       } else if (decoded.roles.includes("user")) {
-  //         navigate("/games/score-dashboard");
-  //       } else {
-  //         setAuth(false);
-  //         console.log("User role not recognized or unauthorized");
-  //       }
-  //     } else {
-  //       console.log("Roles not defined or not an array");
-  //       // Handle case where roles is not defined or not in the expected format
-  //     }
-  //   } catch (error) {
-  //     setAuth(false);
-  //     console.error(
-  //       "Login error:",
-  //       error.response ? error.response.data : error
-  //     );
-  //     if (error.response && error.response.status === 401) {
-  //       // Show alert with error message
-  //       setAlertInfo({
-  //         show: true,
-  //         type: "error",
-  //         message: "Invalid email or password",
-  //       });
-  //     } else {
-  //       // Handle other kinds of errors
-  //       setAlertInfo({
-  //         show: true,
-  //         type: "error",
-  //         message: "An error occurred. Please try again later.",
-  //       });
-  //     }
-  //   }
-  // };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -240,6 +174,9 @@ export default function Login() {
         backgroundPosition: "center",
       }}
     >
+      <Box sx={{}}>
+        <LanguageSelector />
+      </Box>
       <Typography
         variant="h2"
         component="h1"
@@ -248,6 +185,7 @@ export default function Login() {
       >
         Tuberculosis (TB)
       </Typography>
+
       <Typography variant="h5" sx={{ color: "black", mb: 2 }}>
         A bacterial infection that affects your lungs
       </Typography>

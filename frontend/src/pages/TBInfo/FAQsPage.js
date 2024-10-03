@@ -1,9 +1,19 @@
-import React from 'react';
-import {  Typography, Accordion, AccordionSummary, AccordionDetails, styled ,Container } from '@mui/material';
+import React from "react";
+import {
+  Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  styled,
+  Container,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import theme from "../../components/reusable/Theme";
 
+import { useTranslation } from "react-i18next";
+
 const FAQsPage = () => {
+  const { t } = useTranslation();
 
   const StyledAccordion = styled(Accordion)(({ theme }) => ({
     margin: "0.5rem 0",
@@ -40,118 +50,54 @@ const FAQsPage = () => {
     borderTop: "1px solid rgba(0, 0, 0, .125)",
   }));
 
+  const faqKeys = [
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "q5",
+    "q6",
+    // Add more keys if necessary
+  ];
+
   return (
-    <Container sx={{padding: 0 , margin: 0 }}>
+    <Container sx={{ padding: 0, margin: 0 }}>
       <Typography
         variant="h6"
         gutterBottom
         sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
       >
-        Frequently Asked Questions (FAQs)
+        {t("faqs.title")}
       </Typography>
 
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>What is Tuberculosis (TB)?</Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            Tuberculosis (TB) is an infectious disease that most often
-            affects the lungs. TB is caused by a type of bacteria. It
-            spreads through the air when infected people cough, sneeze or
-            spit.
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
-
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>
-            What are the common signs and symptoms of TB?
-          </Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            The most common symptoms of TB include:
-            <ul>
-              <li>A cough that lasts for more than two (2) weeks</li>
-              <li>Cough with sputum which is occasionally bloodstained</li>
-              <li>Loss of appetite and weight</li>
-              <li>Fever</li>
-              <li>
-                Dyspnea, night sweats, chest pain, and hoarseness of voice
-              </li>
-            </ul>
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
-
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>How does TB spread?</Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            Infection is usually by direct airborne transmission from person
-            to person.
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
-
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Can TB be cured?</Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            The vast majority of TB cases can be cured when medicines are
-            provided and taken properly.
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
-
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>
-            What is the treatment and management of TB?
-          </Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            TB disease is treated with a multiple drug regimen for 6-8
-            months (usually isoniazid, rifampin, ethambutol, and
-            pyrazinamide for 2 months, followed by isoniazid and rifampin
-            for 4 to 6 months) if the TB is not drug resistant.
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
-
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>What is Direct Observed Therapy (DOT)?</Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            DOT is a strategy used to ensure TB patient adherence to and
-            tolerability of the prescribed treatment regimen; a health care
-            worker or another designated person watches the TB patient
-            swallow each dose of the prescribed drugs.
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
-
-      <StyledAccordion>
-        <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>What is Video Observed Therapy (VOT)?</Typography>
-        </StyledAccordionSummary>
-        <StyledAccordionDetails>
-          <Typography>
-            VOT is the use of a videophone or other video/computer equipment
-            to observe tuberculosis (TB) patients taking their medications
-            remotely.
-          </Typography>
-        </StyledAccordionDetails>
-      </StyledAccordion>
+      {faqKeys.map((key, index) => (
+        <StyledAccordion key={index}>
+          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>{t(`faqs.${key}.title`)}</Typography>
+          </StyledAccordionSummary>
+          <StyledAccordionDetails>
+            <Typography>
+              {/* Check if content is a list (like symptoms in q2) */}
+              {Array.isArray(
+                t(`faqs.${key}.symptoms`, { returnObjects: true })
+              ) ? (
+                <>
+                  {t(`faqs.${key}.content`)}
+                  <ul>
+                    {t(`faqs.${key}.symptoms`, { returnObjects: true }).map(
+                      (symptom, idx) => (
+                        <li key={idx}>{symptom}</li>
+                      )
+                    )}
+                  </ul>
+                </>
+              ) : (
+                t(`faqs.${key}.content`)
+              )}
+            </Typography>
+          </StyledAccordionDetails>
+        </StyledAccordion>
+      ))}
     </Container>
   );
 };

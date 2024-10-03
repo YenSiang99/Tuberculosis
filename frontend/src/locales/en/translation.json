@@ -1,0 +1,102 @@
+{
+  "faqs": {
+    "title": "Frequently Asked Questions (FAQs)",
+    "q1": {
+      "title": "What is Tuberculosis (TB)?",
+      "content": "Tuberculosis (TB) is an infectious disease that most often affects the lungs. TB is caused by a type of bacteria. It spreads through the air when infected people cough, sneeze or spit."
+    },
+    "q2": {
+      "title": "What are the common signs and symptoms of TB?",
+      "content": "The most common symptoms of TB include:",
+      "symptoms": [
+        "A cough that lasts for more than two (2) weeks",
+        "Cough with sputum which is occasionally bloodstained",
+        "Loss of appetite and weight",
+        "Fever",
+        "Dyspnea, night sweats, chest pain, and hoarseness of voice"
+      ]
+    },
+    "q3": {
+      "title": "How does TB spread?",
+      "content": "Infection is usually by direct airborne transmission from person to person."
+    },
+    "q4": {
+      "title": "Can TB be cured?",
+      "content": "The vast majority of TB cases can be cured when medicines are provided and taken properly."
+    },
+    "q5": {
+      "title": "What is the treatment and management of TB?",
+      "content": "TB disease is treated with a multiple drug regimen for 6-8 months (usually isoniazid, rifampin, ethambutol, and pyrazinamide for 2 months, followed by isoniazid and rifampin for 4 to 6 months) if the TB is not drug resistant."
+    },
+    "q6": {
+      "title": "What is Direct Observed Therapy (DOT)?",
+      "content": "DOT is a strategy used to ensure TB patient adherence to and tolerability of the prescribed treatment regimen; a health care worker or another designated person watches the TB patient swallow each dose of the prescribed drugs."
+    },
+    "q7": {
+      "title": "What is Video Observed Therapy (VOT)?",
+      "content": "VOT is the use of a videophone or other video/computer equipment to observe tuberculosis (TB) patients taking their medications remotely."
+    }
+  },
+  "about": {
+    "title": "MyTBCompanion",
+    "faq_title": "Frequently Asked Questions (FAQ)",
+    "q1": {
+      "title": "What is MyTBCompanion?",
+      "content": "MyTBCompanion is a mobile health application to improve the Tuberculosis management among the patients and healthcare. Its main feature is the Video Observed Therapy."
+    },
+    "q2": {
+      "title": "What can MyTBCompanion do?",
+      "content": [
+        "Self-medication video upload",
+        "Side-effect reporting",
+        "Booking appointment",
+        "Progress monitoring",
+        "Reminders for medications and alerts"
+      ]
+    },
+    "q3": {
+      "title": "How should I register?",
+      "content": "Enter email, password, personal information and treatment information."
+    },
+    "q4": {
+      "title": "How do I record and upload the video?",
+      "content": "Click the ‘Upload Video’ button in the homepage. Record the video then press 'Upload' button."
+    },
+    "q5": {
+      "title": "Is there any specification and requirement of the video?",
+      "content": "No"
+    },
+    "q6": {
+      "title": "How should I report the side effects of the medication?",
+      "content": "Click the ‘Report Side Effects’ button in the homepage. Select the date and time, then tick the checkbox on the symptoms that you are experiencing. Then press ‘Submit’ button."
+    },
+    "q7": {
+      "title": "How should I track the progress of my medication?",
+      "content": "Go to Profile page and click the progress tracker."
+    },
+    "q8": {
+      "title": "How should I make an appointment for online consultations?",
+      "content": "Click the ‘Make Appointment’ button in the homepage. Then select the date and time. Finally click the ‘Book’ button."
+    },
+    "q9": {
+      "title": "How should I set the reminder to remind me to take medications on time?",
+      "content": "Go to Profile page and click ‘Settings’. Then click ‘Reminder’. Toggle the ‘Medication Reminder’ then set the time for the reminder."
+    },
+    "q10": {
+      "title": "Where can I find information related to TB or the app?",
+      "content": "You may use Umi (chatbot) or explore the Materials section."
+    },
+    "q11": {
+      "title": "What should I record for the video?",
+      "content": "You need to record your daily medication intake. Please watch this video:"
+    },
+    "q12": {
+      "title": "How do I edit my profile?",
+      "content": "Go to Profile page and click the ‘Pen’ icon on the top right corner to edit your profile information."
+    },
+    "q13": {
+      "title": "How do I view the history of my appointment and side effects?",
+      "content": "Go to Profile page and click ‘History’."
+    }
+  }
+}

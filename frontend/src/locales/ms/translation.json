@@ -1,0 +1,102 @@
+{
+  "faqs": {
+    "title": "Soalan Lazim (FAQs)",
+    "q1": {
+      "title": "Apa itu Tuberkulosis (TB)?",
+      "content": "Tuberkulosis (TB) adalah penyakit berjangkit yang paling kerap menyerang paru-paru. TB disebabkan oleh sejenis bakteria. Ia merebak melalui udara apabila orang yang dijangkiti batuk, bersin atau meludah."
+    },
+    "q2": {
+      "title": "Apakah tanda dan gejala biasa TB?",
+      "content": "Gejala TB yang paling biasa termasuk:",
+      "symptoms": [
+        "Batuk yang berlangsung selama lebih daripada dua (2) minggu",
+        "Batuk dengan kahak yang kadang-kadang berdarah",
+        "Kehilangan selera makan dan berat badan",
+        "Demam",
+        "Sesak nafas, peluh malam, sakit dada, dan suara serak"
+      ]
+    },
+    "q3": {
+      "title": "Bagaimana TB merebak?",
+      "content": "Jangkitan biasanya berlaku melalui penghantaran udara secara langsung dari orang ke orang."
+    },
+    "q4": {
+      "title": "Bolehkah TB disembuhkan?",
+      "content": "Kebanyakan kes TB boleh disembuhkan apabila ubat diberikan dan diambil dengan betul."
+    },
+    "q5": {
+      "title": "Apakah rawatan dan pengurusan TB?",
+      "content": "Penyakit TB dirawat dengan rejimen ubat pelbagai selama 6-8 bulan (biasanya isoniazid, rifampin, ethambutol, dan pyrazinamide selama 2 bulan, diikuti dengan isoniazid dan rifampin selama 4 hingga 6 bulan) jika TB tidak tahan dadah."
+    },
+    "q6": {
+      "title": "Apakah Terapi Diperhatikan Secara Langsung (DOT)?",
+      "content": "DOT adalah strategi yang digunakan untuk memastikan kepatuhan pesakit TB terhadap dan kebolehterimaan rejimen rawatan yang ditetapkan; pekerja kesihatan atau orang yang dilantik menonton pesakit TB menelan setiap dos ubat yang ditetapkan."
+    },
+    "q7": {
+      "title": "Apakah Terapi Diperhatikan Secara Video (VOT)?",
+      "content": "VOT adalah penggunaan telefon video atau peralatan video/komputer lain untuk memerhati pesakit TB mengambil ubat mereka dari jauh."
+    }
+  },
+  "about": {
+    "title": "MyTBCompanion",
+    "faq_title": "Soalan Lazim (FAQ)",
+    "q1": {
+      "title": "Apa itu MyTBCompanion?",
+      "content": "MyTBCompanion adalah aplikasi kesihatan mudah alih untuk meningkatkan pengurusan Tuberkulosis di kalangan pesakit dan penjagaan kesihatan. Ciri utamanya ialah Terapi Video Diperhatikan."
+    },
+    "q2": {
+      "title": "Apa yang boleh dilakukan oleh MyTBCompanion?",
+      "content": [
+        "Muat naik video pengambilan ubat sendiri",
+        "Laporan kesan sampingan",
+        "Tempahan janji temu",
+        "Pemantauan kemajuan",
+        "Peringatan untuk ubat-ubatan dan amaran"
+      ]
+    },
+    "q3": {
+      "title": "Bagaimana saya harus mendaftar?",
+      "content": "Masukkan emel, kata laluan, maklumat peribadi dan maklumat rawatan."
+    },
+    "q4": {
+      "title": "Bagaimana saya merakam dan memuat naik video?",
+      "content": "Klik butang 'Muat Naik Video' di halaman utama. Rakam video kemudian tekan butang 'Muat Naik'."
+    },
+    "q5": {
+      "title": "Adakah terdapat spesifikasi dan keperluan video?",
+      "content": "Tiada"
+    },
+    "q6": {
+      "title": "Bagaimana saya harus melaporkan kesan sampingan ubat?",
+      "content": "Klik butang 'Lapor Kesan Sampingan' di halaman utama. Pilih tarikh dan masa, kemudian tandakan kotak pilihan pada simptom yang anda alami. Kemudian tekan butang 'Hantar'."
+    },
+    "q7": {
+      "title": "Bagaimana saya harus memantau kemajuan pengambilan ubat saya?",
+      "content": "Pergi ke halaman Profil dan klik penjejak kemajuan."
+    },
+    "q8": {
+      "title": "Bagaimana saya membuat janji temu untuk konsultasi dalam talian?",
+      "content": "Klik butang 'Buat Janji Temu' di halaman utama. Kemudian pilih tarikh dan masa. Akhir sekali klik butang 'Tempah'."
+    },
+    "q9": {
+      "title": "Bagaimana saya menetapkan peringatan untuk mengingatkan saya mengambil ubat tepat pada masanya?",
+      "content": "Pergi ke halaman Profil dan klik 'Tetapan'. Kemudian klik 'Peringatan'. Tukar 'Peringatan Ubat' kemudian tetapkan masa untuk peringatan."
+    },
+    "q10": {
+      "title": "Di mana saya boleh mencari maklumat berkaitan dengan TB atau aplikasi?",
+      "content": "Anda boleh menggunakan Umi (chatbot) atau meneroka bahagian Bahan."
+    },
+    "q11": {
+      "title": "Apakah yang perlu saya rakam untuk video?",
+      "content": "Anda perlu merakam pengambilan ubat harian anda. Sila tonton video ini:"
+    },
+    "q12": {
+      "title": "Bagaimana saya mengedit profil saya?",
+      "content": "Pergi ke halaman Profil dan klik ikon 'Pen' di sudut kanan atas untuk mengedit maklumat profil anda."
+    },
+    "q13": {
+      "title": "Bagaimana saya melihat sejarah janji temu dan kesan sampingan saya?",
+      "content": "Pergi ke halaman Profil dan klik 'Sejarah'."
+    }
+  }
+}
