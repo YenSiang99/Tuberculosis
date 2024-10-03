@@ -8,10 +8,13 @@ import {
   Button,
   Box,
   CssBaseline,
+  Grid,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import theme from "../components/reusable/Theme";
+
+import LanguageSelector from "../components/reusable/LanguageSelector"; // Import the new component
 
 export default function AuthLayout() {
   const navigate = useNavigate();
@@ -33,37 +36,53 @@ export default function AuthLayout() {
           sx={{ backgroundColor: "white" }}
         >
           <Toolbar>
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <IconButton sx={{ p: 1 }}>
-                <Avatar alt="TB Logo" src="./logo.png" />
-              </IconButton>
+            <Grid container alignItems="center">
+              {/* Left side (logo + app name) */}
+              <Grid item xs={8} sx={{ display: "flex", alignItems: "center" }}>
+                <IconButton sx={{ p: 1 }}>
+                  <Avatar alt="TB Logo" src="./logo.png" />
+                </IconButton>
+                <Typography variant="h5" color="inherit">
+                  <span style={{ color: "#0046c0", fontWeight: "bold" }}>
+                    My
+                  </span>
+                  <span style={{ color: "#4cbcea", fontWeight: "bold" }}>
+                    TB
+                  </span>
+                  <span style={{ color: "#0046c0", fontWeight: "bold" }}>
+                    Companion
+                  </span>
+                </Typography>
+              </Grid>
 
-              <Typography variant="h5" color="inherit">
-                <span style={{ color: "#0046c0", fontWeight: "bold" }}>My</span>
-                <span style={{ color: "#4cbcea", fontWeight: "bold" }}>TB</span>
-                <span style={{ color: "#0046c0", fontWeight: "bold" }}>
-                  Companion
-                </span>
-              </Typography>
-            </Box>
+              {/* Right side (Language Selector) */}
+              <Grid
+                item
+                container
+                direction="row"
+                xs={4}
+                sx={{ display: "flex", justifyContent: "flex-end" }}
+                spacing={1}
+              >
+                {/* Override the color of the LanguageSelector */}
+                <Grid item sx={{ color: "black" }}>
+                  <LanguageSelector />
+                </Grid>
+                {!isLoginPage && (
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      sx={{ color: "white" }}
+                      onClick={() => navigate("/")}
+                    >
+                      Back to Login
+                    </Button>
+                  </Grid>
+                )}
+              </Grid>
+            </Grid>
+
             {/* Hide the Back to Login button on the login page */}
-            {!isLoginPage && (
-              <Box sx={{ flexGrow: 0 }}>
-                <Button
-                  variant="contained"
-                  sx={{ color: "white" }}
-                  onClick={() => navigate("/")}
-                >
-                  Back to Login
-                </Button>
-              </Box>
-            )}
           </Toolbar>
         </AppBar>
         <Box component="main" sx={{ flexGrow: 1 }}>

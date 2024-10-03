@@ -98,5 +98,25 @@
       "title": "How do I view the history of my appointment and side effects?",
       "content": "Go to Profile page and click ‘History’."
     }
+  },
+  "login": {
+    "title": "Login",
+    "email_placeholder": "Email / Phone Number (eg 0123456789)",
+    "password_placeholder": "Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot password?",
+    "not_a_user": "Not a user yet?",
+    "register": "Register",
+    "login_button": "Login",
+    "tb_title": "Tuberculosis (TB)",
+    "tb_subtitle": "A bacterial infection that affects your lungs",
+    "more_info": "Would you like to know more about TB?",
+    "more_info_yes": "Yes",
+    "select_role": "Select Your Role",
+    "role_patient": "Patient",
+    "role_healthcare": "Healthcare Professional",
+    "role_user": "Normal User",
+    "invalid_credentials": "Invalid email, phone number, or password",
+    "generic_error": "An error occurred. Please try again later."
   }
 }

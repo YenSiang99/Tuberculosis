@@ -98,5 +98,25 @@
       "title": "Bagaimana saya melihat sejarah janji temu dan kesan sampingan saya?",
       "content": "Pergi ke halaman Profil dan klik 'Sejarah'."
     }
+  },
+  "login": {
+    "title": "Log Masuk",
+    "email_placeholder": "Emel / Nombor Telefon (contoh 0123456789)",
+    "password_placeholder": "Kata Laluan",
+    "remember_me": "Ingat saya",
+    "forgot_password": "Lupa kata laluan?",
+    "not_a_user": "Belum berdaftar?",
+    "register": "Daftar",
+    "login_button": "Log Masuk",
+    "tb_title": "Tuberkulosis (TB)",
+    "tb_subtitle": "Jangkitan bakteria yang menjejaskan paru-paru anda",
+    "more_info": "Adakah anda ingin tahu lebih lanjut mengenai TB?",
+    "more_info_yes": "Ya",
+    "select_role": "Pilih Peranan Anda",
+    "role_patient": "Pesakit",
+    "role_healthcare": "Profesional Kesihatan",
+    "role_user": "Pengguna Biasa",
+    "invalid_credentials": "Emel, nombor telefon atau kata laluan tidak sah",
+    "generic_error": "Ralat berlaku. Sila cuba lagi kemudian."
   }
 }
