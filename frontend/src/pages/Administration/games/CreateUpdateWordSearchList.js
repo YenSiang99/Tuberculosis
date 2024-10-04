@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Switch,
+  FormControlLabel,
+} from "@mui/material";
 import axios from "../../../components/axios"; // replace with your axios instance
 
 export default function CreateUpdateWordSearchList() {
@@ -11,6 +19,8 @@ export default function CreateUpdateWordSearchList() {
     name: "",
     description: "",
     words: [],
+    active: false,
+    totalGameTime: 0, // Initialize with default total game time
   });
   const [newWord, setNewWord] = useState(""); // For adding new words
 
@@ -46,10 +56,12 @@ export default function CreateUpdateWordSearchList() {
   };
 
   const handleSubmit = () => {
+    const { name, description, words, active, totalGameTime } = wordList; // Destructure only the fields you want to send
+    const updatePayload = { name, description, words, active, totalGameTime };
     if (id) {
       // Update word list
       axios
-        .put(`/wordLists/${id}`, wordList)
+        .put(`/wordLists/${id}`, updatePayload)
         .then(() => {
           navigate("/admin/wordsearchmenu");
         })
@@ -59,7 +71,7 @@ export default function CreateUpdateWordSearchList() {
     } else {
       // Create new word list
       axios
-        .post("/wordLists", wordList)
+        .post("/wordLists", updatePayload)
         .then(() => {
           navigate("/admin/wordsearchmenu");
         })
@@ -89,6 +101,31 @@ export default function CreateUpdateWordSearchList() {
         onChange={(e) =>
           setWordList({ ...wordList, description: e.target.value })
         }
+        sx={{ marginBottom: 2 }}
+      />
+      <TextField
+        label="Total Game Time (in seconds)"
+        type="number"
+        fullWidth
+        value={wordList.totalGameTime}
+        onChange={(e) =>
+          setWordList({
+            ...wordList,
+            totalGameTime: parseInt(e.target.value, 10),
+          })
+        }
+        sx={{ marginBottom: 2 }}
+      />
+      <FormControlLabel
+        control={
+          <Switch
+            checked={wordList.active}
+            onChange={(e) =>
+              setWordList({ ...wordList, active: e.target.checked })
+            }
+          />
+        }
+        label="Active"
         sx={{ marginBottom: 2 }}
       />
 

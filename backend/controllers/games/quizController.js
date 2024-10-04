@@ -1,27 +1,6 @@
 const Quiz = require("../../models/games/QuizModel");
 
 // Create Quiz
-// exports.createQuiz = async (req, res) => {
-//   try {
-//     const { name, description, questions } = req.body;
-
-//     // Optionally deactivate all other quizzes
-//     await Quiz.updateMany({}, { active: false });
-
-//     const newQuiz = new Quiz({
-//       name,
-//       description,
-//       questions,
-//       active: true, // Automatically activate the new quiz
-//     });
-//     await newQuiz.save();
-
-//     res.status(201).send(newQuiz);
-//   } catch (error) {
-//     res.status(400).send(error.message);
-//   }
-// };
-
 exports.createQuiz = async (req, res) => {
   try {
     const { name, description, timeLimitPerQuestion, questions } = req.body;
@@ -33,16 +12,24 @@ exports.createQuiz = async (req, res) => {
         .send("`timeLimitPerQuestion` must be a positive number in seconds.");
     }
 
-    // Optionally deactivate all other quizzes
-    await Quiz.updateMany({}, { active: false });
+    // Check if any quiz exists in the database
+    const existingQuizCount = await Quiz.countDocuments();
+    let isActive = false;
 
+    if (existingQuizCount === 0) {
+      // If this is the first quiz, set it as active
+      isActive = true;
+    }
+
+    // Create new quiz
     const newQuiz = new Quiz({
       name,
       description,
       timeLimitPerQuestion,
       questions,
-      active: true, // Automatically activate the new quiz
+      active: isActive, // First quiz will be active, others inactive by default
     });
+
     await newQuiz.save();
 
     res.status(201).send(newQuiz);
@@ -50,7 +37,6 @@ exports.createQuiz = async (req, res) => {
     res.status(400).send(error.message);
   }
 };
-
 // Get all quizzes
 exports.getAllQuizzes = async (req, res) => {
   try {
@@ -90,23 +76,6 @@ exports.getActiveQuiz = async (req, res) => {
 };
 
 // Update Quiz
-// exports.updateQuiz = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updates = req.body; // This includes name, description, questions, and active state
-//     const updatedQuiz = await Quiz.findByIdAndUpdate(id, updates, {
-//       new: true,
-//     });
-//     if (!updatedQuiz) {
-//       return res.status(404).send("Quiz not found.");
-//     }
-//     res.status(200).send(updatedQuiz);
-//   } catch (error) {
-//     res.status(400).send(error.message);
-//   }
-// };
-
-// Update Quiz
 exports.updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,14 +110,35 @@ exports.updateQuiz = async (req, res) => {
       }
     }
 
-    const updatedQuiz = await Quiz.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    });
-    if (!updatedQuiz) {
+    // Find the quiz to update
+    const quiz = await Quiz.findById(id);
+
+    if (!quiz) {
       return res.status(404).send("Quiz not found.");
     }
-    res.status(200).send(updatedQuiz);
+
+    // Check if the active status is being updated
+    if ("active" in updates) {
+      if (quiz.active && updates.active === false) {
+        // Prevent deactivating the only active quiz
+        return res
+          .status(400)
+          .send({ error: "Cannot deactivate the active quiz." });
+      } else if (!quiz.active && updates.active === true) {
+        // If setting a non-active quiz to active, deactivate the current active one
+        const activeQuiz = await Quiz.findOne({ active: true });
+        if (activeQuiz) {
+          activeQuiz.active = false;
+          await activeQuiz.save();
+        }
+      }
+    }
+
+    // Update the quiz with allowed updates
+    Object.assign(quiz, updates);
+    await quiz.save();
+
+    res.status(200).send(quiz);
   } catch (error) {
     res.status(400).send(error.message);
   }
@@ -158,10 +148,20 @@ exports.updateQuiz = async (req, res) => {
 exports.deleteQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedQuiz = await Quiz.findByIdAndDelete(id);
-    if (!deletedQuiz) {
+
+    // Find the quiz to delete
+    const quiz = await Quiz.findById(id);
+
+    if (!quiz) {
       return res.status(404).send("Quiz not found.");
     }
+
+    // Prevent deletion of active quiz
+    if (quiz.active) {
+      return res.status(400).send({ error: "Cannot delete an active quiz." });
+    }
+
+    await quiz.remove();
     res.status(200).send({ message: "Quiz deleted successfully." });
   } catch (error) {
     res.status(500).send(error.message);

@@ -2,9 +2,12 @@ const FillBlank = require("../../models/games/FillBlankModel");
 
 exports.createFillBlank = async (req, res) => {
   try {
-    // Deactivate all other fill blanks if the new one is set to active
     if (req.body.active) {
-      await FillBlank.updateMany({}, { active: false });
+      // Deactivate all other fill blanks if the new one is set to active
+      const activeSetExists = await FillBlank.exists({ active: true });
+      if (activeSetExists) {
+        await FillBlank.updateMany({}, { active: false });
+      }
     }
 
     const fillBlank = new FillBlank(req.body); // Directly use the request body for creation
@@ -54,23 +57,32 @@ exports.getActiveFillBlank = async (req, res) => {
 
 exports.updateFillBlank = async (req, res) => {
   try {
-    // Deactivate all other fill blanks if this one is set to active
-    if (req.body.active) {
-      await FillBlank.updateMany(
-        { _id: { $ne: req.params.id } }, // Ensure the current one is not deactivated
-        { active: false }
-      );
-    }
+    const { id } = req.params;
+    const updates = req.body;
 
-    const fillBlank = await FillBlank.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-
+    const fillBlank = await FillBlank.findById(id);
     if (!fillBlank) {
       return res.status(404).send("Fill-in-the-Blanks set not found.");
     }
+
+    if (updates.active && !fillBlank.active) {
+      // Deactivate all other fill blanks if this one is set to active
+      await FillBlank.updateMany({ _id: { $ne: id } }, { active: false });
+    }
+
+    // Prevent deactivating the only active fill blank
+    if (fillBlank.active && updates.active === false) {
+      const activeCount = await FillBlank.countDocuments({ active: true });
+      if (activeCount < 2) {
+        return res.status(400).send({
+          error:
+            "Another fill blank must be set to active before deactivating this one.",
+        });
+      }
+    }
+
+    Object.assign(fillBlank, updates);
+    await fillBlank.save();
 
     res.send(fillBlank);
   } catch (error) {
@@ -80,12 +92,21 @@ exports.updateFillBlank = async (req, res) => {
 
 exports.deleteFillBlank = async (req, res) => {
   try {
-    const fillBlank = await FillBlank.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+    const fillBlank = await FillBlank.findById(id);
     if (!fillBlank) {
       return res.status(404).send("Fill-in-the-Blanks set not found.");
     }
 
-    res.send(fillBlank);
+    // Prevent deletion of an active fill blank
+    if (fillBlank.active) {
+      return res
+        .status(400)
+        .send({ error: "Cannot delete an active Fill-in-the-Blanks set." });
+    }
+
+    await fillBlank.remove();
+    res.send({ message: "Fill-in-the-Blanks set deleted successfully." });
   } catch (error) {
     res.status(500).send(error.message);
   }

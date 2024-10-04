@@ -4,21 +4,24 @@ exports.createWordList = async (req, res) => {
   try {
     const { name, words, description, totalGameTime } = req.body;
 
-    // Find and deactivate currently active word list
-    const activeWordList = await WordList.findOne({ active: true });
-    if (activeWordList) {
-      activeWordList.active = false;
-      await activeWordList.save();
+    // Check if any word list exists in the database
+    const existingWordListCount = await WordList.countDocuments();
+    let isActive = false;
+
+    if (existingWordListCount === 0) {
+      // If this is the first word list, set it as active
+      isActive = true;
     }
 
-    // Create new word list and set it as active
+    // Create new word list
     const newWordList = new WordList({
       name,
       words,
       description,
-      totalGameTime, // Include the total game time
-      active: true, // Set the new word list as active
+      totalGameTime,
+      active: isActive, // First word list will be active, others inactive by default
     });
+
     await newWordList.save();
 
     res.status(201).send(newWordList);
@@ -26,7 +29,6 @@ exports.createWordList = async (req, res) => {
     res.status(400).send(error.message);
   }
 };
-
 exports.getWordLists = async (req, res) => {
   try {
     const wordLists = await WordList.find({});
@@ -77,22 +79,6 @@ exports.getWordListByFields = async (req, res) => {
   }
 };
 
-// exports.updateWordList = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updates = req.body;
-//     const wordList = await WordList.findByIdAndUpdate(id, updates, {
-//       new: true,
-//     });
-//     if (!wordList) {
-//       return res.status(404).send("Word list not found.");
-//     }
-//     res.send(wordList);
-//   } catch (error) {
-//     res.status(400).send(error.message);
-//   }
-// };
-
 exports.updateWordList = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,14 +101,34 @@ exports.updateWordList = async (req, res) => {
       return res.status(400).send({ error: "Invalid updates!" });
     }
 
-    const wordList = await WordList.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    });
+    // Find the word list to update
+    const wordList = await WordList.findById(id);
 
     if (!wordList) {
       return res.status(404).send("Word list not found.");
     }
+
+    // Check if the active status is being updated
+    if ("active" in updates) {
+      if (wordList.active && updates.active === false) {
+        // Prevent deactivating the only active word list
+        return res
+          .status(400)
+          .send({ error: "Cannot deactivate the active word list." });
+      } else if (!wordList.active && updates.active === true) {
+        // If setting a non-active word list to active, deactivate the current active one
+        const activeWordList = await WordList.findOne({ active: true });
+        if (activeWordList) {
+          activeWordList.active = false;
+          await activeWordList.save();
+        }
+      }
+    }
+
+    // Update the word list with allowed updates
+    Object.assign(wordList, updates);
+    await wordList.save();
+
     res.send(wordList);
   } catch (error) {
     res.status(400).send(error.message);
@@ -132,11 +138,23 @@ exports.updateWordList = async (req, res) => {
 exports.deleteWordList = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await WordList.findByIdAndDelete(id);
-    if (!result) {
+
+    // Find the word list to delete
+    const wordList = await WordList.findById(id);
+
+    if (!wordList) {
       return res.status(404).send("Word list not found.");
     }
-    res.send(result);
+
+    // Prevent deletion of active word list
+    if (wordList.active) {
+      return res
+        .status(400)
+        .send({ error: "Cannot delete an active word list." });
+    }
+
+    await wordList.remove();
+    res.send(wordList);
   } catch (error) {
     res.status(500).send(error.message);
   }
