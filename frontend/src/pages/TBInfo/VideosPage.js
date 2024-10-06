@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   Typography,
@@ -6,28 +6,36 @@ import {
   Card,
   CardContent,
   CardMedia,
+  Button,
 } from "@mui/material";
 
 const VideosPage = () => {
-  // Define a list of videos with their filenames and titles
+  const languages = ["English", "Malay", "Mandarin", "Tamil"];
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+
+  // Define a list of videos with their indexes and titles
   const videos = [
     {
-      src: "./videos/Video 1_ Understanding the Basics_compressed.mp4",
+      index: 1,
       title: "Understanding the Basics of Tuberculosis",
     },
     {
-      src: "./videos/Video 2_ Signs and Symptoms, Treatment and Management of TB_compressed.mp4",
+      index: 2,
+      title: "Signs and Symptoms, Treatment and Management of TB",
+    },
+    {
+      index: 3,
       title: "Fighting Tuberculosis: Innovation and Research",
     },
     {
-      src: "./videos/Video 4_ Fighting TB_ Innovation and Research_compressed.mp4",
-      title: "Fighting Tuberculosis: Innovation and Research",
-    },
-    {
-      src: "./videos/Video 5_ Direct Observed Therapy (DOT) vs Video Observed Therapy (VOT)_compressed.mp4",
-      title: "Fighting Tuberculosis: Innovation and Research",
+      index: 4,
+      title: "Direct Observed Therapy (DOT) vs Video Observed Therapy (VOT)",
     },
   ];
+
+  const getVideoSrc = (index) => {
+    return `./videos/${selectedLanguage}/compressed/Video ${index} (${selectedLanguage}).mp4`;
+  };
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -38,6 +46,25 @@ const VideosPage = () => {
       >
         Educational Videos
       </Typography>
+      {/* Language selector */}
+      <Grid
+        item
+        container
+        justifyContent="center"
+        xs={12}
+        sx={{ marginBottom: 2 }}
+      >
+        {languages.map((language) => (
+          <Button
+            key={language}
+            variant={selectedLanguage === language ? "contained" : "outlined"}
+            onClick={() => setSelectedLanguage(language)}
+            sx={{ margin: "0 8px" }}
+          >
+            {language}
+          </Button>
+        ))}
+      </Grid>
       <Grid container spacing={2}>
         {videos.map((video, index) => (
           <Grid item xs={12} md={6} key={index}>
@@ -45,7 +72,7 @@ const VideosPage = () => {
               <CardMedia
                 component="video"
                 controls
-                src={video.src}
+                src={getVideoSrc(video.index)}
                 title={video.title}
                 style={{ height: 300 }}
               />
