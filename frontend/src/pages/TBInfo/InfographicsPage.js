@@ -11,43 +11,47 @@ import {
 import theme from "../../components/reusable/Theme";
 
 const InfographicsPage = () => {
+  const languages = ["English", "Malay", "Mandarin", "Tamil"];
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+
   const infographics = [
     {
-      name: "Infographic_1.png",
+      index: 1,
       type: "single",
     },
     {
-      name: "Infographic_2.png",
+      index: 2,
       type: "single",
     },
     {
-      name: "Infographic_3.png",
+      index: 3,
       type: "single",
     },
     {
-      name: "Infographic_4.png",
+      index: 4,
       type: "single",
     },
     {
-      name: "Infographic_5.png",
+      index: 5,
       type: "single",
     },
     {
-      name: "Infographic_6.png",
+      index: 6,
       type: "single",
     },
     {
-      name: "Infographic_7.png",
+      index: 7,
       type: "single",
     },
     {
-      name: "Infographic_8.png",
+      index: 8,
       type: "single",
     },
+    // Example of a multi-page infographic
     // {
-    //   name: "Infographic_6",
+    //   index: 6,
     //   type: "multi",
-    //   pages: ["Page1.png", "Page2.png"],
+    //   pages: 2, // Number of pages
     // },
   ];
 
@@ -66,12 +70,15 @@ const InfographicsPage = () => {
     }
   };
 
-  const getInfographicSrc = (folder, file) => {
-    if (file) {
-      return `./infographics/${folder}/${file}`;
+  const getInfographicSrc = (index, pageNumber) => {
+    const folder = selectedLanguage;
+    let fileName;
+    if (pageNumber) {
+      fileName = `Infographic ${index} (${selectedLanguage}).png`;
     } else {
-      return `./infographics/${folder}`;
+      fileName = `Infographic ${index} (${selectedLanguage}).png`;
     }
+    return `./infographics/${folder}/${fileName}`;
   };
 
   return (
@@ -83,6 +90,19 @@ const InfographicsPage = () => {
         Infographics
       </Typography>
       <Grid container spacing={2} justifyContent="center" alignItems="center">
+        {/* Language selector */}
+        <Grid item container justifyContent="center" xs={12}>
+          {languages.map((language) => (
+            <Button
+              key={language}
+              variant={selectedLanguage === language ? "contained" : "outlined"}
+              onClick={() => setSelectedLanguage(language)}
+              sx={{ margin: "0 8px" }}
+            >
+              {language}
+            </Button>
+          ))}
+        </Grid>
         {/* Previous and next button */}
         <Grid item container justifyContent="space-between" xs={12}>
           <Grid
@@ -106,20 +126,25 @@ const InfographicsPage = () => {
             )}
           </Grid>
         </Grid>
-        {/*  */}
+        {/* Infographic content */}
         <Grid item container>
           {infographics[currentInfographicIndex].type === "multi" ? (
             <Grid item container spacing={2}>
-              {infographics[currentInfographicIndex].pages.map(
-                (page, index) => (
+              {Array.from(
+                {
+                  length: infographics[currentInfographicIndex].pages,
+                },
+                (_, index) => (
                   <Grid item xs={12} sm={6} md={6} lg={6} key={index}>
                     <img
                       key={index}
                       src={getInfographicSrc(
-                        infographics[currentInfographicIndex].name,
-                        page
+                        infographics[currentInfographicIndex].index,
+                        index + 1
                       )}
-                      alt={`Page ${index + 1}`}
+                      alt={`Infographic ${
+                        infographics[currentInfographicIndex].index
+                      } Page ${index + 1}`}
                       style={{ width: "100%", height: "auto" }}
                     />
                   </Grid>
@@ -130,10 +155,10 @@ const InfographicsPage = () => {
             <Grid item>
               <img
                 src={getInfographicSrc(
-                  infographics[currentInfographicIndex].name
+                  infographics[currentInfographicIndex].index
                 )}
                 style={{ width: "100%", height: "auto" }}
-                alt={`Infographic ${currentInfographicIndex + 1}`}
+                alt={`Infographic ${infographics[currentInfographicIndex].index}`}
               />
             </Grid>
           )}
