@@ -29,6 +29,8 @@ export default function CreateUpdateQuiz() {
   const [newQuestion, setNewQuestion] = useState({
     questionText: "",
     options: [
+      { optionText: "", isCorrect: true },
+      { optionText: "", isCorrect: false },
       { optionText: "", isCorrect: false },
       { optionText: "", isCorrect: false },
     ], // Initial 2 options
@@ -58,20 +60,36 @@ export default function CreateUpdateQuiz() {
 
   // Handle Add Question to the quiz
   const handleAddQuestion = () => {
-    if (newQuestion.questionText) {
-      setQuiz((prev) => ({
-        ...prev,
-        questions: [...prev.questions, newQuestion],
-      }));
-      setNewQuestion({
-        questionText: "",
-        options: [
-          { optionText: "", isCorrect: false },
-          { optionText: "", isCorrect: false },
-        ],
-      });
-    }
+    console.log("function is called");
+    setQuiz((prev) => ({
+      ...prev,
+      questions: [...prev.questions, newQuestion],
+    }));
+
+    // Reset newQuestion to its initial state
+    setNewQuestion({
+      questionText: "",
+      options: [
+        { optionText: "", isCorrect: true },
+        { optionText: "", isCorrect: false },
+        { optionText: "", isCorrect: false },
+        { optionText: "", isCorrect: false },
+      ],
+    });
   };
+
+  // const handleAddOption = (questionIndex) => {
+  //   const updatedQuestions = quiz.questions.map((question, qIdx) => {
+  //     if (qIdx === questionIndex) {
+  //       return {
+  //         ...question,
+  //         options: [...question.options, { optionText: "", isCorrect: false }],
+  //       };
+  //     }
+  //     return question;
+  //   });
+  //   setQuiz({ ...quiz, questions: updatedQuestions });
+  // };
 
   // Handle Delete Question
   const handleDeleteQuestion = (questionIndex) => {
@@ -226,9 +244,28 @@ export default function CreateUpdateQuiz() {
 
       {quiz.questions.map((question, qIdx) => (
         <Box key={qIdx} sx={{ marginBottom: 4 }}>
-          <Typography variant="h6" sx={{ marginBottom: 1 }}>
-            {`Question ${qIdx + 1}`}
-          </Typography>
+          {/* Question Header */}
+          <Grid
+            container
+            alignItems="center"
+            spacing={1}
+            sx={{ marginBottom: 2 }}
+          >
+            <Grid item xs>
+              <Typography variant="h6">Question {qIdx + 1}</Typography>
+            </Grid>
+            {/* <Grid item>
+              <Button startIcon={<Add />} onClick={() => handleAddOption(qIdx)}>
+                Add Option
+              </Button>
+            </Grid> */}
+            <Grid item>
+              <IconButton onClick={() => handleDeleteQuestion(qIdx)}>
+                <Delete />
+              </IconButton>
+            </Grid>
+          </Grid>
+
           <TextField
             label="Question Text"
             fullWidth
@@ -243,6 +280,7 @@ export default function CreateUpdateQuiz() {
             sx={{ marginBottom: 2 }}
           />
 
+          {/* Options */}
           <Grid container spacing={2}>
             {question.options.map((option, oIdx) => (
               <Grid item xs={12} sm={6} key={oIdx}>
@@ -255,58 +293,50 @@ export default function CreateUpdateQuiz() {
                   }
                   sx={{ marginBottom: 1 }}
                 />
-                <Button
-                  variant="contained"
-                  color={option.isCorrect ? "success" : "error"}
-                  onClick={() => handleCorrectOptionChange(qIdx, oIdx)}
-                  fullWidth
-                  sx={{ marginBottom: 1 }}
-                >
-                  {option.isCorrect ? "Correct Answer" : "Set as Correct"}
-                </Button>
-                <IconButton
-                  onClick={() => handleDeleteOption(qIdx, oIdx)}
-                  sx={{ marginLeft: 1 }}
-                >
-                  <Delete />
-                </IconButton>
+                <Grid container alignItems="center" spacing={1}>
+                  <Grid item xs>
+                    <Button
+                      variant="contained"
+                      color={option.isCorrect ? "success" : "error"}
+                      onClick={() => handleCorrectOptionChange(qIdx, oIdx)}
+                      fullWidth
+                    >
+                      {option.isCorrect ? "Correct Answer" : "Set as Correct"}
+                    </Button>
+                  </Grid>
+                  {/* <Grid item>
+                    <IconButton onClick={() => handleDeleteOption(qIdx, oIdx)}>
+                      <Delete />
+                    </IconButton>
+                  </Grid> */}
+                </Grid>
               </Grid>
             ))}
           </Grid>
-
-          <Button
-            startIcon={<Add />}
-            onClick={() => handleAddOption(qIdx)}
-            sx={{ marginTop: 1 }}
-          >
-            Add Option
-          </Button>
-          <IconButton
-            onClick={() => handleDeleteQuestion(qIdx)}
-            sx={{ marginLeft: 1 }}
-          >
-            <Delete />
-          </IconButton>
         </Box>
       ))}
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleAddQuestion}
-        sx={{ marginTop: 2 }}
-      >
-        Add Question
-      </Button>
+      <Grid container spacing={2}>
+        {/* Add Question Button */}
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddQuestion}
+          >
+            Add Question
+          </Button>
+        </Grid>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ marginTop: 2 }}
-      >
-        {id ? "Update Quiz" : "Create Quiz"}
-      </Button>
+        {/* Update/Create Quiz Button aligned right */}
+        <Grid item xs={12}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+              {id ? "Update Quiz" : "Create Quiz"}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
     </Container>
   );
 }

@@ -16,6 +16,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../components/axios";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Switch, FormControlLabel } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DataViewer from "../../../components/reusable/DataViewer";
 
@@ -63,11 +64,18 @@ export default function StoryCreateUpdate() {
     }
   }, [id]);
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setStory((prevStory) => ({
+  //     ...prevStory,
+  //     [name]: value,
+  //   }));
+  // };
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setStory((prevStory) => ({
       ...prevStory,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -200,6 +208,22 @@ export default function StoryCreateUpdate() {
           onChange={handleChange}
           sx={{ marginBottom: 2 }}
         />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={story.active}
+              onChange={(e) =>
+                setStory((prevStory) => ({
+                  ...prevStory,
+                  active: e.target.checked,
+                }))
+              }
+              name="active"
+              color="primary"
+            />
+          }
+          label="Active Status"
+        />
         <Button onClick={addStep} variant="contained" sx={{ marginBottom: 2 }}>
           Add Step
         </Button>
@@ -318,3 +342,222 @@ export default function StoryCreateUpdate() {
     </Container>
   );
 }
+
+// import React, { useState, useEffect, useCallback } from "react";
+// import ReactFlow, {
+//   ReactFlowProvider,
+//   addEdge,
+//   removeElements,
+//   MiniMap,
+//   Controls,
+//   Background,
+//   Handle,
+//   Position,
+// } from "reactflow";
+// import "reactflow/dist/style.css";
+// import axios from "../../../components/axios";
+// import { useParams } from "react-router-dom";
+
+// const nodeTypes = {
+//   stepNode: StepNode,
+//   endNode: EndNode,
+// };
+
+// // Custom node for steps
+// function StepNode({ data }) {
+//   return (
+//     <div
+//       style={{
+//         padding: 10,
+//         border: "1px solid #777",
+//         borderRadius: 5,
+//         background: "#fff",
+//       }}
+//     >
+//       <strong>{data.label}</strong>
+//       <div style={{ marginTop: 10 }}>
+//         {data.options.map((option, index) => (
+//           <div key={index}>
+//             Option {index + 1}: {option.optionText}
+//           </div>
+//         ))}
+//       </div>
+//       <Handle
+//         type="source"
+//         position={Position.Bottom}
+//         id="a"
+//         style={{ background: "#555" }}
+//       />
+//       <Handle
+//         type="target"
+//         position={Position.Top}
+//         id="b"
+//         style={{ background: "#555" }}
+//       />
+//     </div>
+//   );
+// }
+
+// // Custom node for ends
+// function EndNode({ data }) {
+//   return (
+//     <div
+//       style={{
+//         padding: 10,
+//         border: "1px solid #777",
+//         borderRadius: 5,
+//         background: "#fdd",
+//       }}
+//     >
+//       <strong>{data.label}</strong>
+//       <div style={{ marginTop: 10 }}>Type: {data.endType}</div>
+//       <Handle
+//         type="target"
+//         position={Position.Top}
+//         id="b"
+//         style={{ background: "#555" }}
+//       />
+//     </div>
+//   );
+// }
+
+// function StoryCreateUpdate() {
+//   const { id } = useParams();
+//   const [story, setStory] = useState(null);
+//   const [elements, setElements] = useState([]);
+
+//   useEffect(() => {
+//     // Fetch the story data
+//     if (id) {
+//       axios
+//         .get(`/stories/${id}`)
+//         .then((response) => {
+//           setStory(response.data);
+//         })
+//         .catch((error) => {
+//           console.error("Error fetching story", error);
+//         });
+//     }
+//   }, [id]);
+
+//   useEffect(() => {
+//     if (story) {
+//       const els = generateElements(story);
+//       setElements(els);
+//     }
+//   }, [story]);
+
+//   // Function to generate nodes and edges from story data
+//   const generateElements = (storyData) => {
+//     const nodes = [];
+//     const edges = [];
+
+//     // Create step nodes
+//     storyData.steps.forEach((step, stepIndex) => {
+//       nodes.push({
+//         id: `step-${stepIndex}`,
+//         type: "stepNode",
+//         position: { x: 250 * stepIndex, y: 100 },
+//         data: {
+//           label: step.content,
+//           options: step.options,
+//         },
+//       });
+//     });
+
+//     // Create end nodes
+//     storyData.ends.forEach((end, endIndex) => {
+//       nodes.push({
+//         id: `end-${endIndex}`,
+//         type: "endNode",
+//         position: { x: 250 * endIndex, y: 400 },
+//         data: {
+//           label: end.content,
+//           endType: end.endType,
+//         },
+//       });
+//     });
+
+//     // Create edges based on options
+//     storyData.steps.forEach((step, stepIndex) => {
+//       step.options.forEach((option, optionIndex) => {
+//         // Find the target node (could be a step or an end)
+//         const targetStepIndex = storyData.steps.findIndex(
+//           (s) => s.content === option.nextStep
+//         );
+//         const targetEndIndex = storyData.ends.findIndex(
+//           (e) => e.content === option.nextStep
+//         );
+
+//         if (targetStepIndex !== -1) {
+//           edges.push({
+//             id: `e${stepIndex}-${targetStepIndex}-${optionIndex}`,
+//             source: `step-${stepIndex}`,
+//             target: `step-${targetStepIndex}`,
+//             label: option.optionText,
+//             arrowHeadType: "arrowclosed",
+//           });
+//         } else if (targetEndIndex !== -1) {
+//           edges.push({
+//             id: `e${stepIndex}-end-${targetEndIndex}-${optionIndex}`,
+//             source: `step-${stepIndex}`,
+//             target: `end-${targetEndIndex}`,
+//             label: option.optionText,
+//             arrowHeadType: "arrowclosed",
+//           });
+//         }
+//       });
+//     });
+
+//     return [...nodes, ...edges];
+//   };
+
+//   // Handlers for React Flow events
+//   const onConnect = useCallback(
+//     (params) => setElements((els) => addEdge(params, els)),
+//     []
+//   );
+//   const onElementsRemove = useCallback(
+//     (elementsToRemove) =>
+//       setElements((els) => removeElements(elementsToRemove, els)),
+//     []
+//   );
+//   const onLoad = useCallback((reactFlowInstance) => {
+//     reactFlowInstance.fitView();
+//   }, []);
+
+//   return (
+//     <div style={{ height: "80vh", width: "100%" }}>
+//       {story ? (
+//         <ReactFlowProvider>
+//           <ReactFlow
+//             elements={elements}
+//             nodeTypes={nodeTypes}
+//             onConnect={onConnect}
+//             onElementsRemove={onElementsRemove}
+//             onLoad={onLoad}
+//             snapToGrid={true}
+//             snapGrid={[15, 15]}
+//           >
+//             <MiniMap
+//               nodeStrokeColor={(n) => {
+//                 if (n.type === "endNode") return "#f00";
+//                 return "#00f";
+//               }}
+//               nodeColor={(n) => {
+//                 if (n.type === "endNode") return "#fdd";
+//                 return "#ddf";
+//               }}
+//             />
+//             <Controls />
+//             <Background color="#aaa" gap={16} />
+//           </ReactFlow>
+//         </ReactFlowProvider>
+//       ) : (
+//         <div>Loading story...</div>
+//       )}
+//     </div>
+//   );
+// }
+
+// export default StoryCreateUpdate;

@@ -26,9 +26,11 @@ import "react-phone-input-2/lib/material.css";
 import theme from "../../components/reusable/Theme";
 import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 export default function PatientRegister() {
   const navigate = useNavigate();
+  const { t } = useTranslation(); // Initialize translation function
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [nricNumber, setNRICNumber] = useState("");
@@ -73,8 +75,7 @@ export default function PatientRegister() {
     if (!passwordRegex.test(password)) {
       return {
         valid: false,
-        message:
-          "Password must be at least 8 characters long and contain at least one letter and one number.",
+        message: t("patient_registration.password_requirements"),
       };
     }
     return { valid: true, message: "" };
@@ -90,7 +91,7 @@ export default function PatientRegister() {
     if (!emailRegex.test(email)) {
       return {
         valid: false,
-        message: "Invalid email format.",
+        message: t("patient_registration.invalid_email"),
       };
     }
     return { valid: true, message: "" };
@@ -105,7 +106,7 @@ export default function PatientRegister() {
     if (country === "Malaysia" && nricNumber.length !== 12) {
       return {
         valid: false,
-        message: "IC Number must have exactly 12 digits.",
+        message: t("patient_registration.nric_length_error"),
       };
     }
     return { valid: true, message: "" };
@@ -179,7 +180,8 @@ export default function PatientRegister() {
         show: true,
         type: "error",
         message:
-          "Registration failed: " + (error.response?.data || error.message),
+          t("patient_registration.registration_failed") +
+          (error.response?.data || error.message),
       });
     }
   };
@@ -225,8 +227,7 @@ export default function PatientRegister() {
     if (diagnosisDateObj > treatmentStartDateObj) {
       setDiagnosisDateError({
         valid: false,
-        message:
-          "Diagnosis date must be earlier than the treatment start date.",
+        message: t("patient_registration.diagnosis_date_error"),
       });
     } else {
       setDiagnosisDateError({ valid: true, message: "" });
@@ -268,7 +269,7 @@ export default function PatientRegister() {
             <PersonIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Patient Registration
+            {t("patient_registration.title")}
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <Box
@@ -279,7 +280,7 @@ export default function PatientRegister() {
               }}
             >
               <Typography variant="h6" sx={{ mt: 2, fontWeight: "bold" }}>
-                Personal Details
+                {t("patient_registration.personal_details")}
               </Typography>
               <Grid container spacing={2}>
                 <Grid item sm={12}>
@@ -316,7 +317,7 @@ export default function PatientRegister() {
                               textTransform: "none", // Optional: prevents uppercase styling
                             }}
                           >
-                            Edit Photo
+                            {t("patient_registration.edit_photo")}
                           </Button>
                         </label>
                       </Grid>
@@ -345,7 +346,7 @@ export default function PatientRegister() {
                             textTransform: "none", // Optional: prevents uppercase styling
                           }}
                         >
-                          Upload Profile Picture
+                          {t("patient_registration.upload_profile_picture")}
                         </Button>
                       </label>
                     </Grid>
@@ -358,7 +359,7 @@ export default function PatientRegister() {
                     required
                     fullWidth
                     id="firstName"
-                    label="First Name"
+                    label={t("patient_registration.first_name")}
                     name="firstName"
                     autoComplete="given-name"
                     autoFocus
@@ -372,7 +373,7 @@ export default function PatientRegister() {
                     required
                     fullWidth
                     id="lastName"
-                    label="Last Name"
+                    label={t("patient_registration.last_name")}
                     name="lastName"
                     autoComplete="family-name"
                     value={lastName}
@@ -386,7 +387,7 @@ export default function PatientRegister() {
                     required
                     fullWidth
                     id="gender"
-                    label="Gender"
+                    label={t("patient_registration.gender")}
                     name="gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
@@ -395,8 +396,12 @@ export default function PatientRegister() {
                     }}
                   >
                     <option value=""></option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <option value="male">
+                      {t("patient_registration.male")}
+                    </option>
+                    <option value="female">
+                      {t("patient_registration.female")}
+                    </option>
                   </TextField>
                 </Grid>
 
@@ -410,6 +415,7 @@ export default function PatientRegister() {
                     countryCodeEditable={false}
                     containerStyle={{ width: "100%" }}
                     inputStyle={{ width: "100%", height: "56px" }}
+                    placeholder={t("patient_registration.phone_placeholder")}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -436,7 +442,7 @@ export default function PatientRegister() {
                         required
                         fullWidth
                         id="nricNumber"
-                        label="NRIC Number"
+                        label={t("patient_registration.nric_number")}
                         name="nricNumber"
                         autoComplete="off"
                         value={nricNumber}
@@ -451,7 +457,7 @@ export default function PatientRegister() {
                         margin="normal"
                         fullWidth
                         id="calculatedAge"
-                        label="Age"
+                        label={t("patient_registration.age")}
                         name="calculatedAge"
                         value={age}
                         disabled
@@ -466,7 +472,7 @@ export default function PatientRegister() {
                         required
                         fullWidth
                         id="passportNumber"
-                        label="Passport Number"
+                        label={t("patient_registration.passport_number")}
                         name="passportNumber"
                         autoComplete="off"
                         value={passportNumber}
@@ -479,7 +485,7 @@ export default function PatientRegister() {
                         required
                         fullWidth
                         id="age"
-                        label="Age"
+                        label={t("patient_registration.age")}
                         name="age"
                         type="number"
                         autoComplete="off"
@@ -495,7 +501,7 @@ export default function PatientRegister() {
                     required
                     fullWidth
                     id="email"
-                    label="Email Address"
+                    label={t("patient_registration.email")}
                     name="email"
                     autoComplete="email"
                     value={email}
@@ -511,7 +517,7 @@ export default function PatientRegister() {
                     required
                     fullWidth
                     name="password"
-                    label="Password"
+                    label={t("patient_registration.password")}
                     type={showPassword ? "text" : "password"}
                     id="password"
                     autoComplete="current-password"
@@ -544,7 +550,7 @@ export default function PatientRegister() {
             </Box>
 
             <Typography variant="h6" sx={{ mt: 4, fontWeight: "bold" }}>
-              Treatment Details
+              {t("patient_registration.treatment_details")}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -554,7 +560,7 @@ export default function PatientRegister() {
                   required
                   fullWidth
                   id="diagnosis"
-                  label="Diagnosis"
+                  label={t("patient_registration.diagnosis")}
                   name="diagnosis"
                   autoComplete="off"
                   value={diagnosis}
@@ -562,15 +568,17 @@ export default function PatientRegister() {
                   sx={{ mt: 2, width: "100%", minWidth: 400 }}
                 >
                   <MenuItem value="SPPTB">
-                    Smear positive pulmonary tuberculosis (SPPTB)
+                    {t("patient_registration.spptb")}
                   </MenuItem>
                   <MenuItem value="SNTB">
-                    Smear negative pulmonary tuberculosis (SNTB)
+                    {t("patient_registration.sntb")}
                   </MenuItem>
                   <MenuItem value="EXPTB">
-                    Extrapulmonary tuberculosis (EXPTB)
+                    {t("patient_registration.exptb")}
                   </MenuItem>
-                  <MenuItem value="LTBI">Latent TB infection (LTBI)</MenuItem>
+                  <MenuItem value="LTBI">
+                    {t("patient_registration.ltbi")}
+                  </MenuItem>
                 </TextField>
               </Grid>
 
@@ -581,7 +589,7 @@ export default function PatientRegister() {
                   required
                   fullWidth
                   id="treatment"
-                  label="Current Treatment"
+                  label={t("patient_registration.current_treatment")}
                   name="treatment"
                   autoComplete="off"
                   value={treatment}
@@ -592,12 +600,14 @@ export default function PatientRegister() {
                   sx={{ mt: 2, width: "100%", minWidth: 400 }}
                 >
                   <MenuItem value="Akurit-4">
-                    Akurit-4 (EHRZ Fixed dose combination)
+                    {t("patient_registration.akurit_4")}
                   </MenuItem>
                   <MenuItem value="Akurit">
-                    Akurit (HR Fixed dose combination)
+                    {t("patient_registration.akurit")}
                   </MenuItem>
-                  <MenuItem value="Pyridoxine10mg">Pyridoxine 10mg</MenuItem>
+                  <MenuItem value="Pyridoxine10mg">
+                    {t("patient_registration.pyridoxine")}
+                  </MenuItem>
                 </TextField>
               </Grid>
 
@@ -608,7 +618,7 @@ export default function PatientRegister() {
                   required
                   fullWidth
                   id="numberOfTablets"
-                  label="Number of Tablets"
+                  label={t("patient_registration.number_of_tablets")}
                   name="numberOfTablets"
                   autoComplete="off"
                   value={numberOfTablets}
@@ -629,7 +639,7 @@ export default function PatientRegister() {
                   required
                   fullWidth
                   id="diagnosisDate"
-                  label="Diagnosis Date"
+                  label={t("patient_registration.diagnosis_date")}
                   name="diagnosisDate"
                   type="date"
                   InputLabelProps={{ shrink: true }}
@@ -651,7 +661,7 @@ export default function PatientRegister() {
                   required
                   fullWidth
                   id="treatmentStartDate"
-                  label="Treatment Start Date"
+                  label={t("patient_registration.treatment_start_date")}
                   name="treatmentStartDate"
                   type="date"
                   InputLabelProps={{ shrink: true }}
@@ -673,7 +683,7 @@ export default function PatientRegister() {
                   required
                   fullWidth
                   id="treatmentDuration"
-                  label="Treatment Duration (Months)"
+                  label={t("patient_registration.treatment_duration")}
                   name="treatmentDuration"
                   type="number"
                   autoComplete="off"
@@ -691,7 +701,7 @@ export default function PatientRegister() {
               sx={{ mt: 3, mb: 2 }}
               // disabled={!isFormValid()}
             >
-              Register
+              {t("patient_registration.register_button")}
             </Button>
           </Box>
         </Paper>

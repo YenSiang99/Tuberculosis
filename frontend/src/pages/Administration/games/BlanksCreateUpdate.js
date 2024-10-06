@@ -7,6 +7,9 @@ import {
   Typography,
   Box,
   Grid,
+  Switch,
+  FormControlLabel,
+  Divider,
 } from "@mui/material";
 import axios from "../../../components/axios"; // Adjust with your axios instance
 
@@ -42,17 +45,25 @@ export default function CreateUpdateFillBlank() {
   }, [id]);
 
   const handleAddQuestion = () => {
-    if (newQuestion.textBefore && newQuestion.answer && newQuestion.textAfter) {
-      setFillBlank((prev) => ({
-        ...prev,
-        questions: [...prev.questions, newQuestion],
-      }));
-      setNewQuestion({
-        textBefore: "",
-        textAfter: "",
-        answer: "",
-      });
-    }
+    // if (newQuestion.textBefore && newQuestion.answer && newQuestion.textAfter) {
+    setFillBlank((prev) => ({
+      ...prev,
+      questions: [...prev.questions, newQuestion],
+    }));
+    setNewQuestion({
+      textBefore: "",
+      textAfter: "",
+      answer: "",
+    });
+    // }
+  };
+
+  const handleDeleteQuestion = (index) => {
+    setFillBlank((prev) => {
+      const updatedQuestions = [...prev.questions];
+      updatedQuestions.splice(index, 1);
+      return { ...prev, questions: updatedQuestions };
+    });
   };
 
   const handleSubmit = () => {
@@ -104,118 +115,117 @@ export default function CreateUpdateFillBlank() {
         sx={{ marginBottom: 2 }}
       />
 
+      <FormControlLabel
+        control={
+          <Switch
+            checked={fillBlank.active}
+            onChange={(e) =>
+              setFillBlank({ ...fillBlank, active: e.target.checked })
+            }
+            name="active"
+            color="primary"
+          />
+        }
+        label="Active"
+        sx={{ marginBottom: 2 }}
+      />
+
       <Typography variant="h6" sx={{ marginBottom: 2 }}>
         Questions
       </Typography>
 
-      {fillBlank.questions.map((question, qIdx) => (
-        <Box key={qIdx} sx={{ marginBottom: 4 }}>
-          <Typography variant="h6" sx={{ marginBottom: 1 }}>
-            {`Question ${qIdx + 1}`}
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Text Before"
-                fullWidth
-                value={question.textBefore}
-                onChange={(e) =>
-                  setFillBlank((prev) => {
-                    const updatedQuestions = [...prev.questions];
-                    updatedQuestions[qIdx].textBefore = e.target.value;
-                    return { ...prev, questions: updatedQuestions };
-                  })
-                }
-                sx={{ marginBottom: 1 }}
-              />
+      <Grid container spacing={2}>
+        {fillBlank.questions.map((question, qIdx) => (
+          <Grid item container key={qIdx} rowSpacing={{ xs: 1 }}>
+            <Grid item container spacing={2}>
+              <Grid item>
+                <Typography variant="h6" sx={{ marginBottom: 1 }}>
+                  {`Question ${qIdx + 1}`}
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => handleDeleteQuestion(qIdx)}
+                >
+                  Delete Question
+                </Button>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Answer"
-                fullWidth
-                value={question.answer}
-                onChange={(e) =>
-                  setFillBlank((prev) => {
-                    const updatedQuestions = [...prev.questions];
-                    updatedQuestions[qIdx].answer = e.target.value;
-                    return { ...prev, questions: updatedQuestions };
-                  })
-                }
-                sx={{ marginBottom: 1 }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Text After"
-                fullWidth
-                value={question.textAfter}
-                onChange={(e) =>
-                  setFillBlank((prev) => {
-                    const updatedQuestions = [...prev.questions];
-                    updatedQuestions[qIdx].textAfter = e.target.value;
-                    return { ...prev, questions: updatedQuestions };
-                  })
-                }
-                sx={{ marginBottom: 1 }}
-              />
+            <Grid item container spacing={2}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Text Before"
+                  fullWidth
+                  value={question.textBefore}
+                  onChange={(e) =>
+                    setFillBlank((prev) => {
+                      const updatedQuestions = [...prev.questions];
+                      updatedQuestions[qIdx] = {
+                        ...updatedQuestions[qIdx],
+                        textBefore: e.target.value,
+                      };
+                      return { ...prev, questions: updatedQuestions };
+                    })
+                  }
+                  sx={{ marginBottom: 1 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Answer"
+                  fullWidth
+                  value={question.answer}
+                  onChange={(e) =>
+                    setFillBlank((prev) => {
+                      const updatedQuestions = [...prev.questions];
+                      updatedQuestions[qIdx] = {
+                        ...updatedQuestions[qIdx],
+                        answer: e.target.value,
+                      };
+                      return { ...prev, questions: updatedQuestions };
+                    })
+                  }
+                  sx={{ marginBottom: 1 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Text After"
+                  fullWidth
+                  value={question.textAfter}
+                  onChange={(e) =>
+                    setFillBlank((prev) => {
+                      const updatedQuestions = [...prev.questions];
+                      updatedQuestions[qIdx] = {
+                        ...updatedQuestions[qIdx],
+                        textAfter: e.target.value,
+                      };
+                      return { ...prev, questions: updatedQuestions };
+                    })
+                  }
+                  sx={{ marginBottom: 1 }}
+                />
+              </Grid>
             </Grid>
           </Grid>
-        </Box>
-      ))}
-
-      <Typography variant="h6" sx={{ marginTop: 2 }}>
-        Add New Question
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={4}>
-          <TextField
-            label="Text Before"
-            fullWidth
-            value={newQuestion.textBefore}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, textBefore: e.target.value })
-            }
-          />
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <TextField
-            label="Answer"
-            fullWidth
-            value={newQuestion.answer}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, answer: e.target.value })
-            }
-          />
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <TextField
-            label="Text After"
-            fullWidth
-            value={newQuestion.textAfter}
-            onChange={(e) =>
-              setNewQuestion({ ...newQuestion, textAfter: e.target.value })
-            }
-          />
-        </Grid>
+        ))}
       </Grid>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleAddQuestion}
-        sx={{ marginTop: 2 }}
-      >
-        Add Question
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
+        <Button variant="contained" color="primary" onClick={handleAddQuestion}>
+          Add Question
+        </Button>
+      </Box>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ marginTop: 2 }}
-      >
-        {id ? "Update Fill in the Blanks" : "Create Fill in the Blanks"}
-      </Button>
+      <Divider sx={{ marginY: 4 }} />
+
+      <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2 }}>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
+          {id ? "Update Fill in the Blanks" : "Create Fill in the Blanks"}
+        </Button>
+      </Box>
     </Container>
   );
 }

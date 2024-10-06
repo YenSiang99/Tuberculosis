@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ThemeProvider,
   Box,
   Typography,
   TextField,
@@ -19,11 +18,12 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import theme from "../../components/reusable/Theme";
 import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 export default function HealthcareRegister() {
+  const { t } = useTranslation(); // Initialize translation function
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -74,14 +74,14 @@ export default function HealthcareRegister() {
         setAlertInfo({
           show: true,
           type: "error",
-          message: "Email already registered.",
+          message: t("healthcare_registration.email_already_registered"), // Use translated string
         });
       } else {
         // General error handling
         setAlertInfo({
           show: true,
           type: "error",
-          message: "An unexpected error occurred. Please try again.",
+          message: t("healthcare_registration.unexpected_error"), // Use translated string
         });
       }
     }
@@ -111,8 +111,7 @@ export default function HealthcareRegister() {
     if (!passwordRegex.test(password)) {
       return {
         valid: false,
-        message:
-          "Password must be at least 8 characters long and contain at least one letter and one number.",
+        message: t("healthcare_registration.password_invalid"), // Use translated string
       };
     }
     return { valid: true, message: "" };
@@ -128,7 +127,7 @@ export default function HealthcareRegister() {
     if (!emailRegex.test(email)) {
       return {
         valid: false,
-        message: "Invalid email format.",
+        message: t("healthcare_registration.email_invalid"), // Use translated string
       };
     }
     return { valid: true, message: "" };
@@ -139,85 +138,51 @@ export default function HealthcareRegister() {
     setEmailError(validationResult);
   };
 
-  const isFormValid = () => {
-    return emailError.valid && passwordError.valid;
-  };
-
   return (
-    <ThemeProvider theme={theme}>
+    <Box
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <Box
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(217, 241, 251, 0.8), rgba(217, 241, 251, 0.8)), url(${BgImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          minHeight: "100vh",
+        sx={{
+          marginTop: 8,
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
           alignItems: "center",
+          padding: 3,
+          boxShadow: "0px 3px 15px rgba(0,0,0,0.2)",
+          borderRadius: "15px",
+          backgroundColor: "white",
+          width: "100vh",
         }}
       >
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: 3,
-            boxShadow: "0px 3px 15px rgba(0,0,0,0.2)",
-            borderRadius: "15px",
-            backgroundColor: "white",
-            width: "100vh",
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Healthcare Registration
-          </Typography>
-          <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
-            <Grid container spacing={2}>
-              <Grid item sm={12}>
-                {/* Profile picture upload section */}
-                {profilePicture ? (
-                  <>
-                    {/* Profile picture display */}
-                    <Grid item>
-                      <Avatar
-                        src={profilePicture}
-                        sx={{ width: 90, height: 90 }}
-                      />
-                    </Grid>
-                    {/* Edit photo button */}
-                    <Grid item>
-                      <input
-                        accept="image/*"
-                        id="icon-button-file"
-                        type="file"
-                        style={{ display: "none" }}
-                        onChange={handleProfilePictureUpload}
-                      />
-                      <label htmlFor="icon-button-file">
-                        <Button
-                          variant="outlined"
-                          component="span"
-                          startIcon={<CloudUploadIcon />}
-                          style={{
-                            marginTop: "8px",
-                            padding: "10px 14px",
-                            border: "1px solid #ced4da",
-                            borderRadius: "4px",
-                            backgroundColor: "#fff",
-                            textTransform: "none", // Optional: prevents uppercase styling
-                          }}
-                        >
-                          Edit Photo
-                        </Button>
-                      </label>
-                    </Grid>
-                  </>
-                ) : (
-                  // Upload button only shown when no profile picture is uploaded
+        <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          {t("healthcare_registration.title")} {/* Translate Title */}
+        </Typography>
+        <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
+          <Grid container spacing={2}>
+            <Grid item sm={12}>
+              {/* Profile picture upload section */}
+              {profilePicture ? (
+                <>
+                  {/* Profile picture display */}
+                  <Grid item>
+                    <Avatar
+                      src={profilePicture}
+                      sx={{ width: 90, height: 90 }}
+                    />
+                  </Grid>
+                  {/* Edit photo button */}
                   <Grid item>
                     <input
                       accept="image/*"
@@ -237,137 +202,167 @@ export default function HealthcareRegister() {
                           border: "1px solid #ced4da",
                           borderRadius: "4px",
                           backgroundColor: "#fff",
-                          textTransform: "none", // Optional: prevents uppercase styling
+                          textTransform: "none",
                         }}
                       >
-                        Upload Profile Picture
+                        {t("healthcare_registration.edit_photo")}
                       </Button>
                     </label>
                   </Grid>
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  name="firstName"
-                  autoComplete="given-name"
-                  autoFocus
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="group"
-                  label="Group"
-                  name="group"
-                  value={group}
-                  onChange={(e) => setGroup(e.target.value)}
-                >
-                  <MenuItem value="doctor">Doctor</MenuItem>
-                  <MenuItem value="nurse">Nurse</MenuItem>
-                  <MenuItem value="medical assistant">
-                    Medical Assistant
-                  </MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="mcpId"
-                  label="MCP ID"
-                  name="mcpId"
-                  autoFocus
-                  value={mcpId}
-                  onChange={(e) => setMCPID(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={handleEmailChange}
-                  error={!emailError.valid}
-                  helperText={emailError.valid ? "" : emailError.message}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={handlePasswordChange}
-                  error={!passwordError.valid}
-                  helperText={passwordError.valid ? "" : passwordError.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? (
-                            <VisibilityOffIcon />
-                          ) : (
-                            <VisibilityIcon />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
+                </>
+              ) : (
+                // Upload button only shown when no profile picture is uploaded
+                <Grid item>
+                  <input
+                    accept="image/*"
+                    id="icon-button-file"
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={handleProfilePictureUpload}
+                  />
+                  <label htmlFor="icon-button-file">
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      startIcon={<CloudUploadIcon />}
+                      style={{
+                        marginTop: "8px",
+                        padding: "10px 14px",
+                        border: "1px solid #ced4da",
+                        borderRadius: "4px",
+                        backgroundColor: "#fff",
+                        textTransform: "none",
+                      }}
+                    >
+                      {t("healthcare_registration.upload_profile_picture")}
+                    </Button>
+                  </label>
+                </Grid>
+              )}
             </Grid>
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              sx={{ mt: 3, mb: 2 }}
-              // disabled={!isFormValid()}
-            >
-              Register
-            </Button>
-          </Box>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="firstName"
+                label={t("healthcare_registration.first_name")}
+                name="firstName"
+                autoComplete="given-name"
+                autoFocus
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="lastName"
+                label={t("healthcare_registration.last_name")}
+                name="lastName"
+                autoComplete="family-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                select
+                margin="normal"
+                required
+                fullWidth
+                id="group"
+                label={t("healthcare_registration.group")}
+                name="group"
+                value={group}
+                onChange={(e) => setGroup(e.target.value)}
+              >
+                <MenuItem value="doctor">
+                  {t("healthcare_registration.doctor")}
+                </MenuItem>
+                <MenuItem value="nurse">
+                  {t("healthcare_registration.nurse")}
+                </MenuItem>
+                <MenuItem value="medical_assistant">
+                  {t("healthcare_registration.medical_assistant")}
+                </MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="mcpId"
+                label={t("healthcare_registration.mcp_id")}
+                name="mcpId"
+                autoFocus
+                value={mcpId}
+                onChange={(e) => setMCPID(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label={t("healthcare_registration.email")}
+                name="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={handleEmailChange}
+                error={!emailError.valid}
+                helperText={emailError.valid ? "" : emailError.message}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label={t("healthcare_registration.password")}
+                type={showPassword ? "text" : "password"}
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={handlePasswordChange}
+                error={!passwordError.valid}
+                helperText={passwordError.valid ? "" : passwordError.message}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {t("healthcare_registration.register_button")}
+          </Button>
         </Box>
       </Box>
-
       <CustomDialog
         open={alertInfo.show}
         onClose={handleCloseAlert}
@@ -378,6 +373,6 @@ export default function HealthcareRegister() {
           {alertInfo.message}
         </Alert>
       </CustomDialog>
-    </ThemeProvider>
+    </Box>
   );
 }

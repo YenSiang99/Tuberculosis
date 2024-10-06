@@ -22,7 +22,10 @@ import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
 import PhoneInput from "react-phone-input-2";
 
+import { useTranslation } from "react-i18next";
+
 export default function UserRegister() {
+  const { t } = useTranslation(); // Initialize translation function
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -151,7 +154,7 @@ export default function UserRegister() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            User Registration
+            {t("user_registration.title")} {/* Translate Registration Title */}
           </Typography>
           <Box
             component="form"
@@ -159,114 +162,6 @@ export default function UserRegister() {
             sx={{ mt: 1, width: "100%" }}
           >
             <Grid container spacing={2}>
-              {/* <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  name="firstName"
-                  autoComplete="given-name"
-                  autoFocus
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </Grid> */}
-              {/* <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={handleEmailChange}
-                  error={!emailError.valid}
-                  helperText={emailError.valid ? "" : emailError.message}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={handlePasswordChange}
-                  error={!passwordError.valid}
-                  helperText={passwordError.valid ? "" : passwordError.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? (
-                            <VisibilityOffIcon />
-                          ) : (
-                            <VisibilityIcon />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid> */}
-              {/* <Grid item xs={12}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="confirmPassword"
-                  label="Confirm Password"
-                  type={showPassword ? "text" : "password"}
-                  id="confirmPassword"
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  error={!passwordError.valid}
-                  helperText={passwordError.valid ? "" : passwordError.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? (
-                            <VisibilityOffIcon />
-                          ) : (
-                            <VisibilityIcon />
-                          )}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid> */}
               <Grid item xs={12}>
                 <PhoneInput
                   country={"my"}
@@ -277,6 +172,7 @@ export default function UserRegister() {
                   countryCodeEditable={false}
                   containerStyle={{ width: "100%" }}
                   inputStyle={{ width: "100%", height: "56px" }}
+                  placeholder={t("user_registration.phone_placeholder")}
                 />
               </Grid>
             </Grid>
@@ -287,7 +183,7 @@ export default function UserRegister() {
               sx={{ mt: 3, mb: 2 }}
               disabled={!isFormValid()}
             >
-              Register
+              {t("user_registration.register_button")} {/* Translate Button */}
             </Button>
           </Box>
         </Box>

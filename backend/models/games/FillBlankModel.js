@@ -4,7 +4,7 @@ const questionSchema = new mongoose.Schema({
   textBefore: { type: String, required: true }, // Text before the blank
   textAfter: { type: String, required: true }, // Text after the blank
   answer: { type: String, required: true }, // Correct answer (blank word)
-  position: { type: Number, required: true }, // Position of the blank in the sentence (optional, for word highlight)
+  position: { type: Number, default: null }, // Position of the blank in the sentence (optional, for word highlight)
 });
 
 const fillBlankSchema = new mongoose.Schema({
