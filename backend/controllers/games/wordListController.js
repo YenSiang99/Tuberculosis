@@ -1,8 +1,30 @@
 const WordList = require("../../models/games/WordListModel");
 
+// controllers/WordListController.js
+
 exports.createWordList = async (req, res) => {
   try {
     const { name, words, description, totalGameTime } = req.body;
+
+    // Validate that words is a non-empty object with at least one language
+    if (
+      !words ||
+      typeof words !== "object" ||
+      Object.keys(words).length === 0
+    ) {
+      return res
+        .status(400)
+        .send("Words must be provided for at least one language.");
+    }
+
+    // Ensure that words for each language is an array of strings
+    for (const [lang, wordArray] of Object.entries(words)) {
+      if (!Array.isArray(wordArray)) {
+        return res
+          .status(400)
+          .send(`Words for language '${lang}' must be an array.`);
+      }
+    }
 
     // Check if any word list exists in the database
     const existingWordListCount = await WordList.countDocuments();
@@ -19,7 +41,7 @@ exports.createWordList = async (req, res) => {
       words,
       description,
       totalGameTime,
-      active: isActive, // First word list will be active, others inactive by default
+      active: isActive,
     });
 
     await newWordList.save();
@@ -29,6 +51,7 @@ exports.createWordList = async (req, res) => {
     res.status(400).send(error.message);
   }
 };
+
 exports.getWordLists = async (req, res) => {
   try {
     const wordLists = await WordList.find({});
@@ -41,13 +64,23 @@ exports.getWordLists = async (req, res) => {
 exports.getWordListById = async (req, res) => {
   try {
     const wordListId = req.params.id;
+    const { language } = req.query;
+
     const wordList = await WordList.findById(wordListId);
 
     if (!wordList) {
       return res.status(404).send("Word list not found.");
     }
 
-    res.status(200).send(wordList);
+    let responseWordList = wordList.toObject();
+
+    if (language) {
+      responseWordList.words = {
+        [language]: wordList.words.get(language) || [],
+      };
+    }
+
+    res.status(200).send(responseWordList);
   } catch (error) {
     res.status(500).send(error.message);
   }
@@ -55,11 +88,24 @@ exports.getWordListById = async (req, res) => {
 
 exports.getActiveWordList = async (req, res) => {
   try {
+    const { language } = req.query;
+
     const activeWordList = await WordList.findOne({ active: true });
+
     if (!activeWordList) {
       return res.status(404).send("Active word list not found.");
     }
-    res.status(200).send(activeWordList);
+
+    // If language is specified, return words only for that language
+    let responseWordList = activeWordList.toObject();
+
+    if (language) {
+      responseWordList.words = {
+        [language]: activeWordList.words.get(language) || [],
+      };
+    }
+
+    res.status(200).send(responseWordList);
   } catch (error) {
     res.status(500).send(error.message);
   }
@@ -108,7 +154,7 @@ exports.updateWordList = async (req, res) => {
       return res.status(404).send("Word list not found.");
     }
 
-    // Check if the active status is being updated
+    // Handle active status updates
     if ("active" in updates) {
       if (wordList.active && updates.active === false) {
         // Prevent deactivating the only active word list
@@ -116,17 +162,30 @@ exports.updateWordList = async (req, res) => {
           .status(400)
           .send({ error: "Cannot deactivate the active word list." });
       } else if (!wordList.active && updates.active === true) {
-        // If setting a non-active word list to active, deactivate the current active one
-        const activeWordList = await WordList.findOne({ active: true });
-        if (activeWordList) {
-          activeWordList.active = false;
-          await activeWordList.save();
-        }
+        // Deactivate other active word lists
+        await WordList.updateMany({ active: true }, { active: false });
       }
     }
 
     // Update the word list with allowed updates
-    Object.assign(wordList, updates);
+    if ("words" in updates) {
+      // Merge existing words with updates
+      for (const [lang, wordArray] of Object.entries(updates.words)) {
+        if (!Array.isArray(wordArray)) {
+          return res
+            .status(400)
+            .send(`Words for language '${lang}' must be an array.`);
+        }
+        wordList.words.set(lang, wordArray);
+      }
+    }
+
+    for (const key of updateKeys) {
+      if (key !== "words") {
+        wordList[key] = updates[key];
+      }
+    }
+
     await wordList.save();
 
     res.send(wordList);

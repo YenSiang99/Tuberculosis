@@ -1,3 +1,5 @@
+// models/games/WordListModel.js
+
 const mongoose = require("mongoose");
 
 const wordListSchema = new mongoose.Schema(
@@ -9,21 +11,21 @@ const wordListSchema = new mongoose.Schema(
       trim: true,
     },
     words: {
-      type: [String],
+      type: Map,
+      of: [String],
       required: true,
+      default: {},
     },
     description: String,
     active: {
-      // Indicates if the word list is currently active
       type: Boolean,
       required: true,
       default: false,
     },
     totalGameTime: {
-      // Total time for the game in seconds
       type: Number,
       required: true,
-      default: 90, // Set a default value if desired
+      default: 90,
     },
   },
   {

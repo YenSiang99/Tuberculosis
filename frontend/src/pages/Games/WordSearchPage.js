@@ -11,10 +11,13 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
+import { useTranslation } from "react-i18next";
 
 const WordSearchPage = () => {
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language; // This will give you 'en' or 'ms'
+
   const [wordsToFind, setWordsToFind] = useState([]);
   const gridSize = 15;
 
@@ -378,15 +381,26 @@ const WordSearchPage = () => {
   useEffect(() => {
     const fetchActiveWordList = async () => {
       try {
-        const response = await axios.get("/wordLists/active");
+        // Include the language parameter in the API call
+        const response = await axios.get(
+          `/wordLists/active?language=${currentLanguage}`
+        );
         const data = response.data;
+
         setTotalTime(data.totalGameTime);
-        setGameTimer(data.totalGameTime); // Set gameTimer to totalGameTime
+        setGameTimer(data.totalGameTime);
+
         if (data && data.words) {
-          setWordsToFind(data.words); // Set the fetched words in the state
+          // Assuming data.words is structured as { [language]: ['word1', 'word2', ...] }
+          const words = data.words[currentLanguage] || [];
+          setWordsToFind(words.map((word) => word.toUpperCase())); // Convert words to uppercase if needed
+
           const emptyGrid = generateEmptyGrid(gridSize);
-          const gridWithWords = placeWordsInGrid(emptyGrid, data.words); // Use the fetched words
-          setGrid(gridWithWords); // Set the grid with the words
+          const gridWithWords = placeWordsInGrid(
+            emptyGrid,
+            words.map((word) => word.toUpperCase())
+          );
+          setGrid(gridWithWords);
         }
       } catch (error) {
         console.error("Failed to fetch word list", error);
@@ -394,7 +408,7 @@ const WordSearchPage = () => {
     };
 
     fetchActiveWordList();
-  }, [gridSize]);
+  }, [gridSize, currentLanguage]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
