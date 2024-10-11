@@ -14,41 +14,129 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
+import { useTranslation } from "react-i18next";
 
 const InteractiveStoryPage = () => {
+  const { i18n, t } = useTranslation();
+  const selectedLanguage = i18n.language || "en";
+  const [prevLanguage, setPrevLanguage] = useState(selectedLanguage);
   const [storyData, setStoryData] = useState({
-    title: "Journey of a TB Patient",
+    title: {
+      en: "A Day in the Life of a TB Patient",
+      ms: "Sehari dalam Kehidupan Pesakit TB",
+    },
+    description: {
+      en: "Navigate through choices as a tuberculosis patient.",
+      ms: "Melalui pilihan sebagai pesakit tuberkulosis.",
+    },
     steps: [
       {
-        content:
-          "John, a 30-year-old male, has been coughing for more than 3 weeks. What should John do?",
+        stepId: "step1",
+        content: {
+          en: "You wake up feeling unwell with a persistent cough. What do you do?",
+          ms: "Anda bangun berasa tidak sihat dengan batuk yang berterusan. Apa yang anda lakukan?",
+        },
         options: [
           {
-            optionText: "Ignore it and hope it gets better.",
-            nextStep: "end2",
+            optionText: {
+              en: "Ignore it and go to work",
+              ms: "Abaikan dan pergi bekerja",
+            },
+            nextStep: "step2", // References the next step by stepId
           },
           {
-            optionText: "Visit a healthcare professional.",
-            nextStep: "end1",
+            optionText: {
+              en: "Visit a clinic for a check-up",
+              ms: "Lawati klinik untuk pemeriksaan",
+            },
+            nextStep: "step3",
+          },
+        ],
+      },
+      {
+        stepId: "step2",
+        content: {
+          en: "At work, your symptoms worsen. What's your next step?",
+          ms: "Di tempat kerja, gejala anda semakin teruk. Apakah langkah seterusnya?",
+        },
+        options: [
+          {
+            optionText: {
+              en: "Take some over-the-counter medicine",
+              ms: "Ambil ubat dari kaunter",
+            },
+            nextStep: "end1", // References an end by endId
+          },
+          {
+            optionText: {
+              en: "Inform your supervisor and go home",
+              ms: "Maklumkan penyelia anda dan pulang ke rumah",
+            },
+            nextStep: "end2",
+          },
+        ],
+      },
+      {
+        stepId: "step3",
+        content: {
+          en: "The doctor suspects TB and orders tests. What's your response?",
+          ms: "Doktor mengesyaki TB dan mengarahkan ujian. Apakah respons anda?",
+        },
+        options: [
+          {
+            optionText: {
+              en: "Agree to the tests",
+              ms: "Bersetuju untuk ujian",
+            },
+            nextStep: "end3",
+          },
+          {
+            optionText: {
+              en: "Refuse and leave the clinic",
+              ms: "Menolak dan meninggalkan klinik",
+            },
+            nextStep: "end4",
           },
         ],
       },
     ],
     ends: [
       {
-        content:
-          "Ignoring the symptoms, John's condition worsens, demonstrating the danger of neglecting early signs of TB.",
+        endId: "end1",
+        content: {
+          en: "Your condition worsens without proper treatment.",
+          ms: "Keadaan anda semakin teruk tanpa rawatan yang betul.",
+        },
+        endType: "negative",
+      },
+      {
+        endId: "end2",
+        content: {
+          en: "You rest at home but miss early diagnosis.",
+          ms: "Anda berehat di rumah tetapi terlepas diagnosis awal.",
+        },
+        endType: "negative",
+      },
+      {
+        endId: "end3",
+        content: {
+          en: "You begin treatment early and recover well.",
+          ms: "Anda memulakan rawatan awal dan pulih dengan baik.",
+        },
         endType: "positive",
       },
       {
-        content:
-          "Fear leads to worse health outcomes. John's condition deteriorates because he didn't proceed with the necessary tests.",
+        endId: "end4",
+        content: {
+          en: "Without diagnosis, your health deteriorates.",
+          ms: "Tanpa diagnosis, kesihatan anda merosot.",
+        },
         endType: "negative",
       },
     ],
   });
   const [currentStepId, setCurrentStepId] = useState(
-    storyData.steps[0].content
+    storyData?.steps[0]?.stepId || null
   );
   const [loading, setLoading] = useState(true); // To handle loading state
   const [error, setError] = useState(null); // For error handling
@@ -58,19 +146,33 @@ const InteractiveStoryPage = () => {
   const [finalTimeTaken, setFinalTimeTaken] = useState(null); // New state for final time
   const [gameStarted, setGameStarted] = useState(false); // Track if the game has started
 
+  // const currentStep =
+  //   storyData.steps.find((step) => step.content === currentStepId) ||
+  //   storyData.ends.find((end) => end.content === currentStepId);
+
   const currentStep =
-    storyData.steps.find((step) => step.content === currentStepId) ||
-    storyData.ends.find((end) => end.content === currentStepId);
+    storyData?.steps.find((step) => step.stepId === currentStepId) ||
+    storyData?.ends.find((end) => end.endId === currentStepId);
+
   const isEnd = currentStep && "endType" in currentStep;
 
   const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
 
   // Function to generate image URLs based on the content
+  // const generateImageUrl = (content) => {
+  //   const formattedContent = content
+  //     .replace(/[^a-zA-Z ]/g, "")
+  //     .replace(/\s+/g, "-");
+  //   return `https://image.pollinations.ai/prompt/${formattedContent}-kids-animation-16-by-9-image`;
+  // };
+
   const generateImageUrl = (content) => {
-    const formattedContent = content
+    const englishContent = content?.en || content?.[selectedLanguage] || "";
+    const formattedContent = englishContent
       .replace(/[^a-zA-Z ]/g, "")
       .replace(/\s+/g, "-");
+    console.log("formattedContent", formattedContent);
     return `https://image.pollinations.ai/prompt/${formattedContent}-kids-animation-16-by-9-image`;
   };
 
@@ -87,17 +189,29 @@ const InteractiveStoryPage = () => {
   };
 
   const handleRestartStory = () => {
+    resetGame();
+  };
+
+  useEffect(() => {
+    if (selectedLanguage !== prevLanguage) {
+      resetGame();
+      setPrevLanguage(selectedLanguage);
+    }
+  }, [selectedLanguage, prevLanguage]);
+
+  const resetGame = () => {
+    setCurrentStepId(storyData?.steps[0]?.stepId || null);
     setRetries(0);
     setStartTime(Date.now());
-    setFinalTimeTaken(null); // Reset final time when restarting
-    setCurrentStepId(storyData.steps[0].content);
-    setGameStarted(true); // Reset game start
+    setFinalTimeTaken(null);
+    setGameStarted(false);
+    setOpenInstructionDialog(true);
   };
 
   const handleRetryStory = () => {
     setRetries(retries + 1);
-    setFinalTimeTaken(null); // Reset final time on retry
-    setCurrentStepId(storyData.steps[0].content);
+    setFinalTimeTaken(null);
+    setCurrentStepId(storyData?.steps[0]?.stepId || null);
   };
 
   const calculateTimeTaken = () => {
@@ -129,7 +243,9 @@ const InteractiveStoryPage = () => {
       .then((response) => {
         console.log("reading stories .. response.data", response.data);
         setStoryData(response.data);
-        setCurrentStepId(response.data.steps[0].content); // Set initial step to the first step
+        // setCurrentStepId(response.data.steps[0].content); // Set initial step to the first step
+        setCurrentStepId(response.data.steps[0]?.stepId || null); // Use stepId
+
         setLoading(false); // Stop loading once data is fetched
       })
       .catch((err) => {
@@ -171,7 +287,12 @@ const InteractiveStoryPage = () => {
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h4">{storyData.title}</Typography>
+          <Typography variant="h4">
+            {/* {storyData.title[selectedLanguage]} */}
+            {storyData.title?.[selectedLanguage] ||
+              storyData.title?.en ||
+              "Story Title"}
+          </Typography>
         </Grid>
 
         <Grid
@@ -214,7 +335,10 @@ const InteractiveStoryPage = () => {
             md={6}
           >
             <Grid item>
-              <Typography variant="h6">{currentStep.content}</Typography>
+              <Typography variant="h6">
+                {currentStep?.content?.[selectedLanguage] ||
+                  "Content not available"}
+              </Typography>
             </Grid>
             {!isEnd &&
               currentStep.options.map((option, index) => (
@@ -224,7 +348,8 @@ const InteractiveStoryPage = () => {
                     onClick={() => setCurrentStepId(option.nextStep)}
                     sx={{ width: "100%" }}
                   >
-                    {option.optionText}
+                    {option.optionText?.[selectedLanguage] ||
+                      option.optionText?.en}
                   </Button>
                 </Grid>
               ))}
