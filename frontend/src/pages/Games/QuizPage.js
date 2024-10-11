@@ -17,20 +17,22 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
-import DataViewer from "../../components/reusable/DataViewer";
+import { useTranslation } from "react-i18next";
 
 const QuizPage = () => {
   const test = false;
+  const { i18n, t } = useTranslation();
+  const selectedLanguage = i18n.language || "en";
 
-  const [questions, setQuestions] = useState([]); // Initialize as empty array
+  const [prevLanguage, setPrevLanguage] = useState(selectedLanguage);
+
+  const [questions, setQuestions] = useState([]);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
-  // Timer variables
   const [questionTime, setQuestionTime] = useState(null);
   const [questionTimer, setQuestionTimer] = useState(null);
   const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
-  // Asnwer Feedback for each question and summary
   const [answerFeedback, setFeedback] = useState(null);
 
   const [gameEnd, setGameEnd] = useState(false);
@@ -46,11 +48,11 @@ const QuizPage = () => {
   const submitQuizScore = async () => {
     const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
 
-    if (!storedUserData) return; // Only submit score if user is logged in
+    if (!storedUserData) return;
 
     const payload = {
-      totalTimeTaken: totalTimeTaken, // Total time taken to answer the quiz
-      score: score, // User's score
+      totalTimeTaken: totalTimeTaken,
+      score: score,
       completionStatus: score === questions.length ? "Completed" : "Incomplete",
     };
 
@@ -63,10 +65,8 @@ const QuizPage = () => {
   };
 
   const handleOptionClick = (option, questionId) => {
-    // Set user selection option
-
-    const timeSpentOnQuestion = questionTime - questionTimer; // Time taken to answer the current question
-    setTotalTimeTaken((prevTime) => prevTime + timeSpentOnQuestion); // Accumulate time spent
+    const timeSpentOnQuestion = questionTime - questionTimer;
+    setTotalTimeTaken((prevTime) => prevTime + timeSpentOnQuestion);
 
     setQuestions((prevQuestions) =>
       prevQuestions.map((question) =>
@@ -76,7 +76,6 @@ const QuizPage = () => {
       )
     );
 
-    // Let user know if they selected the right or wrong answer
     setFeedback(option.isCorrect ? "correct" : "wrong");
     if (option.isCorrect) setScore(score + 1);
     if (currentQuestionIndex < questions.length - 1) {
@@ -104,7 +103,7 @@ const QuizPage = () => {
       setNextQuestionTimer(0);
     } else {
       setGameEnd(true);
-      submitQuizScore(); // Submit score when quiz is completed
+      submitQuizScore();
     }
   };
 
@@ -127,7 +126,6 @@ const QuizPage = () => {
     setGamePause(true);
   };
 
-  // State to countdown question timer
   useEffect(() => {
     if (!test && gameStart && !gamePause) {
       if (questionTimer > 0 && answerFeedback === null) {
@@ -143,7 +141,6 @@ const QuizPage = () => {
     }
   }, [questionTimer, answerFeedback, gameStart, gamePause]);
 
-  // State to countdown next question timer
   useEffect(() => {
     if (!test && gameStart && !gamePause && questionTimer !== null) {
       if (answerFeedback && nextQuestionTimer > 0) {
@@ -164,8 +161,9 @@ const QuizPage = () => {
       try {
         const response = await axios.get("/quizzes/active");
         const data = response.data;
+        console.log("Fetched quiz data:", data);
         if (data && data.questions) {
-          setQuestions(data.questions); // Set the questions based on the API response
+          setQuestions(data.questions);
           setQuestionTime(data.timeLimitPerQuestion);
           setQuestionTimer(data.timeLimitPerQuestion);
         }
@@ -177,7 +175,30 @@ const QuizPage = () => {
     fetchActiveQuiz();
   }, []);
 
-  const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"]; // Dark Red, Dark Blue, Dark Yellow, Dark Green
+  // Detect language change and reset game
+  useEffect(() => {
+    if (selectedLanguage !== prevLanguage) {
+      resetGame();
+      setPrevLanguage(selectedLanguage);
+    }
+  }, [selectedLanguage, prevLanguage]);
+
+  const resetGame = () => {
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setQuestionTimer(questionTime);
+    setNextQuestionTimer(0);
+    setFeedback(null);
+    setGameEnd(false);
+    setGameStart(false);
+    setGamePause(false);
+    setOpenInstructionDialog(true);
+    setTotalTimeTaken(0);
+  };
+
+  console.log("Current Question:", questions[currentQuestionIndex]);
+
+  const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"];
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -186,7 +207,7 @@ const QuizPage = () => {
         gutterBottom
         sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
       >
-        Quiz Time!
+        {t("Quiz Time!")}
       </Typography>
       {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
       {!gameEnd && questions.length > 0 ? (
@@ -210,24 +231,28 @@ const QuizPage = () => {
                 handleOpenInstructionDialog();
               }}
             >
-              View Instruction
+              {t("View Instruction")}
             </Button>
           </Grid>
           {/* Title */}
 
           <Grid item xs={12} sm={12} md={12} lg={12}>
             <Typography variant="h4">
-              {questions[currentQuestionIndex].questionText}
+              {questions[currentQuestionIndex]?.questionText?.[
+                selectedLanguage
+              ] ||
+                questions[currentQuestionIndex]?.questionText?.en ||
+                "Question text not available"}
             </Typography>
           </Grid>
           {/* Time Countdown for question */}
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {questionTimer !== null ? (
               <Typography variant="h7">
-                Time left: {questionTimer} seconds
+                {t("Time left")}: {questionTimer} {t("seconds")}
               </Typography>
             ) : (
-              <Typography variant="h7">Loading...</Typography>
+              <Typography variant="h7">{t("Loading...")}</Typography>
             )}
           </Grid>
           {/* Answer Selection */}
@@ -253,7 +278,9 @@ const QuizPage = () => {
                     lineHeight: 1.5,
                   }}
                 >
-                  {option.optionText}
+                  {option.optionText?.[selectedLanguage] ||
+                    option.optionText?.en ||
+                    "Option text not available"}
                 </Button>
               </Grid>
             ))}
@@ -265,11 +292,11 @@ const QuizPage = () => {
                 variant="h6"
                 sx={{ color: answerFeedback === "correct" ? "green" : "red" }}
               >
-                {answerFeedback === "correct" ? "Correct!" : "Wrong!"}
+                {answerFeedback === "correct" ? t("Correct!") : t("Wrong!")}
               </Typography>
               {nextQuestionTimer > 0 && (
                 <Typography variant="caption">
-                  Next question in: {nextQuestionTimer} seconds
+                  {t("Next question in")}: {nextQuestionTimer} {t("seconds")}
                 </Typography>
               )}
             </Grid>
@@ -290,7 +317,7 @@ const QuizPage = () => {
               >
                 {currentQuestionIndex > 0 && (
                   <Button variant="contained" onClick={handlePreviousQuestion}>
-                    previous
+                    {t("Previous")}
                   </Button>
                 )}
               </Grid>
@@ -304,7 +331,7 @@ const QuizPage = () => {
                     onClick={goToNextQuestion}
                     sx={{ flexGrow: 0, display: "flex" }}
                   >
-                    Next
+                    {t("Next")}
                   </Button>
                 )}
               </Grid>
@@ -315,10 +342,10 @@ const QuizPage = () => {
         // Summary page
         <Box sx={{ my: 2 }}>
           <Typography variant="h3" gutterBottom>
-            Your Score: {score} / {questions.length}
+            {t("Your Score")}: {score} / {questions.length}
           </Typography>
           <Typography variant="h4" gutterBottom>
-            Summary of Questions:
+            {t("Summary of Questions")}:
           </Typography>
           {questions.length > 0 ? (
             <>
@@ -327,7 +354,9 @@ const QuizPage = () => {
                   <Typography
                     sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
                   >
-                    {question.questionText}
+                    {question.questionText?.[selectedLanguage] ||
+                      question.questionText?.en ||
+                      "Question text not available"}
                   </Typography>
                   <RadioGroup>
                     {question.options.map((option) => {
@@ -337,7 +366,11 @@ const QuizPage = () => {
                       return (
                         <FormControlLabel
                           key={option._id}
-                          value={option.optionText}
+                          value={
+                            option.optionText?.[selectedLanguage] ||
+                            option.optionText?.en ||
+                            "Option text not available"
+                          }
                           control={<Radio checked={isUserSelection} />}
                           label={
                             <span
@@ -350,11 +383,13 @@ const QuizPage = () => {
                                 fontWeight: isUserSelection ? "bold" : "normal",
                               }}
                             >
-                              {option.optionText}
+                              {option.optionText?.[selectedLanguage] ||
+                                option.optionText?.en ||
+                                "Option text not available"}
                               {isUserSelection &&
                                 !isCorrect &&
-                                " (Your Choice)"}
-                              {isCorrect && " (Correct)"}
+                                ` (${t("Your Choice")})`}
+                              {isCorrect && ` (${t("Correct")})`}
                             </span>
                           }
                           sx={{
@@ -376,7 +411,7 @@ const QuizPage = () => {
               ))}
             </>
           ) : (
-            <Typography variant="h6">Loading quiz...</Typography> // Show loading message until data is fetched
+            <Typography variant="h6">{t("Loading quiz...")}</Typography>
           )}
         </Box>
       )}
@@ -387,40 +422,47 @@ const QuizPage = () => {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          {"Quiz Game: How To Play?"}
+          {t("Quiz Game: How To Play?")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            1. <strong>Objective:</strong> <br />
-            Answer all the questions correctly to complete the quiz.
+            {/* Instructions translated */}
+            1. <strong>{t("Objective")}:</strong> <br />
+            {t("Answer all the questions correctly to complete the quiz.")}
             <br />
             <br />
-            2. <strong>Multiple Choices:</strong> <br />
-            Each question will present 4 possible answers. Select the one you
-            think is correct.
+            2. <strong>{t("Multiple Choices")}:</strong> <br />
+            {t(
+              "Each question will present 4 possible answers. Select the one you think is correct."
+            )}
             <br />
             <br />
-            3. <strong>Time Limit:</strong> <br />
-            You have {questionTime} seconds to answer each question.
+            3. <strong>{t("Time Limit")}:</strong> <br />
+            {t("You have")} {questionTime} {t("seconds")}{" "}
+            {t("to answer each question.")}
             <br />
             <br />
-            4. <strong>Missed Answers:</strong> <br />
-            If the timer runs out before you answer, the question will be marked
-            as incorrect.
+            4. <strong>{t("Missed Answers")}:</strong> <br />
+            {t(
+              "If the timer runs out before you answer, the question will be marked as incorrect."
+            )}
             <br />
             <br />
-            5. <strong>Preparation Time:</strong> <br />
-            There will be a 5-second interval between questions to get ready for
-            the next one.
+            5. <strong>{t("Preparation Time")}:</strong> <br />
+            {t(
+              "There will be a 5-second interval between questions to get ready for the next one."
+            )}
             <br />
             <br />
-            6. <strong>Finish Strong:</strong> <br />
-            Keep going until you’ve answered all the questions. Good luck!
+            6. <strong>{t("Finish Strong")}:</strong> <br />
+            {t(
+              "Keep going until you’ve answered all the questions. Good luck!"
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseInstructionDialog} autoFocus>
-            Okay
+            {t("Okay")}
           </Button>
         </DialogActions>
       </Dialog>
