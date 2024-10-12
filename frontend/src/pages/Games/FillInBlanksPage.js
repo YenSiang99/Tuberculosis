@@ -232,7 +232,7 @@ const FillInBlanksPage = () => {
         {t("fill_in_the_blanks.title")}
       </Typography>
 
-      {gameStart ? (
+      {!gameEnd ? (
         <Grid container spacing={2}>
           <Grid
             item

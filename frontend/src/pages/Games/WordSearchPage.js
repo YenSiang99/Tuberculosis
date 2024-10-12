@@ -34,6 +34,7 @@ const WordSearchPage = () => {
   const [gamePause, setGamePause] = useState(false);
 
   const [gameEnd, setGameEnd] = useState(false);
+  const [finalTimeTaken, setFinalTimeTaken] = useState(null);
 
   const submitScore = async () => {
     const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
@@ -359,10 +360,29 @@ const WordSearchPage = () => {
   };
 
   // countdown timer
+  // useEffect(() => {
+  //   if (gameStart && !gamePause && gameTimer !== null) {
+  //     if (gameTimer > 0) {
+  //       if (foundWords.length === wordsToFind.length) {
+  //         setGameEnd(true);
+  //         submitScore(); // Submit score when user finds all words
+  //       } else {
+  //         const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
+  //         return () => clearTimeout(countdown);
+  //       }
+  //     }
+  //     if (gameTimer === 0) {
+  //       setGameEnd(true);
+  //       submitScore(); // Submit score when timer runs out
+  //     }
+  //   }
+  // }, [gameTimer, gameStart, gamePause, foundWords]);
+
   useEffect(() => {
     if (gameStart && !gamePause && gameTimer !== null) {
       if (gameTimer > 0) {
         if (foundWords.length === wordsToFind.length) {
+          if (finalTimeTaken === null) setFinalTimeTaken(totalTime - gameTimer); // Set only once
           setGameEnd(true);
           submitScore(); // Submit score when user finds all words
         } else {
@@ -371,11 +391,12 @@ const WordSearchPage = () => {
         }
       }
       if (gameTimer === 0) {
+        if (finalTimeTaken === null) setFinalTimeTaken(totalTime - gameTimer); // Set only once
         setGameEnd(true);
         submitScore(); // Submit score when timer runs out
       }
     }
-  }, [gameTimer, gameStart, gamePause, foundWords]);
+  }, [gameTimer, gameStart, gamePause, foundWords, finalTimeTaken]);
 
   // fetch word list
   useEffect(() => {
@@ -460,9 +481,14 @@ const WordSearchPage = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
-                    : {totalTime - gameTimer} {t("word_search.seconds")}
+                    :{" "}
+                    {finalTimeTaken !== null
+                      ? finalTimeTaken
+                      : totalTime - gameTimer}{" "}
+                    {t("word_search.seconds")}
                   </Typography>
                 </Grid>
+
                 <Grid item xs={6}>
                   <Typography variant="h6">
                     {t("word_search.accuracyRate")}
@@ -521,6 +547,7 @@ const WordSearchPage = () => {
                     setGameEnd(false);
                     setGamePause(false);
                     setGameStart(true);
+                    setFinalTimeTaken(null);
                   }}
                 >
                   {t("word_search.playAgain")}
