@@ -2,21 +2,26 @@
 
 const mongoose = require("mongoose");
 
+const wordSchema = new mongoose.Schema({
+  en: { type: String, required: true },
+  ms: { type: String, required: true },
+});
+
 const wordListSchema = new mongoose.Schema(
   {
     name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
+      en: { type: String, required: true, unique: true, trim: true },
+      ms: { type: String, required: true, unique: true, trim: true },
     },
     words: {
-      type: Map,
-      of: [String],
+      type: [wordSchema],
       required: true,
-      default: {},
+      default: [],
     },
-    description: String,
+    description: {
+      en: { type: String, default: "" },
+      ms: { type: String, default: "" },
+    },
     active: {
       type: Boolean,
       required: true,

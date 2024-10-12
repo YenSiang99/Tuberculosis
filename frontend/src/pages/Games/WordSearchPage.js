@@ -73,8 +73,9 @@ const WordSearchPage = () => {
 
     words.forEach((word) => {
       let placed = false;
+      let attempts = 0;
 
-      while (!placed) {
+      while (!placed && attempts < 100) {
         const direction = Math.floor(Math.random() * 3); // 0: horizontal, 1: vertical, 2: diagonal
         const startX = Math.floor(Math.random() * gridSize);
         const startY = Math.floor(Math.random() * gridSize);
@@ -97,6 +98,7 @@ const WordSearchPage = () => {
           }
           placed = true;
         }
+        attempts++;
       }
     });
 
@@ -359,25 +361,6 @@ const WordSearchPage = () => {
     );
   };
 
-  // countdown timer
-  // useEffect(() => {
-  //   if (gameStart && !gamePause && gameTimer !== null) {
-  //     if (gameTimer > 0) {
-  //       if (foundWords.length === wordsToFind.length) {
-  //         setGameEnd(true);
-  //         submitScore(); // Submit score when user finds all words
-  //       } else {
-  //         const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
-  //         return () => clearTimeout(countdown);
-  //       }
-  //     }
-  //     if (gameTimer === 0) {
-  //       setGameEnd(true);
-  //       submitScore(); // Submit score when timer runs out
-  //     }
-  //   }
-  // }, [gameTimer, gameStart, gamePause, foundWords]);
-
   useEffect(() => {
     if (gameStart && !gamePause && gameTimer !== null) {
       if (gameTimer > 0) {
@@ -398,30 +381,40 @@ const WordSearchPage = () => {
     }
   }, [gameTimer, gameStart, gamePause, foundWords, finalTimeTaken]);
 
-  // fetch word list
+  // Fetch word list and handle language changes
   useEffect(() => {
     const fetchActiveWordList = async () => {
       try {
-        // Include the language parameter in the API call
-        const response = await axios.get(
-          `/wordLists/active?language=${currentLanguage}`
-        );
+        // Remove the language parameter from the API call
+        const response = await axios.get(`/wordLists/active`);
         const data = response.data;
 
         setTotalTime(data.totalGameTime);
         setGameTimer(data.totalGameTime);
 
         if (data && data.words) {
-          // Assuming data.words is structured as { [language]: ['word1', 'word2', ...] }
-          const words = data.words[currentLanguage] || [];
-          setWordsToFind(words.map((word) => word.toUpperCase())); // Convert words to uppercase if needed
+          // Extract words in the current language
+          const words = data.words.map(
+            (wordObj) => wordObj[currentLanguage] || ""
+          );
+          const upperCaseWords = words.map((word) => word.toUpperCase());
+
+          setWordsToFind(upperCaseWords);
 
           const emptyGrid = generateEmptyGrid(gridSize);
-          const gridWithWords = placeWordsInGrid(
-            emptyGrid,
-            words.map((word) => word.toUpperCase())
-          );
+          const gridWithWords = placeWordsInGrid(emptyGrid, upperCaseWords);
           setGrid(gridWithWords);
+
+          // Reset game state when language changes
+          setSelectedCells([]);
+          setFoundWords([]);
+          setGameEnd(false);
+          setGamePause(false);
+          setGameStart(false);
+          setFinalTimeTaken(null);
+
+          // Open instruction dialog when language changes
+          setOpenInstructionDialog(true);
         }
       } catch (error) {
         console.error("Failed to fetch word list", error);

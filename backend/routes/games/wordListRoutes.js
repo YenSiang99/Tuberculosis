@@ -8,9 +8,6 @@ router.post("/", wordListController.createWordList);
 // Get the active word list (optionally filtered by language)
 router.get("/active", wordListController.getActiveWordList);
 
-// Search word lists by fields
-router.get("/search", wordListController.getWordListByFields);
-
 // Get all word lists (optionally filtered by language)
 router.get("/", wordListController.getWordLists);
 

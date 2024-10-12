@@ -1,28 +1,49 @@
+// controllers/wordListController.js
+
 const WordList = require("../../models/games/WordListModel");
 
-// controllers/WordListController.js
+// Utility function to validate multilingual fields
+const validateLanguageFields = (field) => {
+  return (
+    field &&
+    typeof field === "object" &&
+    typeof field.en === "string" &&
+    typeof field.ms === "string" &&
+    field.en.trim() !== "" &&
+    field.ms.trim() !== ""
+  );
+};
 
+// Create Word List
 exports.createWordList = async (req, res) => {
   try {
     const { name, words, description, totalGameTime } = req.body;
 
-    // Validate that words is a non-empty object with at least one language
-    if (
-      !words ||
-      typeof words !== "object" ||
-      Object.keys(words).length === 0
-    ) {
+    // Validate that `name` has both 'en' and 'ms' translations
+    if (!validateLanguageFields(name)) {
       return res
         .status(400)
-        .send("Words must be provided for at least one language.");
+        .send("Name must have both 'en' and 'ms' translations.");
     }
 
-    // Ensure that words for each language is an array of strings
-    for (const [lang, wordArray] of Object.entries(words)) {
-      if (!Array.isArray(wordArray)) {
+    // Validate `description` if provided
+    if (description && !validateLanguageFields(description)) {
+      return res
+        .status(400)
+        .send("Description must have both 'en' and 'ms' translations.");
+    }
+
+    // Validate that `words` is a non-empty array
+    if (!Array.isArray(words) || words.length === 0) {
+      return res.status(400).send("Words must be a non-empty array.");
+    }
+
+    // Validate each word has 'en' and 'ms' translations
+    for (const word of words) {
+      if (!validateLanguageFields(word)) {
         return res
           .status(400)
-          .send(`Words for language '${lang}' must be an array.`);
+          .send("Each word must have 'en' and 'ms' translations.");
       }
     }
 
@@ -52,6 +73,7 @@ exports.createWordList = async (req, res) => {
   }
 };
 
+// Get all Word Lists
 exports.getWordLists = async (req, res) => {
   try {
     const wordLists = await WordList.find({});
@@ -61,10 +83,10 @@ exports.getWordLists = async (req, res) => {
   }
 };
 
+// Get Word List by ID
 exports.getWordListById = async (req, res) => {
   try {
     const wordListId = req.params.id;
-    const { language } = req.query;
 
     const wordList = await WordList.findById(wordListId);
 
@@ -72,59 +94,28 @@ exports.getWordListById = async (req, res) => {
       return res.status(404).send("Word list not found.");
     }
 
-    let responseWordList = wordList.toObject();
-
-    if (language) {
-      responseWordList.words = {
-        [language]: wordList.words.get(language) || [],
-      };
-    }
-
-    res.status(200).send(responseWordList);
+    res.status(200).send(wordList);
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
+// Get Active Word List
 exports.getActiveWordList = async (req, res) => {
   try {
-    const { language } = req.query;
-
     const activeWordList = await WordList.findOne({ active: true });
 
     if (!activeWordList) {
       return res.status(404).send("Active word list not found.");
     }
 
-    // If language is specified, return words only for that language
-    let responseWordList = activeWordList.toObject();
-
-    if (language) {
-      responseWordList.words = {
-        [language]: activeWordList.words.get(language) || [],
-      };
-    }
-
-    res.status(200).send(responseWordList);
+    res.status(200).send(activeWordList);
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
-// future purposes individual field filtering api ?
-exports.getWordListByFields = async (req, res) => {
-  try {
-    const filter = req.query; // All query parameters become filters
-    const wordLists = await WordList.find(filter);
-    if (!wordLists.length) {
-      return res.status(404).send("No word lists found matching the criteria.");
-    }
-    res.status(200).send(wordLists);
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-};
-
+// Update Word List
 exports.updateWordList = async (req, res) => {
   try {
     const { id } = req.params;
@@ -145,6 +136,30 @@ exports.updateWordList = async (req, res) => {
 
     if (!isValidOperation) {
       return res.status(400).send({ error: "Invalid updates!" });
+    }
+
+    // Validate fields if they are being updated
+    if (updates.name && !validateLanguageFields(updates.name)) {
+      return res
+        .status(400)
+        .send("Name must have both 'en' and 'ms' translations.");
+    }
+    if (updates.description && !validateLanguageFields(updates.description)) {
+      return res
+        .status(400)
+        .send("Description must have both 'en' and 'ms' translations.");
+    }
+    if (updates.words) {
+      if (!Array.isArray(updates.words) || updates.words.length === 0) {
+        return res.status(400).send("Words must be a non-empty array.");
+      }
+      for (const word of updates.words) {
+        if (!validateLanguageFields(word)) {
+          return res
+            .status(400)
+            .send("Each word must have 'en' and 'ms' translations.");
+        }
+      }
     }
 
     // Find the word list to update
@@ -168,23 +183,7 @@ exports.updateWordList = async (req, res) => {
     }
 
     // Update the word list with allowed updates
-    if ("words" in updates) {
-      // Merge existing words with updates
-      for (const [lang, wordArray] of Object.entries(updates.words)) {
-        if (!Array.isArray(wordArray)) {
-          return res
-            .status(400)
-            .send(`Words for language '${lang}' must be an array.`);
-        }
-        wordList.words.set(lang, wordArray);
-      }
-    }
-
-    for (const key of updateKeys) {
-      if (key !== "words") {
-        wordList[key] = updates[key];
-      }
-    }
+    Object.assign(wordList, updates);
 
     await wordList.save();
 
@@ -194,6 +193,7 @@ exports.updateWordList = async (req, res) => {
   }
 };
 
+// Delete Word List
 exports.deleteWordList = async (req, res) => {
   try {
     const { id } = req.params;
@@ -213,7 +213,7 @@ exports.deleteWordList = async (req, res) => {
     }
 
     await wordList.remove();
-    res.send(wordList);
+    res.send({ message: "Word list deleted successfully." });
   } catch (error) {
     res.status(500).send(error.message);
   }
