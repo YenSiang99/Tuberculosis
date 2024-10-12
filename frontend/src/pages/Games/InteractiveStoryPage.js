@@ -146,10 +146,6 @@ const InteractiveStoryPage = () => {
   const [finalTimeTaken, setFinalTimeTaken] = useState(null); // New state for final time
   const [gameStarted, setGameStarted] = useState(false); // Track if the game has started
 
-  // const currentStep =
-  //   storyData.steps.find((step) => step.content === currentStepId) ||
-  //   storyData.ends.find((end) => end.content === currentStepId);
-
   const currentStep =
     storyData?.steps.find((step) => step.stepId === currentStepId) ||
     storyData?.ends.find((end) => end.endId === currentStepId);
@@ -158,14 +154,6 @@ const InteractiveStoryPage = () => {
 
   const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-
-  // Function to generate image URLs based on the content
-  // const generateImageUrl = (content) => {
-  //   const formattedContent = content
-  //     .replace(/[^a-zA-Z ]/g, "")
-  //     .replace(/\s+/g, "-");
-  //   return `https://image.pollinations.ai/prompt/${formattedContent}-kids-animation-16-by-9-image`;
-  // };
 
   const generateImageUrl = (content) => {
     const englishContent = content?.en || content?.[selectedLanguage] || "";
@@ -272,7 +260,7 @@ const InteractiveStoryPage = () => {
         gutterBottom
         sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
       >
-        Interactive Story
+        {t("interactive_story.title")}
       </Typography>
       <Grid container spacing={1}>
         {/* Title */}
@@ -283,15 +271,14 @@ const InteractiveStoryPage = () => {
           sx={{ justifyContent: "start", alignItems: "center" }}
         >
           <Button variant="contained" onClick={handleOpenInstructionDialog}>
-            View Instruction
+            {t("interactive_story.viewInstruction")}
           </Button>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h4">
-            {/* {storyData.title[selectedLanguage]} */}
             {storyData.title?.[selectedLanguage] ||
               storyData.title?.en ||
-              "Story Title"}
+              t("interactive_story.storyTitleFallback")}
           </Typography>
         </Grid>
 
@@ -300,12 +287,14 @@ const InteractiveStoryPage = () => {
           container
           spacing={2}
           direction="row"
-          sx={{ alignItems: "center", alignItems: "stretch" }}
+          sx={{ alignItems: "stretch" }}
         >
-          {/* photo */}
+          {/* Photo */}
           <Grid item xs={12} md={6}>
             <Grid item xs={6}>
-              <Typography variant="h6"> Retries: {retries}</Typography>
+              <Typography variant="h6">
+                {t("interactive_story.retries")}: {retries}
+              </Typography>
             </Grid>
             <Card>
               <CardMedia
@@ -337,7 +326,7 @@ const InteractiveStoryPage = () => {
             <Grid item>
               <Typography variant="h6">
                 {currentStep?.content?.[selectedLanguage] ||
-                  "Content not available"}
+                  t("interactive_story.contentNotAvailable")}
               </Typography>
             </Grid>
             {!isEnd &&
@@ -367,8 +356,7 @@ const InteractiveStoryPage = () => {
                     {/* Negative ending content */}
                     <Grid item>
                       <Typography variant="h6" sx={{ color: "red" }}>
-                        Oh no! Wrong Move! Please start the story from the
-                        beginning and try again!...
+                        {t("interactive_story.ohNoWrongMove")}
                       </Typography>
                     </Grid>
                     {/* Retry the story */}
@@ -378,7 +366,7 @@ const InteractiveStoryPage = () => {
                         color="primary"
                         onClick={handleRetryStory}
                       >
-                        Retry Story
+                        {t("interactive_story.retryStory")}
                       </Button>
                     </Grid>
                   </Grid>
@@ -394,32 +382,36 @@ const InteractiveStoryPage = () => {
                     {/* Positive ending content */}
                     <Grid item xs={12}>
                       <Typography variant="h6" color="green">
-                        Congratulations! You've reached the end of the story!
+                        {t("interactive_story.congratulations")}
                       </Typography>
                     </Grid>
                     {/* Display retries and total time */}
                     <Grid item xs={6}>
-                      <Typography variant="h6">Number of retries</Typography>
+                      <Typography variant="h6">
+                        {t("interactive_story.numberOfRetries")}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="h6">: {retries}</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography variant="h6">Total time taken</Typography>
+                      <Typography variant="h6">
+                        {t("interactive_story.totalTimeTaken")}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="h6">
-                        : {finalTimeTaken} seconds
+                        : {finalTimeTaken} {t("interactive_story.seconds")}
                       </Typography>
                     </Grid>
-                    {/* Call the API to submit the score */}
+                    {/* Restart the story */}
                     <Grid item>
                       <Button
                         variant="contained"
                         color="primary"
                         onClick={handleRestartStory}
                       >
-                        Restart Story!
+                        {t("interactive_story.restartStory")}
                       </Button>
                     </Grid>
                   </Grid>
@@ -435,33 +427,30 @@ const InteractiveStoryPage = () => {
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          {"Quiz Game: How To Play?"}
+          {t("interactive_story.quizGameHowToPlay")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            1. <strong>Introduction to the Story:</strong> <br />
-            Begin by reading the scenario presented on the screen. Each step
-            describes a situation that requires a decision.
+            1. <strong>{t("interactive_story.introductionToTheStory")}:</strong>{" "}
+            <br />
+            {t("interactive_story.introductionText")}
             <br />
             <br />
-            2. <strong>Make Your Choice:</strong> <br />
-            Select the option that you think is the best decision. If you choose
-            correctly, you will proceed to the next step.
+            2. <strong>{t("interactive_story.makeYourChoice")}:</strong> <br />
+            {t("interactive_story.makeYourChoiceText")}
             <br />
             <br />
-            3. <strong>Game Over:</strong> <br />
-            If you make the wrong choice, the game will end. You can restart the
-            story and try again by clicking the "Restart Story" button.
+            3. <strong>{t("interactive_story.gameOver")}:</strong> <br />
+            {t("interactive_story.gameOverText")}
             <br />
             <br />
-            4. <strong>Goal:</strong> <br />
-            The goal is to make the correct decisions that lead to a successful
-            outcome in the story.
+            4. <strong>{t("interactive_story.goal")}:</strong> <br />
+            {t("interactive_story.goalText")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseInstructionDialog} autoFocus>
-            Okay
+            {t("interactive_story.okay")}
           </Button>
         </DialogActions>
       </Dialog>

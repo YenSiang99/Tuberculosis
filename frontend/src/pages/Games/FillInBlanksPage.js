@@ -13,8 +13,13 @@ import {
   DialogTitle,
 } from "@mui/material";
 import axios from "../../components/axios"; // Adjust with your axios instance
+import { useTranslation } from "react-i18next";
 
 const FillInBlanksPage = () => {
+  const { t, i18n } = useTranslation();
+  const selectedLanguage = i18n.language || "en";
+  const [prevLanguage, setPrevLanguage] = useState(selectedLanguage);
+
   const [questions, setQuestions] = useState([]);
   const [selectedBlankId, setSelectedBlankId] = useState(null);
   const [usedWords, setUsedWords] = useState([]);
@@ -29,6 +34,29 @@ const FillInBlanksPage = () => {
   const [gameStart, setGameStart] = useState(false);
   const [gamePause, setGamePause] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
+
+  // Handle language change and reset the game
+  useEffect(() => {
+    if (selectedLanguage !== prevLanguage) {
+      resetGame();
+      setPrevLanguage(selectedLanguage);
+    }
+  }, [selectedLanguage, prevLanguage]);
+
+  const resetGame = () => {
+    setQuestions([]);
+    setSelectedBlankId(null);
+    setUsedWords([]);
+    setGameTime(null);
+    setGameTimer(null);
+    setShowResult(false);
+    setScore(0);
+    setGameStart(false);
+    setGamePause(false);
+    setGameEnd(false);
+    setOpenInstructionDialog(true);
+    fetchQuestions(); // Fetch questions in the new language
+  };
 
   const submitFillBlankScore = async () => {
     console.log("submit called...");
@@ -114,16 +142,6 @@ const FillInBlanksPage = () => {
     return score;
   };
 
-  // const endGame = () => {
-  //   if (!gameOver) {
-  //     setGameOver(true);
-  //     const finalScore = calculateScore();
-  //     setScore(finalScore);
-  //     setShowResult(true);
-  //     submitFillBlankScore();
-  //   }
-  // };
-
   const handleSubmit = () => {
     if (!gameEnd) {
       setGameStart(false);
@@ -173,7 +191,7 @@ const FillInBlanksPage = () => {
     }
   }, [gameTimer, gameStart, gamePause]);
 
-  useEffect(() => {
+  const fetchQuestions = () => {
     axios
       .get("/fillBlanks/active")
       .then((response) => {
@@ -181,10 +199,17 @@ const FillInBlanksPage = () => {
 
         setGameTime(data.totalGameTime);
         setGameTimer(data.totalGameTime);
-        const questionsWithAnswers = response.data.questions.map((q) => ({
-          ...q,
+
+        // Map questions to include the selected language
+        const questionsWithAnswers = data.questions.map((q) => ({
+          _id: q._id,
+          textBefore:
+            q.textBefore[selectedLanguage] || q.textBefore["en"] || "",
+          textAfter: q.textAfter[selectedLanguage] || q.textAfter["en"] || "",
+          answer: q.answer[selectedLanguage] || q.answer["en"] || "",
           answerChoice: "", // Add empty answerChoice field to each question
         }));
+
         setQuestions(questionsWithAnswers);
 
         // Automatically select the first blank by setting the selectedBlankId
@@ -195,12 +220,16 @@ const FillInBlanksPage = () => {
       .catch((error) => {
         console.error("Error fetching questions:", error);
       });
+  };
+
+  useEffect(() => {
+    fetchQuestions();
   }, []);
 
   return (
     <Container sx={{ padding: 2 }}>
       <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
-        Fill in the blanks!
+        {t("fill_in_the_blanks.title")}
       </Typography>
 
       {gameStart ? (
@@ -216,11 +245,13 @@ const FillInBlanksPage = () => {
                 handleOpenInstructionDialog();
               }}
             >
-              View Instruction
+              {t("fill_in_the_blanks.viewInstruction")}
             </Button>
           </Grid>
           <Grid item>
-            <Typography variant="subtitle1">Choose a word:</Typography>
+            <Typography variant="subtitle1">
+              {t("fill_in_the_blanks.chooseAWord")}:
+            </Typography>
           </Grid>
           {/* Word selection */}
           <Grid
@@ -231,16 +262,17 @@ const FillInBlanksPage = () => {
             spacing={1}
             sx={{ justifyContent: "center", width: "100%" }}
           >
-            {questions.map((question, index) => (
+            {/* Generate unique words to select */}
+            {[...new Set(questions.map((q) => q.answer))].map((word, index) => (
               <Grid item key={index} xs={6} md={3}>
                 <Button
                   variant="outlined"
-                  onClick={() => handleWordSelect(question.answer)}
-                  disabled={usedWords.includes(question.answer)}
+                  onClick={() => handleWordSelect(word)}
+                  disabled={usedWords.includes(word)}
                   fullWidth
                   sx={{ height: "100%" }}
                 >
-                  {question.answer}
+                  {word}
                 </Button>
               </Grid>
             ))}
@@ -248,10 +280,13 @@ const FillInBlanksPage = () => {
           <Grid item xs={12} sx={{ textAlign: "center" }}>
             {gameTimer !== null ? (
               <Typography variant="h7">
-                Time left: {gameTimer} seconds
+                {t("fill_in_the_blanks.timeLeft")}: {gameTimer}{" "}
+                {t("fill_in_the_blanks.seconds")}
               </Typography>
             ) : (
-              <Typography variant="h7">Loading...</Typography>
+              <Typography variant="h7">
+                {t("fill_in_the_blanks.loading")}
+              </Typography>
             )}
           </Grid>
 
@@ -300,17 +335,17 @@ const FillInBlanksPage = () => {
                 handleSubmit();
               }}
             >
-              Submit
+              {t("fill_in_the_blanks.submit")}
             </Button>
           </Grid>
         </Grid>
       ) : (
         <Box sx={{ my: 2 }}>
           <Typography variant="h4" gutterBottom>
-            Your Score: {score} / {questions.length}
+            {t("fill_in_the_blanks.yourScore")}: {score} / {questions.length}
           </Typography>
           <Typography variant="h5" gutterBottom>
-            Summary of Questions:
+            {t("fill_in_the_blanks.summaryOfQuestions")}:
           </Typography>
           {questions.map((question, index) => (
             <Box key={question._id} sx={{ mb: 4 }}>
@@ -328,9 +363,11 @@ const FillInBlanksPage = () => {
                 >
                   {question.answerChoice
                     ? question.answerChoice === question.answer
-                      ? question.answer + " (Correct)"
-                      : question.answerChoice + " (Wrong)"
-                    : "No answer"}
+                      ? question.answer +
+                        ` (${t("fill_in_the_blanks.correct")})`
+                      : question.answerChoice +
+                        ` (${t("fill_in_the_blanks.wrong")})`
+                    : t("fill_in_the_blanks.noAnswer")}
                 </span>{" "}
                 {question.textAfter}
               </Typography>
@@ -340,70 +377,66 @@ const FillInBlanksPage = () => {
                   display="block"
                   sx={{ color: "green" }}
                 >
-                  {`Answer: ${question.answer}`}
+                  {t("fill_in_the_blanks.answer")}: {question.answer}
                 </Typography>
               ) : null}
             </Box>
           ))}
           <Button variant="outlined" onClick={handleReset}>
-            Reset Game
+            {t("fill_in_the_blanks.resetGame")}
           </Button>
         </Box>
       )}
       <Dialog
-        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          {"Fill in the Blanks Game: How To Play?"}
+          {t("fill_in_the_blanks.gameInstructionsTitle")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            1. <strong>Objective:</strong> <br />
-            Fill in the blanks with the correct words to complete the sentences
-            about tuberculosis. Each blank represents a missing word that you
-            need to find and select.
+            1. <strong>{t("fill_in_the_blanks.objective")}:</strong> <br />
+            {t("fill_in_the_blanks.objectiveText")}
             <br />
             <br />
-            2. <strong>Selecting Words:</strong> <br />
-            Choose a word from the list provided by clicking on it. Once
-            selected, it will be placed in the highlighted blank. You cannot
-            reuse a word once it has been used.
+            2. <strong>{t("fill_in_the_blanks.selectingWords")}:</strong> <br />
+            {t("fill_in_the_blanks.selectingWordsText")}
             <br />
             <br />
-            3. <strong>Removing Words:</strong> <br />
-            If you want to change a word, click on the blank where the word is
-            placed. This will remove the word and allow you to select a
-            different one.
+            3. <strong>{t("fill_in_the_blanks.removingWords")}:</strong> <br />
+            {t("fill_in_the_blanks.removingWordsText")}
             <br />
             <br />
-            4. <strong>Time Limit:</strong> <br />
-            You have {gameTime !== null ? gameTime : "a limited amount of"}{" "}
-            seconds to fill in all the blanks. Keep an eye on the timer at the
-            top of the screen.
+            4. <strong>{t("fill_in_the_blanks.timeLimit")}:</strong> <br />
+            {t("fill_in_the_blanks.timeLimitText", {
+              gameTime:
+                gameTime !== null
+                  ? gameTime
+                  : t("fill_in_the_blanks.aLimitedAmountOf"),
+            })}
             <br />
             <br />
-            5. <strong>Submit Your Answers:</strong> <br />
-            Once you have filled in all the blanks, or when time runs out,
-            submit your answers to see your score and review the correct
-            answers.
+            5. <strong>
+              {t("fill_in_the_blanks.submitYourAnswers")}:
+            </strong>{" "}
+            <br />
+            {t("fill_in_the_blanks.submitYourAnswersText")}
             <br />
             <br />
-            6. <strong>Scoring:</strong> <br />
-            You will earn points for each correct word you place. The final
-            score will be shown after you submit your answers or when time runs
-            out.
+            6. <strong>{t("fill_in_the_blanks.scoring")}:</strong> <br />
+            {t("fill_in_the_blanks.scoringText")}
             <br />
             <br />
-            7. <strong>Resetting the Game:</strong> <br />
-            You can reset the game at any time to try again with a fresh start.
+            7. <strong>{t("fill_in_the_blanks.resettingTheGame")}:</strong>{" "}
+            <br />
+            {t("fill_in_the_blanks.resettingTheGameText")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseInstructionDialog} autoFocus>
-            Okay
+            {t("fill_in_the_blanks.okay")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -15,7 +15,7 @@ import axios from "../../components/axios";
 import { useTranslation } from "react-i18next";
 
 const WordSearchPage = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const currentLanguage = i18n.language; // This will give you 'en' or 'ms'
 
   const [wordsToFind, setWordsToFind] = useState([]);
@@ -413,7 +413,7 @@ const WordSearchPage = () => {
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
       <Box sx={{ my: 2 }}>
-        <Typography variant="h4">Find the TB-related Words!</Typography>
+        <Typography variant="h4">{t("word_search.title")}</Typography>
       </Box>
       <Grid container direction="row">
         {gameEnd ? (
@@ -427,7 +427,9 @@ const WordSearchPage = () => {
                 textAlign: "center",
               }}
             >
-              <Typography variant="h4">Game Summary</Typography>
+              <Typography variant="h4">
+                {t("word_search.gameSummary")}
+              </Typography>
             </Grid>
             <Grid
               item
@@ -452,15 +454,19 @@ const WordSearchPage = () => {
                 spacing={2}
               >
                 <Grid item xs={6}>
-                  <Typography variant="h6">Total Time Taken</Typography>
-                </Grid>
-                <Grid item xs={6}>
                   <Typography variant="h6">
-                    : {totalTime - gameTimer} seconds
+                    {t("word_search.totalTimeTaken")}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="h6">Accuracy Rate</Typography>
+                  <Typography variant="h6">
+                    : {totalTime - gameTimer} {t("word_search.seconds")}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="h6">
+                    {t("word_search.accuracyRate")}
+                  </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
@@ -468,7 +474,9 @@ const WordSearchPage = () => {
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="h6">Longest Word Found</Typography>
+                  <Typography variant="h6">
+                    {t("word_search.longestWordFound")}
+                  </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
@@ -476,7 +484,7 @@ const WordSearchPage = () => {
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="h6">Score</Typography>
+                  <Typography variant="h6">{t("word_search.score")}</Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
@@ -484,14 +492,16 @@ const WordSearchPage = () => {
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="h6">Completion Status</Typography>
+                  <Typography variant="h6">
+                    {t("word_search.completionStatus")}
+                  </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">
                     :{" "}
                     {foundWords.length === wordsToFind.length
-                      ? "All words found! Well done!"
-                      : "Some words are still missing. Try again!"}
+                      ? t("word_search.allWordsFound")
+                      : t("word_search.someWordsMissing")}
                   </Typography>
                 </Grid>
               </Grid>
@@ -513,7 +523,7 @@ const WordSearchPage = () => {
                     setGameStart(true);
                   }}
                 >
-                  Play Again
+                  {t("word_search.playAgain")}
                 </Button>
               </Grid>
             </Grid>
@@ -531,12 +541,13 @@ const WordSearchPage = () => {
                   handleOpenInstructionDialog();
                 }}
               >
-                View Instruction
+                {t("word_search.viewInstruction")}
               </Button>
             </Grid>
             <Grid item xs={12} sx={{ textAlign: "center" }}>
               <Typography variant="h6">
-                Time left: {gameTimer} seconds
+                {t("word_search.timeLeft")}: {gameTimer}{" "}
+                {t("word_search.seconds")}
               </Typography>
             </Grid>
             {/* Words to find list big screen */}
@@ -550,7 +561,7 @@ const WordSearchPage = () => {
                 variant="h6"
                 sx={{ fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}
               >
-                Words to Find:
+                {t("word_search.wordsToFind")}
               </Typography>
               <ul style={{ paddingLeft: "1rem", fontSize: "inherit" }}>
                 {wordsToFind.map((word, index) => (
@@ -589,7 +600,7 @@ const WordSearchPage = () => {
                   setGameStart(true);
                 }}
               >
-                Reset Game
+                {t("word_search.resetGame")}
               </Button>
             </Grid>
             {/* Words to find list, small screen */}
@@ -637,6 +648,7 @@ const WordSearchPage = () => {
                   justifyContent="center"
                   wrap="nowrap"
                   sx={{ minWidth: "275px", width: "100%" }}
+                  key={rowIndex}
                 >
                   {row.map((letter, colIndex) => (
                     <Grid
@@ -673,47 +685,42 @@ const WordSearchPage = () => {
       </Grid>
 
       <Dialog
-        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          {"Word Search: How To Play?"}
+          {t("word_search.howToPlayTitle")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            1. <strong>Objective:</strong> <br />
-            Find all the hidden words in the grid to complete the game.
+            1. <strong>{t("word_search.objective")}:</strong> <br />
+            {t("word_search.objectiveText")}
             <br />
             <br />
-            2. <strong>Word Directions:</strong> <br />
-            Words may be hidden horizontally, vertically, or diagonally.
+            2. <strong>{t("word_search.wordDirections")}:</strong> <br />
+            {t("word_search.wordDirectionsText")}
             <br />
             <br />
-            3. <strong>Select Letters:</strong> <br />
-            Click or tap on the letters in the grid to select them as part of a
-            word.
+            3. <strong>{t("word_search.selectLetters")}:</strong> <br />
+            {t("word_search.selectLettersText")}
             <br />
             <br />
-            4. <strong>Deselect Letters:</strong> <br />
-            If you change your mind, click or tap the letter again to deselect
-            it.
+            4. <strong>{t("word_search.deselectLetters")}:</strong> <br />
+            {t("word_search.deselectLettersText")}
             <br />
             <br />
-            5. <strong>Finding Words:</strong> <br />
-            Once you've correctly selected a word, the letters will turn green,
-            and the word will be crossed out in the list.
+            5. <strong>{t("word_search.findingWords")}:</strong> <br />
+            {t("word_search.findingWordsText")}
             <br />
             <br />
-            6. <strong>Complete the Challenge:</strong> <br />
-            The game will end after you find all of the words or the timer ends.
-            Good luck!
+            6. <strong>{t("word_search.completeTheChallenge")}:</strong> <br />
+            {t("word_search.completeTheChallengeText")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseInstructionDialog} autoFocus>
-            Okay
+            {t("word_search.okay")}
           </Button>
         </DialogActions>
       </Dialog>

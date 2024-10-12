@@ -207,7 +207,7 @@ const QuizPage = () => {
         gutterBottom
         sx={{ fontWeight: "bold", color: theme.palette.primary.light }}
       >
-        {t("Quiz Time!")}
+        {t("quiz_game.title")}
       </Typography>
       {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
       {!gameEnd && questions.length > 0 ? (
@@ -231,7 +231,7 @@ const QuizPage = () => {
                 handleOpenInstructionDialog();
               }}
             >
-              {t("View Instruction")}
+              {t("quiz_game.viewInstruction")}
             </Button>
           </Grid>
           {/* Title */}
@@ -242,17 +242,18 @@ const QuizPage = () => {
                 selectedLanguage
               ] ||
                 questions[currentQuestionIndex]?.questionText?.en ||
-                "Question text not available"}
+                t("quiz_game.questionTextNotAvailable")}
             </Typography>
           </Grid>
           {/* Time Countdown for question */}
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {questionTimer !== null ? (
               <Typography variant="h7">
-                {t("Time left")}: {questionTimer} {t("seconds")}
+                {t("quiz_game.timeLeft")}: {questionTimer}{" "}
+                {t("quiz_game.seconds")}
               </Typography>
             ) : (
-              <Typography variant="h7">{t("Loading...")}</Typography>
+              <Typography variant="h7">{t("quiz_game.loading")}</Typography>
             )}
           </Grid>
           {/* Answer Selection */}
@@ -280,7 +281,7 @@ const QuizPage = () => {
                 >
                   {option.optionText?.[selectedLanguage] ||
                     option.optionText?.en ||
-                    "Option text not available"}
+                    t("quiz_game.optionTextNotAvailable")}
                 </Button>
               </Grid>
             ))}
@@ -292,11 +293,14 @@ const QuizPage = () => {
                 variant="h6"
                 sx={{ color: answerFeedback === "correct" ? "green" : "red" }}
               >
-                {answerFeedback === "correct" ? t("Correct!") : t("Wrong!")}
+                {answerFeedback === "correct"
+                  ? t("quiz_game.correct")
+                  : t("quiz_game.wrong")}
               </Typography>
               {nextQuestionTimer > 0 && (
                 <Typography variant="caption">
-                  {t("Next question in")}: {nextQuestionTimer} {t("seconds")}
+                  {t("quiz_game.nextQuestionIn")}: {nextQuestionTimer}{" "}
+                  {t("quiz_game.seconds")}
                 </Typography>
               )}
             </Grid>
@@ -317,7 +321,7 @@ const QuizPage = () => {
               >
                 {currentQuestionIndex > 0 && (
                   <Button variant="contained" onClick={handlePreviousQuestion}>
-                    {t("Previous")}
+                    {t("quiz_game.previous")}
                   </Button>
                 )}
               </Grid>
@@ -331,7 +335,7 @@ const QuizPage = () => {
                     onClick={goToNextQuestion}
                     sx={{ flexGrow: 0, display: "flex" }}
                   >
-                    {t("Next")}
+                    {t("quiz_game.next")}
                   </Button>
                 )}
               </Grid>
@@ -342,10 +346,10 @@ const QuizPage = () => {
         // Summary page
         <Box sx={{ my: 2 }}>
           <Typography variant="h3" gutterBottom>
-            {t("Your Score")}: {score} / {questions.length}
+            {t("quiz_game.yourScore")}: {score} / {questions.length}
           </Typography>
           <Typography variant="h4" gutterBottom>
-            {t("Summary of Questions")}:
+            {t("quiz_game.summaryOfQuestions")}:
           </Typography>
           {questions.length > 0 ? (
             <>
@@ -356,7 +360,7 @@ const QuizPage = () => {
                   >
                     {question.questionText?.[selectedLanguage] ||
                       question.questionText?.en ||
-                      "Question text not available"}
+                      t("quiz_game.questionTextNotAvailable")}
                   </Typography>
                   <RadioGroup>
                     {question.options.map((option) => {
@@ -369,7 +373,7 @@ const QuizPage = () => {
                           value={
                             option.optionText?.[selectedLanguage] ||
                             option.optionText?.en ||
-                            "Option text not available"
+                            t("quiz_game.optionTextNotAvailable")
                           }
                           control={<Radio checked={isUserSelection} />}
                           label={
@@ -385,11 +389,12 @@ const QuizPage = () => {
                             >
                               {option.optionText?.[selectedLanguage] ||
                                 option.optionText?.en ||
-                                "Option text not available"}
+                                t("quiz_game.optionTextNotAvailable")}
                               {isUserSelection &&
                                 !isCorrect &&
-                                ` (${t("Your Choice")})`}
-                              {isCorrect && ` (${t("Correct")})`}
+                                ` (${t("quiz_game.yourChoice")})`}
+                              {isCorrect &&
+                                ` (${t("quiz_game.correctAnswer")})`}
                             </span>
                           }
                           sx={{
@@ -411,58 +416,47 @@ const QuizPage = () => {
               ))}
             </>
           ) : (
-            <Typography variant="h6">{t("Loading quiz...")}</Typography>
+            <Typography variant="h6">{t("quiz_game.loadingQuiz")}</Typography>
           )}
         </Box>
       )}
       <Dialog
-        // fullScreen={fullScreen}
         open={openInstructionDialog}
         onClose={handleCloseInstructionDialog}
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          {t("Quiz Game: How To Play?")}
+          {t("quiz_game.quizGameHowToPlay")}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {/* Instructions translated */}
-            1. <strong>{t("Objective")}:</strong> <br />
-            {t("Answer all the questions correctly to complete the quiz.")}
+            1. <strong>{t("quiz_game.objective")}:</strong> <br />
+            {t("quiz_game.objectiveText")}
             <br />
             <br />
-            2. <strong>{t("Multiple Choices")}:</strong> <br />
-            {t(
-              "Each question will present 4 possible answers. Select the one you think is correct."
-            )}
+            2. <strong>{t("quiz_game.multipleChoices")}:</strong> <br />
+            {t("quiz_game.multipleChoicesText")}
             <br />
             <br />
-            3. <strong>{t("Time Limit")}:</strong> <br />
-            {t("You have")} {questionTime} {t("seconds")}{" "}
-            {t("to answer each question.")}
+            3. <strong>{t("quiz_game.timeLimit")}:</strong> <br />
+            {t("quiz_game.timeLimitText", { questionTime })}
             <br />
             <br />
-            4. <strong>{t("Missed Answers")}:</strong> <br />
-            {t(
-              "If the timer runs out before you answer, the question will be marked as incorrect."
-            )}
+            4. <strong>{t("quiz_game.missedAnswers")}:</strong> <br />
+            {t("quiz_game.missedAnswersText")}
             <br />
             <br />
-            5. <strong>{t("Preparation Time")}:</strong> <br />
-            {t(
-              "There will be a 5-second interval between questions to get ready for the next one."
-            )}
+            5. <strong>{t("quiz_game.preparationTime")}:</strong> <br />
+            {t("quiz_game.preparationTimeText")}
             <br />
             <br />
-            6. <strong>{t("Finish Strong")}:</strong> <br />
-            {t(
-              "Keep going until you’ve answered all the questions. Good luck!"
-            )}
+            6. <strong>{t("quiz_game.finishStrong")}:</strong> <br />
+            {t("quiz_game.finishStrongText")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseInstructionDialog} autoFocus>
-            {t("Okay")}
+            {t("quiz_game.okay")}
           </Button>
         </DialogActions>
       </Dialog>
