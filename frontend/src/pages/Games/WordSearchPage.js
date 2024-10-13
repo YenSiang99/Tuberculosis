@@ -362,11 +362,14 @@ const WordSearchPage = () => {
   };
 
   useEffect(() => {
+    if (gameEnd) return; // Do nothing if the game has ended
+
     if (gameStart && !gamePause && gameTimer !== null) {
       if (gameTimer > 0) {
         if (foundWords.length === wordsToFind.length) {
           if (finalTimeTaken === null) setFinalTimeTaken(totalTime - gameTimer); // Set only once
           setGameEnd(true);
+          setGameStart(false); // Stop the game
           submitScore(); // Submit score when user finds all words
         } else {
           const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
@@ -376,10 +379,18 @@ const WordSearchPage = () => {
       if (gameTimer === 0) {
         if (finalTimeTaken === null) setFinalTimeTaken(totalTime - gameTimer); // Set only once
         setGameEnd(true);
+        setGameStart(false); // Stop the game
         submitScore(); // Submit score when timer runs out
       }
     }
-  }, [gameTimer, gameStart, gamePause, foundWords, finalTimeTaken]);
+  }, [
+    gameTimer,
+    gameStart,
+    gamePause,
+    foundWords,
+    finalTimeTaken,
+    gameEnd, // Include gameEnd in the dependencies
+  ]);
 
   // Fetch word list and handle language changes
   useEffect(() => {

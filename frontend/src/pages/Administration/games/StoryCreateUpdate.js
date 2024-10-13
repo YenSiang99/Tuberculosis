@@ -43,12 +43,29 @@ export default function StoryCreateUpdate() {
           console.error("Error fetching story", error);
         });
     } else {
-      // Create mode: Initialize empty steps and ends
+      // Create mode: Initialize with one step and one end
+      const initialStepId = `step1`;
+      const initialEndId = `end1`;
       setStory({
         title: { en: "", ms: "" },
         description: { en: "", ms: "" },
-        steps: [],
-        ends: [],
+        steps: [
+          {
+            stepId: initialStepId,
+            content: { en: "", ms: "" },
+            options: [
+              { optionText: { en: "", ms: "" }, nextStep: "" },
+              { optionText: { en: "", ms: "" }, nextStep: "" },
+            ],
+          },
+        ],
+        ends: [
+          {
+            endId: initialEndId,
+            content: { en: "", ms: "" },
+            endType: "positive",
+          },
+        ],
         active: false,
       });
     }
@@ -112,27 +129,13 @@ export default function StoryCreateUpdate() {
         {
           stepId: newStepId,
           content: { en: "", ms: "" },
-          options: [],
+          options: [
+            { optionText: { en: "", ms: "" }, nextStep: "" },
+            { optionText: { en: "", ms: "" }, nextStep: "" },
+          ],
         },
       ],
     }));
-  };
-
-  // Add a new option to a step
-  const addOption = (stepIndex) => {
-    const updatedSteps = [...story.steps];
-    updatedSteps[stepIndex].options.push({
-      optionText: { en: "", ms: "" },
-      nextStep: "",
-    });
-    setStory((prevStory) => ({ ...prevStory, steps: updatedSteps }));
-  };
-
-  // Remove an option from a step
-  const removeOption = (stepIndex, optionIndex) => {
-    const updatedSteps = [...story.steps];
-    updatedSteps[stepIndex].options.splice(optionIndex, 1);
-    setStory((prevStory) => ({ ...prevStory, steps: updatedSteps }));
   };
 
   // Add a new end
@@ -151,18 +154,22 @@ export default function StoryCreateUpdate() {
     }));
   };
 
-  // Remove a step
+  // Remove a step (if more than one exists)
   const removeStep = (index) => {
-    const updatedSteps = [...story.steps];
-    updatedSteps.splice(index, 1);
-    setStory((prevStory) => ({ ...prevStory, steps: updatedSteps }));
+    if (story.steps.length > 1) {
+      const updatedSteps = [...story.steps];
+      updatedSteps.splice(index, 1);
+      setStory((prevStory) => ({ ...prevStory, steps: updatedSteps }));
+    }
   };
 
-  // Remove an end
+  // Remove an end (if more than one exists)
   const removeEnd = (index) => {
-    const updatedEnds = [...story.ends];
-    updatedEnds.splice(index, 1);
-    setStory((prevStory) => ({ ...prevStory, ends: updatedEnds }));
+    if (story.ends.length > 1) {
+      const updatedEnds = [...story.ends];
+      updatedEnds.splice(index, 1);
+      setStory((prevStory) => ({ ...prevStory, ends: updatedEnds }));
+    }
   };
 
   // Handle form submission
@@ -254,20 +261,19 @@ export default function StoryCreateUpdate() {
         <Typography variant="h5" sx={{ marginTop: 3 }}>
           Steps
         </Typography>
-        <Button onClick={addStep} variant="contained" sx={{ marginBottom: 2 }}>
-          Add Step
-        </Button>
         {story.steps.map((step, stepIndex) => (
           <Card key={stepIndex} sx={{ marginBottom: 2, padding: 2 }}>
             <Typography variant="h6" sx={{ marginBottom: 2 }}>
-              Step {stepIndex + 1} (ID: {step.stepId})
+              Step {stepIndex + 1}
             </Typography>
-            <IconButton
-              onClick={() => removeStep(stepIndex)}
-              sx={{ float: "right" }}
-            >
-              <DeleteIcon />
-            </IconButton>
+            {story.steps.length > 1 && (
+              <IconButton
+                onClick={() => removeStep(stepIndex)}
+                sx={{ float: "right" }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
             <CardContent>
               {/* Step Content Fields */}
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
@@ -294,93 +300,113 @@ export default function StoryCreateUpdate() {
               </Grid>
 
               {/* Options */}
-              {step.options.map((option, optionIndex) => (
-                <Box key={optionIndex} sx={{ marginBottom: 2 }}>
-                  <Typography variant="subtitle1">
-                    Option {optionIndex + 1}
-                  </Typography>
-                  <Grid container spacing={2} sx={{ marginBottom: 1 }}>
-                    <Grid item xs={12} sm={5}>
-                      <TextField
-                        fullWidth
-                        label="Option Text (EN)"
-                        value={option.optionText.en}
+              {step.options.map((option, optionIndex) => {
+                // Exclude next steps/ends already selected in other options
+                const assignedNextSteps = step.options
+                  .filter((_, idx) => idx !== optionIndex)
+                  .map((opt) => opt.nextStep)
+                  .filter((ns) => ns);
+
+                // Available next step (only the immediate next step)
+                const nextStepIndex = stepIndex + 1;
+                const nextStep = story.steps[nextStepIndex];
+
+                return (
+                  <Box key={optionIndex} sx={{ marginBottom: 2 }}>
+                    <Typography variant="subtitle1">
+                      Option {optionIndex + 1}
+                    </Typography>
+                    <Grid container spacing={2} sx={{ marginBottom: 1 }}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Option Text (EN)"
+                          value={option.optionText.en}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              stepIndex,
+                              optionIndex,
+                              "optionText",
+                              "en",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Option Text (MS)"
+                          value={option.optionText.ms}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              stepIndex,
+                              optionIndex,
+                              "optionText",
+                              "ms",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </Grid>
+                    </Grid>
+                    {/* Next Step Selection */}
+                    <FormControl fullWidth sx={{ marginBottom: 1 }}>
+                      <InputLabel>Next Step/End</InputLabel>
+                      <Select
+                        value={option.nextStep}
                         onChange={(e) =>
                           handleOptionChange(
                             stepIndex,
                             optionIndex,
-                            "optionText",
-                            "en",
+                            "nextStep",
+                            null,
                             e.target.value
                           )
                         }
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={5}>
-                      <TextField
-                        fullWidth
-                        label="Option Text (MS)"
-                        value={option.optionText.ms}
-                        onChange={(e) =>
-                          handleOptionChange(
-                            stepIndex,
-                            optionIndex,
-                            "optionText",
-                            "ms",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={2}>
-                      <IconButton
-                        onClick={() => removeOption(stepIndex, optionIndex)}
                       >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                  {/* Next Step Selection */}
-                  <FormControl fullWidth sx={{ marginBottom: 1 }}>
-                    <InputLabel>Next Step/End</InputLabel>
-                    <Select
-                      value={option.nextStep}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          stepIndex,
-                          optionIndex,
-                          "nextStep",
-                          null,
-                          e.target.value
-                        )
-                      }
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      {story.steps.map((s, idx) => (
-                        <MenuItem key={s.stepId} value={s.stepId}>
-                          Step {idx + 1} (ID: {s.stepId})
+                        <MenuItem value="">
+                          <em>None</em>
                         </MenuItem>
-                      ))}
-                      {story.ends.map((end, idx) => (
-                        <MenuItem key={end.endId} value={end.endId}>
-                          End {idx + 1} (ID: {end.endId})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-              ))}
-              <Button
-                onClick={() => addOption(stepIndex)}
-                variant="outlined"
-                startIcon={<AddIcon />}
-                sx={{ marginBottom: 2 }}
-              >
-                Add Option
-              </Button>
+                        {nextStep &&
+                          !assignedNextSteps.includes(nextStep.stepId) && (
+                            <MenuItem
+                              key={nextStep.stepId}
+                              value={nextStep.stepId}
+                            >
+                              Step {nextStepIndex + 1} (
+                              {nextStep.content.en || "No content yet"})
+                            </MenuItem>
+                          )}
+                        {story.ends
+                          .filter(
+                            (end) => !assignedNextSteps.includes(end.endId)
+                          )
+                          .map((end, idx) => (
+                            <MenuItem key={end.endId} value={end.endId}>
+                              End {idx + 1} (
+                              {end.content.en || "No content yet"})
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                );
+              })}
             </CardContent>
+            {/* Add Step Button at the bottom right */}
+            {stepIndex === story.steps.length - 1 && (
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  onClick={addStep}
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  sx={{ marginTop: 2 }}
+                >
+                  Add Step
+                </Button>
+              </Box>
+            )}
           </Card>
         ))}
 
@@ -388,20 +414,17 @@ export default function StoryCreateUpdate() {
         <Typography variant="h5" sx={{ marginTop: 3 }}>
           Ends
         </Typography>
-        <Button onClick={addEnd} variant="contained" sx={{ marginBottom: 2 }}>
-          Add End
-        </Button>
         {story.ends.map((end, index) => (
           <Card key={index} sx={{ marginBottom: 2, padding: 2 }}>
-            <Typography variant="h6">
-              End {index + 1} (ID: {end.endId})
-            </Typography>
-            <IconButton
-              onClick={() => removeEnd(index)}
-              sx={{ float: "right" }}
-            >
-              <DeleteIcon />
-            </IconButton>
+            <Typography variant="h6">End {index + 1}</Typography>
+            {story.ends.length > 1 && (
+              <IconButton
+                onClick={() => removeEnd(index)}
+                sx={{ float: "right" }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
             <CardContent>
               {/* End Content Fields */}
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
@@ -440,6 +463,19 @@ export default function StoryCreateUpdate() {
                 </Select>
               </FormControl>
             </CardContent>
+            {/* Add End Button at the bottom right */}
+            {index === story.ends.length - 1 && (
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  onClick={addEnd}
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  sx={{ marginTop: 2 }}
+                >
+                  Add End
+                </Button>
+              </Box>
+            )}
           </Card>
         ))}
 

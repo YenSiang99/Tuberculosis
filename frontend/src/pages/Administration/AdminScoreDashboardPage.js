@@ -15,8 +15,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import axios from "../../components/axios"; // Adjust the import path based on your project structure
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 export default function AdminScoreDashboardPage() {
+  const { t, i18n } = useTranslation(); // Initialize useTranslation
+  const currentLanguage = i18n.language || "en"; // Get current language
+
   const [tabIndex, setTabIndex] = useState(0);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(false); // Loading state
@@ -73,7 +77,7 @@ export default function AdminScoreDashboardPage() {
     if (!scores || scores.length === 0) {
       return (
         <Typography variant="h6" sx={{ marginTop: 2 }}>
-          No data available.
+          {t("admin_score.noDataAvailable")}
         </Typography>
       );
     }
@@ -87,112 +91,136 @@ export default function AdminScoreDashboardPage() {
     switch (currentGame) {
       case "Word Search":
         headers = [
-          "User",
-          "Word List Name",
-          "Score",
-          "Accuracy Rate",
-          "Time Taken",
-          "Total Game Time",
-          "Completion Status",
-          "Date",
+          t("admin_score.user"),
+          t("admin_score.wordListName"),
+          t("admin_score.score"),
+          t("admin_score.accuracyRate"),
+          t("admin_score.timeTaken"),
+          t("admin_score.totalGameTime"),
+          t("admin_score.completionStatus"),
+          t("admin_score.date"),
         ];
         rows = scores.map((score) => ({
           user:
-            `${score.user?.firstName || ""} ${score.user?.lastName || ""}` ||
+            `${score.user?.firstName || ""} ${
+              score.user?.lastName || ""
+            }`.trim() ||
             score.user?.email ||
             "N/A",
 
-          wordListName: score.wordList?.name || "N/A",
-          score: `${score.score} out of ${score.totalPossibleScore}`,
+          wordListName: score.wordList?.name?.[currentLanguage] || "N/A",
+          score: `${score.score} ${t("admin_score.outOf")} ${
+            score.totalPossibleScore
+          }`,
           accuracyRate: `${score.accuracyRate}%`,
-          timeTaken: `${score.totalTimeTaken} seconds`,
-          totalGameTime: `${score.wordList?.totalGameTime || "N/A"} seconds`,
-          completionStatus: score.completionStatus,
-          date: new Date(score.createdAt).toLocaleString(),
+          timeTaken: `${score.totalTimeTaken} ${t("admin_score.seconds")}`,
+          totalGameTime: `${score.wordList?.totalGameTime || "N/A"} ${t(
+            "admin_score.seconds"
+          )}`,
+          completionStatus:
+            t(`admin_score.${score.completionStatus}`) ||
+            score.completionStatus,
+          date: new Date(score.createdAt).toLocaleString(currentLanguage),
         }));
         break;
 
       case "Quiz":
         headers = [
-          "User",
-          "Quiz Name",
-          "Score",
-          "Accuracy Rate",
-          "Average Time per Question",
-          "Time Limit per Question",
-          "Completion Status",
-          "Date",
+          t("admin_score.user"),
+          t("admin_score.quizName"),
+          t("admin_score.score"),
+          t("admin_score.accuracyRate"),
+          t("admin_score.averageTimePerQuestion"),
+          t("admin_score.timeLimitPerQuestion"),
+          t("admin_score.completionStatus"),
+          t("admin_score.date"),
         ];
         rows = scores.map((score) => ({
           user:
-            `${score.user?.firstName || ""} ${score.user?.lastName || ""}` ||
+            `${score.user?.firstName || ""} ${
+              score.user?.lastName || ""
+            }`.trim() ||
             score.user?.email ||
             "N/A",
 
-          quizName: score.quiz?.name || "N/A",
-          score: `${score.score} out of ${score.totalPossibleScore}`,
+          quizName: score.quiz?.name?.[currentLanguage] || "N/A",
+          score: `${score.score} ${t("admin_score.outOf")} ${
+            score.totalPossibleScore
+          }`,
           accuracyRate:
             typeof score.accuracyRate === "number"
               ? `${score.accuracyRate.toFixed(2)}%`
               : "N/A",
           averageTimePerQuestion:
             typeof score.averageTimePerQuestion === "number"
-              ? `${score.averageTimePerQuestion.toFixed(2)} seconds`
+              ? `${score.averageTimePerQuestion.toFixed(2)} ${t(
+                  "admin_score.seconds"
+                )}`
               : "N/A",
-          timeLimitPerQuestion: `${score.timeLimitPerQuestion} seconds`,
-          completionStatus: score.completionStatus,
-          date: new Date(score.createdAt).toLocaleString(),
+          timeLimitPerQuestion: `${score.timeLimitPerQuestion} ${t(
+            "admin_score.seconds"
+          )}`,
+          completionStatus:
+            t(`admin_score.${score.completionStatus}`) ||
+            score.completionStatus,
+          date: new Date(score.createdAt).toLocaleString(currentLanguage),
         }));
         break;
 
       case "Interactive Story":
         headers = [
-          "User",
-          "Story Title",
-          "Number of Retries",
-          "Total Time Taken (sec)",
-          "Date",
+          t("admin_score.user"),
+          t("admin_score.storyTitle"),
+          t("admin_score.numberOfRetries"),
+          t("admin_score.totalTimeTakenSec"),
+          t("admin_score.date"),
         ];
         rows = scores.map((score) => ({
           user:
-            `${score.user?.firstName || ""} ${score.user?.lastName || ""}` ||
+            `${score.user?.firstName || ""} ${
+              score.user?.lastName || ""
+            }`.trim() ||
             score.user?.email ||
             "N/A",
-          storyTitle: score.story?.title || "N/A",
+          storyTitle: score.story?.title?.[currentLanguage] || "N/A",
           numberOfRetries: score.numberOfRetries,
-          totalTimeTaken: score.totalTimeTaken,
-          date: new Date(score.createdAt).toLocaleString(),
+          totalTimeTaken: `${score.totalTimeTaken} ${t("admin_score.seconds")}`,
+          date: new Date(score.createdAt).toLocaleString(currentLanguage),
         }));
         break;
 
       case "Fill in the Blanks":
         headers = [
-          "User",
-          "Game Name",
-          "Score",
-          "Total Possible Score",
-          "Accuracy Rate",
-          "Total Time Taken",
-          "Total Game Time",
-          "Completion Status",
-          "Date",
+          t("admin_score.user"),
+          t("admin_score.gameName"),
+          t("admin_score.score"),
+          t("admin_score.accuracyRate"),
+          t("admin_score.totalTimeTaken"),
+          t("admin_score.totalGameTime"),
+          t("admin_score.completionStatus"),
+          t("admin_score.date"),
         ];
         rows = scores.map((score) => ({
           user:
-            `${score.user?.firstName || ""} ${score.user?.lastName || ""}` ||
+            `${score.user?.firstName || ""} ${
+              score.user?.lastName || ""
+            }`.trim() ||
             score.user?.email ||
             "N/A",
-          gameName: score.fillBlank?.name || "N/A",
-          score: `${score.score} out of ${score.totalPossibleScore}`,
-          totalPossibleScore: score.totalPossibleScore,
+          gameName: score.fillBlank?.name?.[currentLanguage] || "N/A",
+          score: `${score.score} ${t("admin_score.outOf")} ${
+            score.totalPossibleScore
+          }`,
           accuracyRate:
             typeof score.accuracyRate === "number"
               ? `${score.accuracyRate.toFixed(2)}%`
               : "N/A",
-          totalTimeTaken: `${score.totalTimeTaken} seconds`,
-          totalGameTime: `${score.totalGameTime} seconds`,
-          completionStatus: score.completionStatus,
-          date: new Date(score.createdAt).toLocaleString(),
+          totalTimeTaken: `${score.totalTimeTaken} ${t("admin_score.seconds")}`,
+          totalGameTime: `${score.totalGameTime} ${t("admin_score.seconds")}`,
+          completionStatus:
+            t(`admin_score.${score.completionStatus}`) ||
+            score.completionStatus,
+          date: new Date(score.createdAt).toLocaleString(currentLanguage),
         }));
         break;
       default:
@@ -230,7 +258,7 @@ export default function AdminScoreDashboardPage() {
   return (
     <Container>
       <Typography variant="h4" sx={{ marginBottom: 2 }}>
-        All Users Game Stats
+        {t("admin_score.allUsersGameStats")}
       </Typography>
       <Tabs
         value={tabIndex}
@@ -240,7 +268,7 @@ export default function AdminScoreDashboardPage() {
         scrollButtons="auto"
       >
         {gameApis.map((game, index) => (
-          <Tab label={game.name} key={index} />
+          <Tab label={t(`admin_score.${game.name}`)} key={index} />
         ))}
       </Tabs>
       <Box>{renderTable()}</Box>

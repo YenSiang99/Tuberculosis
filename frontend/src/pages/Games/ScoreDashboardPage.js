@@ -15,8 +15,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import axios from "../../components/axios"; // Adjust the import path based on your project structure
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 export default function GamePerformanceDashboard() {
+  const { t, i18n } = useTranslation(); // Initialize useTranslation
+  const currentLanguage = i18n.language || "en"; // Get current language
+
   const [tabIndex, setTabIndex] = useState(0);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(false); // New loading state
@@ -73,7 +77,7 @@ export default function GamePerformanceDashboard() {
     if (!scores || scores.length === 0) {
       return (
         <Typography variant="h6" sx={{ marginTop: 2 }}>
-          No data available.
+          {t("user_score.noDataAvailable")}
         </Typography>
       );
     }
@@ -87,88 +91,102 @@ export default function GamePerformanceDashboard() {
     switch (currentGame) {
       case "Word Search":
         headers = [
-          "Word List Name",
-          "Score",
-          "Accuracy Rate",
-          "Time Taken",
-          "Total Game Time",
-          "Completion Status",
-          "Date",
+          t("user_score.wordListName"),
+          t("user_score.score"),
+          t("user_score.accuracyRate"),
+          t("user_score.timeTaken"),
+          t("user_score.totalGameTime"),
+          t("user_score.completionStatus"),
+          t("user_score.date"),
         ];
         rows = scores.map((score) => ({
-          wordListName: score.wordList?.name || "N/A",
-          score: `${score.score} out of ${score.totalPossibleScore}`,
+          wordListName: score.wordList?.name?.[currentLanguage] || "N/A",
+          score: `${score.score} ${t("user_score.outOf")} ${
+            score.totalPossibleScore
+          }`,
           accuracyRate: `${score.accuracyRate}%`,
-          timeTaken: `${score.totalTimeTaken} seconds`,
-          totalGameTime: `${score.wordList?.totalGameTime || "N/A"} seconds`,
-          completionStatus: score.completionStatus,
+          timeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
+          totalGameTime: `${score.wordList?.totalGameTime || "N/A"} ${t(
+            "user_score.seconds"
+          )}`,
+          completionStatus:
+            t(`user_score.${score.completionStatus}`) || score.completionStatus,
           date: new Date(score.createdAt).toLocaleString(),
         }));
         break;
 
       case "Quiz":
         headers = [
-          "Quiz Name",
-          "Score",
-          "Accuracy Rate",
-          "Average Time per Question",
-          "Time Limit per Question",
-          "Completion Status",
-          "Date",
+          t("user_score.quizName"),
+          t("user_score.score"),
+          t("user_score.accuracyRate"),
+          t("user_score.averageTimePerQuestion"),
+          t("user_score.timeLimitPerQuestion"),
+          t("user_score.completionStatus"),
+          t("user_score.date"),
         ];
         rows = scores.map((score) => ({
-          quizName: score.quiz?.name || "N/A",
-          score: `${score.score} out of ${score.totalPossibleScore}`,
+          quizName: score.quiz?.name?.[currentLanguage] || "N/A",
+          score: `${score.score} ${t("user_score.outOf")} ${
+            score.totalPossibleScore
+          }`,
           accuracyRate:
             typeof score.accuracyRate === "number"
               ? `${score.accuracyRate.toFixed(2)}%`
               : "N/A",
           averageTimePerQuestion:
             typeof score.averageTimePerQuestion === "number"
-              ? `${score.averageTimePerQuestion.toFixed(2)} seconds`
+              ? `${score.averageTimePerQuestion.toFixed(2)} ${t(
+                  "user_score.seconds"
+                )}`
               : "N/A",
-          timeLimitPerQuestion: `${score.timeLimitPerQuestion} seconds`,
-
-          completionStatus: score.completionStatus,
+          timeLimitPerQuestion: `${score.timeLimitPerQuestion} ${t(
+            "user_score.seconds"
+          )}`,
+          completionStatus:
+            t(`user_score.${score.completionStatus}`) || score.completionStatus,
           date: new Date(score.createdAt).toLocaleString(),
         }));
         break;
 
       case "Interactive Story":
         headers = [
-          "Story Title",
-          "Number of Retries",
-          "Total Time Taken (sec)",
-          "Date",
+          t("user_score.storyTitle"),
+          t("user_score.numberOfRetries"),
+          t("user_score.totalTimeTakenSec"),
+          t("user_score.date"),
         ];
         rows = scores.map((score) => ({
-          storyTitle: score.story?.title || "N/A",
+          storyTitle: score.story?.title?.[currentLanguage] || "N/A",
           numberOfRetries: score.numberOfRetries,
-          totalTimeTaken: score.totalTimeTaken,
+          totalTimeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
           date: new Date(score.createdAt).toLocaleString(),
         }));
         break;
 
       case "Fill in the Blanks":
         headers = [
-          "Game Name",
-          "Score",
-          "Accuracy Rate",
-          "Total Time Taken",
-          "Total Game Time",
-          "Completion Status",
-          "Date",
+          t("user_score.gameName"),
+          t("user_score.score"),
+          t("user_score.accuracyRate"),
+          t("user_score.totalTimeTaken"),
+          t("user_score.totalGameTime"),
+          t("user_score.completionStatus"),
+          t("user_score.date"),
         ];
         rows = scores.map((score) => ({
-          gameName: score.fillBlank?.name || "N/A",
-          score: `${score.score} out of ${score.totalPossibleScore}`,
+          gameName: score.fillBlank?.name?.[currentLanguage] || "N/A",
+          score: `${score.score} ${t("user_score.outOf")} ${
+            score.totalPossibleScore
+          }`,
           accuracyRate:
             typeof score.accuracyRate === "number"
               ? `${score.accuracyRate.toFixed(2)}%`
               : "N/A",
-          totalTimeTaken: `${score.totalTimeTaken} seconds`,
-          totalGameTime: `${score.totalGameTime} seconds`,
-          completionStatus: score.completionStatus,
+          totalTimeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
+          totalGameTime: `${score.totalGameTime} ${t("user_score.seconds")}`,
+          completionStatus:
+            t(`user_score.${score.completionStatus}`) || score.completionStatus,
           date: new Date(score.createdAt).toLocaleString(),
         }));
         break;
@@ -207,7 +225,7 @@ export default function GamePerformanceDashboard() {
   return (
     <Container>
       <Typography variant="h4" sx={{ marginBottom: 2 }}>
-        My Game Stats
+        {t("user_score.myGameStats")}
       </Typography>
       <Tabs
         value={tabIndex}
@@ -217,7 +235,7 @@ export default function GamePerformanceDashboard() {
         scrollButtons="auto"
       >
         {gameApis.map((game, index) => (
-          <Tab label={game.name} key={index} />
+          <Tab label={t(`user_score.${game.name}`)} key={index} />
         ))}
       </Tabs>
       <Box>{renderTable()}</Box>
