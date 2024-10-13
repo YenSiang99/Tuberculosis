@@ -1,3 +1,4 @@
+// QuizzesTable.js
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -66,8 +67,10 @@ export default function QuizzesTable() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Name (EN)</TableCell>
+              <TableCell>Name (MS)</TableCell>
+              <TableCell>Description (EN)</TableCell>
+              <TableCell>Description (MS)</TableCell>
               <TableCell>Active/Inactive</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -75,13 +78,15 @@ export default function QuizzesTable() {
           <TableBody>
             {quizzes.map((quiz) => (
               <TableRow key={quiz._id}>
-                <TableCell>{quiz.name}</TableCell>
-                <TableCell>{quiz.description}</TableCell>
+                <TableCell>{quiz.name.en}</TableCell>
+                <TableCell>{quiz.name.ms}</TableCell>
+                <TableCell>{quiz.description.en}</TableCell>
+                <TableCell>{quiz.description.ms}</TableCell>
                 <TableCell>
                   {quiz.active ? (
-                    <CheckCircleIcon sx={{ color: green[500] }} /> // Green tick for active
+                    <CheckCircleIcon sx={{ color: green[500] }} />
                   ) : (
-                    <CancelIcon sx={{ color: red[500] }} /> // Red cross for inactive
+                    <CancelIcon sx={{ color: red[500] }} />
                   )}
                 </TableCell>
                 <TableCell>

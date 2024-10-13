@@ -1,3 +1,4 @@
+// CreateUpdateQuiz.js
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -19,20 +20,18 @@ export default function CreateUpdateQuiz() {
   const navigate = useNavigate();
 
   const [quiz, setQuiz] = useState({
-    name: "",
-    description: "",
-    timeLimitPerQuestion: "", // Field for time limit per question
-    active: false, // Field for quiz active status
+    name: { en: "", ms: "" },
+    description: { en: "", ms: "" },
+    timeLimitPerQuestion: 30, // Default time limit
+    active: false,
     questions: [],
   });
 
   const [newQuestion, setNewQuestion] = useState({
-    questionText: "",
+    questionText: { en: "", ms: "" },
     options: [
-      { optionText: "", isCorrect: true },
-      { optionText: "", isCorrect: false },
-      { optionText: "", isCorrect: false },
-      { optionText: "", isCorrect: false },
+      { optionText: { en: "", ms: "" }, isCorrect: false },
+      { optionText: { en: "", ms: "" }, isCorrect: false },
     ], // Initial 2 options
   });
 
@@ -60,36 +59,29 @@ export default function CreateUpdateQuiz() {
 
   // Handle Add Question to the quiz
   const handleAddQuestion = () => {
-    console.log("function is called");
-    setQuiz((prev) => ({
-      ...prev,
-      questions: [...prev.questions, newQuestion],
-    }));
+    // Validate that question text and options are filled
+    if (
+      newQuestion.questionText.en &&
+      newQuestion.questionText.ms &&
+      newQuestion.options.every((opt) => opt.optionText.en && opt.optionText.ms)
+    ) {
+      setQuiz((prev) => ({
+        ...prev,
+        questions: [...prev.questions, newQuestion],
+      }));
 
-    // Reset newQuestion to its initial state
-    setNewQuestion({
-      questionText: "",
-      options: [
-        { optionText: "", isCorrect: true },
-        { optionText: "", isCorrect: false },
-        { optionText: "", isCorrect: false },
-        { optionText: "", isCorrect: false },
-      ],
-    });
+      // Reset newQuestion to its initial state
+      setNewQuestion({
+        questionText: { en: "", ms: "" },
+        options: [
+          { optionText: { en: "", ms: "" }, isCorrect: false },
+          { optionText: { en: "", ms: "" }, isCorrect: false },
+        ],
+      });
+    } else {
+      alert("Please fill out all fields for question and options.");
+    }
   };
-
-  // const handleAddOption = (questionIndex) => {
-  //   const updatedQuestions = quiz.questions.map((question, qIdx) => {
-  //     if (qIdx === questionIndex) {
-  //       return {
-  //         ...question,
-  //         options: [...question.options, { optionText: "", isCorrect: false }],
-  //       };
-  //     }
-  //     return question;
-  //   });
-  //   setQuiz({ ...quiz, questions: updatedQuestions });
-  // };
 
   // Handle Delete Question
   const handleDeleteQuestion = (questionIndex) => {
@@ -100,12 +92,18 @@ export default function CreateUpdateQuiz() {
   };
 
   // Handle Option Changes
-  const handleOptionChange = (questionIndex, optionIndex, value) => {
+  const handleOptionChange = (questionIndex, optionIndex, language, value) => {
     const updatedQuestions = quiz.questions.map((question, qIdx) => {
       if (qIdx === questionIndex) {
         const updatedOptions = question.options.map((option, oIdx) => {
           if (oIdx === optionIndex) {
-            return { ...option, optionText: value };
+            return {
+              ...option,
+              optionText: {
+                ...option.optionText,
+                [language]: value,
+              },
+            };
           }
           return option;
         });
@@ -137,7 +135,10 @@ export default function CreateUpdateQuiz() {
       if (qIdx === questionIndex) {
         return {
           ...question,
-          options: [...question.options, { optionText: "", isCorrect: false }],
+          options: [
+            ...question.options,
+            { optionText: { en: "", ms: "" }, isCorrect: false },
+          ],
         };
       }
       return question;
@@ -159,8 +160,33 @@ export default function CreateUpdateQuiz() {
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
+  // Handle Changes in Question Text
+  const handleQuestionTextChange = (questionIndex, language, value) => {
+    const updatedQuestions = quiz.questions.map((question, qIdx) => {
+      if (qIdx === questionIndex) {
+        return {
+          ...question,
+          questionText: {
+            ...question.questionText,
+            [language]: value,
+          },
+        };
+      }
+      return question;
+    });
+    setQuiz({ ...quiz, questions: updatedQuestions });
+  };
+
   // Handle Submit
   const handleSubmit = () => {
+    // Validation can be added here
+
+    if (!quiz.name.en || !quiz.name.ms) {
+      alert("Please fill out the quiz name in both languages.");
+      return;
+    }
+
+    // Prepare data
     const quizData = {
       name: quiz.name,
       description: quiz.description,
@@ -198,20 +224,69 @@ export default function CreateUpdateQuiz() {
         {id ? "Edit Quiz" : "Create New Quiz"}
       </Typography>
 
-      <TextField
-        label="Name"
-        fullWidth
-        value={quiz.name}
-        onChange={(e) => setQuiz({ ...quiz, name: e.target.value })}
-        sx={{ marginBottom: 2 }}
-      />
-      <TextField
-        label="Description"
-        fullWidth
-        value={quiz.description}
-        onChange={(e) => setQuiz({ ...quiz, description: e.target.value })}
-        sx={{ marginBottom: 2 }}
-      />
+      {/* Quiz Name Fields */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Quiz Name (EN)"
+            fullWidth
+            value={quiz.name.en}
+            onChange={(e) =>
+              setQuiz({
+                ...quiz,
+                name: { ...quiz.name, en: e.target.value },
+              })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Quiz Name (MS)"
+            fullWidth
+            value={quiz.name.ms}
+            onChange={(e) =>
+              setQuiz({
+                ...quiz,
+                name: { ...quiz.name, ms: e.target.value },
+              })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Description Fields */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Description (EN)"
+            fullWidth
+            value={quiz.description.en}
+            onChange={(e) =>
+              setQuiz({
+                ...quiz,
+                description: { ...quiz.description, en: e.target.value },
+              })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Description (MS)"
+            fullWidth
+            value={quiz.description.ms}
+            onChange={(e) =>
+              setQuiz({
+                ...quiz,
+                description: { ...quiz.description, ms: e.target.value },
+              })
+            }
+            sx={{ marginBottom: 2 }}
+          />
+        </Grid>
+      </Grid>
 
       {/* Time Limit Per Question Field */}
       <TextField
@@ -242,8 +317,17 @@ export default function CreateUpdateQuiz() {
         Questions
       </Typography>
 
+      {/* Existing Questions */}
       {quiz.questions.map((question, qIdx) => (
-        <Box key={qIdx} sx={{ marginBottom: 4 }}>
+        <Box
+          key={qIdx}
+          sx={{
+            marginBottom: 4,
+            border: "1px solid #ccc",
+            padding: 2,
+            borderRadius: 4,
+          }}
+        >
           {/* Question Header */}
           <Grid
             container
@@ -254,11 +338,6 @@ export default function CreateUpdateQuiz() {
             <Grid item xs>
               <Typography variant="h6">Question {qIdx + 1}</Typography>
             </Grid>
-            {/* <Grid item>
-              <Button startIcon={<Add />} onClick={() => handleAddOption(qIdx)}>
-                Add Option
-              </Button>
-            </Grid> */}
             <Grid item>
               <IconButton onClick={() => handleDeleteQuestion(qIdx)}>
                 <Delete />
@@ -266,77 +345,214 @@ export default function CreateUpdateQuiz() {
             </Grid>
           </Grid>
 
-          <TextField
-            label="Question Text"
-            fullWidth
-            value={question.questionText}
-            onChange={(e) =>
-              setQuiz((prev) => {
-                const updatedQuestions = [...prev.questions];
-                updatedQuestions[qIdx].questionText = e.target.value;
-                return { ...prev, questions: updatedQuestions };
-              })
-            }
-            sx={{ marginBottom: 2 }}
-          />
+          {/* Question Text Fields */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Question Text (EN)"
+                fullWidth
+                value={question.questionText.en}
+                onChange={(e) =>
+                  handleQuestionTextChange(qIdx, "en", e.target.value)
+                }
+                sx={{ marginBottom: 2 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Question Text (MS)"
+                fullWidth
+                value={question.questionText.ms}
+                onChange={(e) =>
+                  handleQuestionTextChange(qIdx, "ms", e.target.value)
+                }
+                sx={{ marginBottom: 2 }}
+              />
+            </Grid>
+          </Grid>
 
           {/* Options */}
-          <Grid container spacing={2}>
-            {question.options.map((option, oIdx) => (
-              <Grid item xs={12} sm={6} key={oIdx}>
-                <TextField
-                  label={`Option ${oIdx + 1}`}
-                  fullWidth
-                  value={option.optionText}
-                  onChange={(e) =>
-                    handleOptionChange(qIdx, oIdx, e.target.value)
-                  }
-                  sx={{ marginBottom: 1 }}
-                />
-                <Grid container alignItems="center" spacing={1}>
-                  <Grid item xs>
-                    <Button
-                      variant="contained"
-                      color={option.isCorrect ? "success" : "error"}
-                      onClick={() => handleCorrectOptionChange(qIdx, oIdx)}
-                      fullWidth
-                    >
-                      {option.isCorrect ? "Correct Answer" : "Set as Correct"}
-                    </Button>
-                  </Grid>
-                  {/* <Grid item>
-                    <IconButton onClick={() => handleDeleteOption(qIdx, oIdx)}>
-                      <Delete />
-                    </IconButton>
-                  </Grid> */}
+          {question.options.map((option, oIdx) => (
+            <Box key={oIdx} sx={{ marginBottom: 2 }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} sm={5}>
+                  <TextField
+                    label={`Option ${oIdx + 1} (EN)`}
+                    fullWidth
+                    value={option.optionText.en}
+                    onChange={(e) =>
+                      handleOptionChange(qIdx, oIdx, "en", e.target.value)
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={5}>
+                  <TextField
+                    label={`Option ${oIdx + 1} (MS)`}
+                    fullWidth
+                    value={option.optionText.ms}
+                    onChange={(e) =>
+                      handleOptionChange(qIdx, oIdx, "ms", e.target.value)
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={2}>
+                  <Button
+                    variant="contained"
+                    color={option.isCorrect ? "success" : "primary"}
+                    onClick={() => handleCorrectOptionChange(qIdx, oIdx)}
+                    fullWidth
+                  >
+                    {option.isCorrect ? "Correct" : "Set Correct"}
+                  </Button>
                 </Grid>
               </Grid>
-            ))}
-          </Grid>
+            </Box>
+          ))}
+
+          {/* Add Option Button */}
+          <Button
+            startIcon={<Add />}
+            onClick={() => handleAddOption(qIdx)}
+            sx={{ marginBottom: 2 }}
+          >
+            Add Option
+          </Button>
         </Box>
       ))}
 
-      <Grid container spacing={2}>
-        {/* Add Question Button */}
-        <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAddQuestion}
-          >
-            Add Question
-          </Button>
+      {/* New Question Section */}
+      <Box
+        sx={{
+          marginBottom: 4,
+          border: "1px solid #ccc",
+          padding: 2,
+          borderRadius: 4,
+        }}
+      >
+        <Typography variant="h6" sx={{ marginBottom: 2 }}>
+          Add New Question
+        </Typography>
+
+        {/* New Question Text Fields */}
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Question Text (EN)"
+              fullWidth
+              value={newQuestion.questionText.en}
+              onChange={(e) =>
+                setNewQuestion((prev) => ({
+                  ...prev,
+                  questionText: { ...prev.questionText, en: e.target.value },
+                }))
+              }
+              sx={{ marginBottom: 2 }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Question Text (MS)"
+              fullWidth
+              value={newQuestion.questionText.ms}
+              onChange={(e) =>
+                setNewQuestion((prev) => ({
+                  ...prev,
+                  questionText: { ...prev.questionText, ms: e.target.value },
+                }))
+              }
+              sx={{ marginBottom: 2 }}
+            />
+          </Grid>
         </Grid>
 
-        {/* Update/Create Quiz Button aligned right */}
-        <Grid item xs={12}>
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              {id ? "Update Quiz" : "Create Quiz"}
-            </Button>
+        {/* New Question Options */}
+        {newQuestion.options.map((option, oIdx) => (
+          <Box key={oIdx} sx={{ marginBottom: 2 }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={5}>
+                <TextField
+                  label={`Option ${oIdx + 1} (EN)`}
+                  fullWidth
+                  value={option.optionText.en}
+                  onChange={(e) =>
+                    setNewQuestion((prev) => {
+                      const updatedOptions = [...prev.options];
+                      updatedOptions[oIdx].optionText.en = e.target.value;
+                      return { ...prev, options: updatedOptions };
+                    })
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} sm={5}>
+                <TextField
+                  label={`Option ${oIdx + 1} (MS)`}
+                  fullWidth
+                  value={option.optionText.ms}
+                  onChange={(e) =>
+                    setNewQuestion((prev) => {
+                      const updatedOptions = [...prev.options];
+                      updatedOptions[oIdx].optionText.ms = e.target.value;
+                      return { ...prev, options: updatedOptions };
+                    })
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} sm={2}>
+                <Button
+                  variant="contained"
+                  color={option.isCorrect ? "success" : "primary"}
+                  onClick={() =>
+                    setNewQuestion((prev) => {
+                      const updatedOptions = prev.options.map((opt, idx) => ({
+                        ...opt,
+                        isCorrect: idx === oIdx,
+                      }));
+                      return { ...prev, options: updatedOptions };
+                    })
+                  }
+                  fullWidth
+                >
+                  {option.isCorrect ? "Correct" : "Set Correct"}
+                </Button>
+              </Grid>
+            </Grid>
           </Box>
-        </Grid>
-      </Grid>
+        ))}
+
+        {/* Add Option Button for New Question */}
+        <Button
+          startIcon={<Add />}
+          onClick={() =>
+            setNewQuestion((prev) => ({
+              ...prev,
+              options: [
+                ...prev.options,
+                { optionText: { en: "", ms: "" }, isCorrect: false },
+              ],
+            }))
+          }
+          sx={{ marginBottom: 2 }}
+        >
+          Add Option
+        </Button>
+
+        {/* Add Question Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleAddQuestion}
+          sx={{ marginBottom: 2 }}
+        >
+          Add Question to Quiz
+        </Button>
+      </Box>
+
+      {/* Submit Button */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
+          {id ? "Update Quiz" : "Create Quiz"}
+        </Button>
+      </Box>
     </Container>
   );
 }

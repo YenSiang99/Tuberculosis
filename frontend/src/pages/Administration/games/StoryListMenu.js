@@ -1,3 +1,4 @@
+// StoryListMenu.js
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -63,8 +64,10 @@ export default function StoryListMenu() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Title (EN)</TableCell>
+              <TableCell>Title (MS)</TableCell>
+              <TableCell>Description (EN)</TableCell>
+              <TableCell>Description (MS)</TableCell>
               <TableCell>Active</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -72,8 +75,10 @@ export default function StoryListMenu() {
           <TableBody>
             {stories.map((story) => (
               <TableRow key={story._id}>
-                <TableCell>{story.title}</TableCell>
-                <TableCell>{story.description}</TableCell>
+                <TableCell>{story.title.en}</TableCell>
+                <TableCell>{story.title.ms}</TableCell>
+                <TableCell>{story.description.en}</TableCell>
+                <TableCell>{story.description.ms}</TableCell>
                 <TableCell>
                   {story.active ? (
                     <CheckCircleIcon sx={{ color: green[500] }} />

@@ -182,44 +182,6 @@ exports.getActiveStory = async (req, res) => {
   }
 };
 
-// exports.updateStory = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updates = req.body;
-
-//     // Find the story to update
-//     const story = await Story.findById(id);
-//     if (!story) {
-//       return res.status(404).send({ error: "Story not found." });
-//     }
-
-//     // Check if the active status is being updated
-//     if ("active" in updates) {
-//       if (story.active && updates.active === false) {
-//         // Prevent deactivating the only active story
-//         return res
-//           .status(400)
-//           .send({ error: "Cannot deactivate the active story." });
-//       } else if (!story.active && updates.active === true) {
-//         // If setting a non-active story to active, deactivate the current active one
-//         const activeStory = await Story.findOne({ active: true });
-//         if (activeStory) {
-//           activeStory.active = false;
-//           await activeStory.save();
-//         }
-//       }
-//     }
-
-//     // Update the story with allowed updates
-//     Object.assign(story, updates);
-//     await story.save();
-
-//     res.send(story);
-//   } catch (error) {
-//     res.status(400).send({ error: error.message });
-//   }
-// };
-
 exports.updateStory = async (req, res) => {
   try {
     const { id } = req.params;

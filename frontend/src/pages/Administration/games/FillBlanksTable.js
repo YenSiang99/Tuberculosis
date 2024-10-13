@@ -1,3 +1,4 @@
+// FillBlanksTable.js
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -66,8 +67,10 @@ export default function FillBlanksTable() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Name (EN)</TableCell>
+              <TableCell>Name (MS)</TableCell>
+              <TableCell>Description (EN)</TableCell>
+              <TableCell>Description (MS)</TableCell>
               <TableCell>Active/Inactive</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -75,13 +78,15 @@ export default function FillBlanksTable() {
           <TableBody>
             {fillBlanks.map((fillBlank) => (
               <TableRow key={fillBlank._id}>
-                <TableCell>{fillBlank.name}</TableCell>
-                <TableCell>{fillBlank.description}</TableCell>
+                <TableCell>{fillBlank.name.en}</TableCell>
+                <TableCell>{fillBlank.name.ms}</TableCell>
+                <TableCell>{fillBlank.description.en}</TableCell>
+                <TableCell>{fillBlank.description.ms}</TableCell>
                 <TableCell>
                   {fillBlank.active ? (
-                    <CheckCircleIcon sx={{ color: green[500] }} /> // Green tick for active
+                    <CheckCircleIcon sx={{ color: green[500] }} />
                   ) : (
-                    <CancelIcon sx={{ color: red[500] }} /> // Red cross for inactive
+                    <CancelIcon sx={{ color: red[500] }} />
                   )}
                 </TableCell>
                 <TableCell>
