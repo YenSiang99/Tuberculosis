@@ -71,6 +71,7 @@ import HealthcareNotification from "./pages/Healthcare/HealthcareNotification";
 import TestPage from "./pages/TestPage";
 
 function App() {
+  console.log(`Current Environment: ${process.env.NODE_ENV}`);
   return (
     <Router>
       <AuthProvider>

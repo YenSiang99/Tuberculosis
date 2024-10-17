@@ -6,7 +6,26 @@ const fs = require("fs");
 const path = require("path");
 
 // Environment package
-require("dotenv").config();
+// require("dotenv").config();
+
+console.log(`Current Environment: ${process.env.NODE_ENV}`);
+
+// Determine the current environment; default to 'development'
+const env = process.env.NODE_ENV || "development";
+
+// Construct the path to the corresponding .env file
+const envFilePath = path.resolve(__dirname, `.env.${env}`);
+
+// Load the appropriate .env file
+if (fs.existsSync(envFilePath)) {
+  require("dotenv").config({ path: envFilePath });
+  console.log(`Loaded environment variables from ${envFilePath}`);
+} else {
+  console.warn(
+    `Environment file ${envFilePath} not found. Falling back to default .env`
+  );
+  require("dotenv").config(); // Loads .env as a fallback
+}
 
 const cors = require("cors");
 const authRoutes = require("./routes/auth/authRoutes");
@@ -71,5 +90,5 @@ app.use("/media", express.static(path.join(__dirname, "media")));
 
 app.get("/", (req, res) => res.send("Backend is running!"));
 app.listen(port, () =>
-  console.log(`Server listening at http://localhost:${port}`)
+  console.log(`Server listening at ${process.env.BASE_URL}`)
 );
