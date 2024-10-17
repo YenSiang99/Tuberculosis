@@ -77,7 +77,20 @@ const userSchema = new mongoose.Schema(
     firstName: { type: String, required: false }, // Optional
     lastName: { type: String, required: false }, // Optional
     gender: { type: String, enum: ["male", "female", ""], required: false }, // Optional
-    phoneNumber: { type: String, required: true, unique: true }, // Required for phone registration
+    phoneNumber: {
+      type: String,
+      unique: true,
+      validate: {
+        validator: function (value) {
+          // Phone number is required for 'patient' and 'user' groups
+          if (["patient", "user"].includes(this.group)) {
+            return value != null && value.trim().length > 0;
+          }
+          return true; // Not required for other user types
+        },
+        message: "Phone number is required for patients and users.",
+      },
+    },
     country: { type: String, required: false }, // Optional
     passportNumber: { type: String, required: false }, // Optional
     nricNumber: { type: String, required: false }, // Optional

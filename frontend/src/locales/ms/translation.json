@@ -144,7 +144,13 @@
     "password": "Kata Laluan",
     "register_button": "Daftar",
     "success_message": "Pendaftaran berjaya!",
-    "error_message": "Ralat berlaku. Sila cuba lagi."
+    "error_message": "Ralat berlaku. Sila cuba lagi.",
+    "email_already_registered": "Emel ini telah didaftarkan.",
+    "unexpected_error": "Ralat tidak dijangka berlaku.",
+    "password_invalid": "Kata laluan mesti sekurang-kurangnya 8 aksara dan termasuk nombor.",
+    "email_invalid": "Sila masukkan alamat emel yang sah.",
+    "upload_profile_picture": "Muat Naik Gambar Profil",
+    "edit_photo": "Edit Gambar"
   },
   "patient_registration": {
     "title": "Pendaftaran Pesakit",

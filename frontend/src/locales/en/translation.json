@@ -144,7 +144,13 @@
     "password": "Password",
     "register_button": "Register",
     "success_message": "Registration successful!",
-    "error_message": "An error occurred. Please try again."
+    "error_message": "An error occurred. Please try again.",
+    "email_already_registered": "This email is already registered.",
+    "unexpected_error": "An unexpected error occurred.",
+    "password_invalid": "Password must be at least 8 characters and include a number.",
+    "email_invalid": "Please enter a valid email address.",
+    "upload_profile_picture": "Upload Profile Picture",
+    "edit_photo": "Edit Photo"
   },
   "patient_registration": {
     "title": "Patient Registration",
