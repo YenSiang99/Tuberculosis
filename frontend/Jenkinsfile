@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Clone the repo
+                git 'https://github.com/YenSiang99/Tuberculosis.git'
+            }
+        }
+        stage('Build Frontend') {
+            steps {
+                script {
+                    // Navigate to frontend directory and build the frontend using Docker
+                    docker.build('frontend-image', './frontend')
+                }
+            }
+        }
+        stage('Deploy Frontend') {
+            steps {
+                script {
+                    // Stop and remove any old frontend container
+                    sh 'docker stop frontend-container || true'
+                    sh 'docker rm frontend-container || true'
+
+                    // Run the newly built frontend container
+                    sh 'docker run -d --name frontend-container -p 80:80 frontend-image'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Frontend build and deployment successful!'
+        }
+        failure {
+            echo 'Something went wrong with the build or deployment.'
+        }
+    }
+}
