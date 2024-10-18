@@ -153,7 +153,7 @@ export default function GamePerformanceDashboard() {
         headers = [
           t("user_score.storyTitle"),
           t("user_score.numberOfRetries"),
-          t("user_score.totalTimeTakenSec"),
+          t("user_score.totalTimeTaken"),
           t("user_score.date"),
         ];
         rows = scores.map((score) => ({

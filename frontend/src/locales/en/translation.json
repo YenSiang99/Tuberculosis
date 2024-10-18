@@ -325,7 +325,7 @@
     "timeLimitPerQuestion": "Time Limit per Question",
     "storyTitle": "Story Title",
     "numberOfRetries": "Number of Retries",
-    "totalTimeTakenSec": "Total Time Taken (sec)",
+    "totalTimeTaken": "Total Time Taken (sec)",
     "gameName": "Game Name",
     "outOf": "out of",
     "seconds": "seconds",
