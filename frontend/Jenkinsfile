@@ -34,13 +34,14 @@ pipeline {
         stage('Push Images to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') { // Ensure 'dockerhub-credentials-id' matches your Jenkins credentials ID
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
+                        echo "Pushing frontend image to Docker Hub"
                         docker.image("${FRONTEND_IMAGE}:latest").push('latest')
-                        // docker.image("${BACKEND_IMAGE}:latest").push('latest')
                     }
                 }
             }
         }
+
         stage('Deploy to Production') {
             steps {
                 sshagent(['deploy-server-ssh-key']) { // Replace with your Jenkins SSH credentials ID
