@@ -1,30 +1,52 @@
 pipeline {
     agent any
 
+    environment {
+        // Docker Hub credentials (Jenkins Credentials ID)
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Replace with your Jenkins Docker Hub credentials ID
+        // Docker Hub Repository Names
+        FRONTEND_IMAGE = 'yensiang99/tuberculosis-frontend'
+        BACKEND_IMAGE = 'yensiang99/tuberculosis-backend'
+        DEPLOY_SERVER = 'root@77.37.44.176' // Replace with your deployment server's SSH user and IP
+        DEPLOY_SCRIPT_PATH = '/opt/deploy/deploy.sh' // Replace with the actual path on your deployment server
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-                // Clone the repo
                 git branch: 'main', url: 'https://github.com/YenSiang99/Tuberculosis.git'
             }
         }
         stage('Build Frontend') {
             steps {
                 script {
-                    // Navigate to frontend directory and build the frontend using Docker
-                    docker.build('frontend-image', './frontend')
+                    docker.build("${FRONTEND_IMAGE}:latest", './frontend')
                 }
             }
         }
-        stage('Deploy Frontend') {
+        // stage('Build Backend') {
+        //     steps {
+        //         script {
+        //             docker.build("${BACKEND_IMAGE}:latest", './backend')
+        //         }
+        //     }
+        // }
+        stage('Push Images to Docker Hub') {
             steps {
                 script {
-                    // Stop and remove any old frontend container
-                    sh 'docker stop frontend-container || true'
-                    sh 'docker rm frontend-container || true'
-
-                    // Run the newly built frontend container
-                    sh 'docker run -d --name frontend-container -p 80:80 frontend-image'
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') { // Ensure 'dockerhub-credentials-id' matches your Jenkins credentials ID
+                        docker.image("${FRONTEND_IMAGE}:latest").push('latest')
+                        // docker.image("${BACKEND_IMAGE}:latest").push('latest')
+                    }
+                }
+            }
+        }
+        stage('Deploy to Production') {
+            steps {
+                sshagent(['deploy-server-ssh-key']) { // Replace with your Jenkins SSH credentials ID
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'bash ${DEPLOY_SCRIPT_PATH}'
+                    """
                 }
             }
         }
@@ -32,10 +54,10 @@ pipeline {
 
     post {
         success {
-            echo 'Frontend build and deployment successful!'
+            echo 'CI/CD Pipeline completed successfully.'
         }
         failure {
-            echo 'Something went wrong with the build or deployment.'
+            echo 'CI/CD Pipeline failed.'
         }
     }
 }
