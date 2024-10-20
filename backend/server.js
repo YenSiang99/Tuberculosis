@@ -63,7 +63,8 @@ const port = 3001;
 
 require("./scheduler");
 
-mongoose.connect("mongodb://127.0.0.1:27017/tb_project");
+mongoose.connect(process.env.MONGO_URL);
+
 app.use(express.json());
 app.use(cors());
 
