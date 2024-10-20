@@ -4,8 +4,13 @@ FROM node:16-alpine
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy the package.json and install dependencies
+# Copy the package.json 
 COPY package*.json ./
+
+# Set environment to production
+ENV NODE_ENV=production
+
+#Install dependencies
 RUN npm install --legacy-peer-deps
 
 # Copy the rest of the backend code to the container
@@ -16,3 +21,5 @@ EXPOSE 3001
 
 # Start the backend app
 CMD ["npm", "start"]
+
+
