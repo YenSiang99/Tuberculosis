@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        // Docker Hub credentials (Jenkins Credentials ID)
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Use your Jenkins Docker Hub credentials ID
+        // Docker Hub Repository Name for Backend
+        BACKEND_IMAGE = 'yensiang99/tuberculosis-backend'
+        DEPLOY_SERVER = 'root@77.37.44.176' // Replace with your deployment server's SSH user and IP
+        DEPLOY_SCRIPT_PATH = '/opt/deploy/deploy_backend.sh' // Path for backend deploy script
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/YenSiang99/Tuberculosis.git'
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                script {
+                    docker.build("${BACKEND_IMAGE}:latest", './backend')
+                }
+            }
+        }
+
+        stage('Push Backend Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials-id') {
+                        echo "Pushing backend image to Docker Hub"
+                        docker.image("${BACKEND_IMAGE}:latest").push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Backend to Production') {
+            steps {
+                sshagent(['deploy-server-ssh-key']) { // Use your Jenkins SSH credentials ID
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'bash ${DEPLOY_SCRIPT_PATH}'
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Backend CI/CD Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Backend CI/CD Pipeline failed.'
+        }
+    }
+}
