@@ -32,7 +32,6 @@ export default function UserRegister() {
   });
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  // Function to format phone number for display (remove '6' prefix)
   const getLocalPhoneNumber = (number) => {
     return number.startsWith("6") ? number.slice(1) : number;
   };
@@ -52,13 +51,13 @@ export default function UserRegister() {
         setAlertInfo({
           show: true,
           type: "error",
-          message: "Phone number already registered.",
+          message: t("user_registration.error.phone_exists"),
         });
       } else {
         setAlertInfo({
           show: true,
           type: "error",
-          message: "An unexpected error occurred. Please try again.",
+          message: t("user_registration.error.general"),
         });
       }
     }
@@ -118,8 +117,7 @@ export default function UserRegister() {
           </Typography>
 
           <Alert severity="info" sx={{ width: "100%", mb: 2 }}>
-            After registration, use your phone number (without country code 6)
-            as both username and password to login.
+            {t("user_registration.info_message")}
           </Alert>
 
           <Box
@@ -176,30 +174,32 @@ export default function UserRegister() {
         fullWidth
       >
         <DialogTitle id="success-dialog-title">
-          Registration Successful!
+          {t("user_registration.success.title")}
         </DialogTitle>
         <DialogContent>
           <Alert severity="success" sx={{ mb: 2 }}>
-            Your account has been created successfully.
+            {t("user_registration.success.message")}
           </Alert>
           <Typography variant="body1" gutterBottom>
-            Please use the following credentials to login:
+            {t("user_registration.success.credentials_intro")}
           </Typography>
           <Box sx={{ bgcolor: "grey.100", p: 2, borderRadius: 1, mt: 1 }}>
             <Typography variant="body1" sx={{ fontWeight: "medium", mb: 1 }}>
-              Username: {getLocalPhoneNumber(phoneNumber)}
+              {t("user_registration.success.username_label")}{" "}
+              {getLocalPhoneNumber(phoneNumber)}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-              Password: {getLocalPhoneNumber(phoneNumber)}
+              {t("user_registration.success.password_label")}{" "}
+              {getLocalPhoneNumber(phoneNumber)}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            Please make sure to save these credentials securely.
+            {t("user_registration.success.security_note")}
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleSuccessDialogClose} variant="contained">
-            Proceed to Login
+            {t("user_registration.success.proceed_button")}
           </Button>
         </DialogActions>
       </Dialog>

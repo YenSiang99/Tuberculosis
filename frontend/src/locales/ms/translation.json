@@ -144,16 +144,23 @@
     "generic_error": "Ralat berlaku. Sila cuba lagi kemudian."
   },
   "user_registration": {
-    "title": "Pendaftaran Pengguna",
-    "first_name": "Nama Pertama",
-    "last_name": "Nama Akhir",
-    "email": "Alamat Emel",
-    "password": "Kata Laluan",
-    "confirm_password": "Sahkan Kata Laluan",
+    "title": "Daftar",
+    "phone_placeholder": "Masukkan nombor telefon anda",
     "register_button": "Daftar",
-    "email_already_registered": "Emel telah didaftarkan.",
-    "unexpected_error": "Ralat berlaku. Sila cuba lagi.",
-    "phone_placeholder": "Nombor Telefon"
+    "info_message": "Selepas pendaftaran, gunakan nombor telefon anda (tanpa kod negara 6) sebagai nama pengguna dan kata laluan untuk log masuk.",
+    "success": {
+      "title": "Pendaftaran Berjaya!",
+      "message": "Akaun anda telah berjaya dicipta.",
+      "credentials_intro": "Sila gunakan maklumat log masuk berikut:",
+      "username_label": "Nama Pengguna:",
+      "password_label": "Kata Laluan:",
+      "security_note": "Sila pastikan anda menyimpan maklumat log masuk ini dengan selamat.",
+      "proceed_button": "Teruskan ke Log Masuk"
+    },
+    "error": {
+      "phone_exists": "Nombor telefon sudah didaftarkan.",
+      "general": "Ralat tidak dijangka berlaku. Sila cuba lagi."
+    }
   },
   "healthcare_registration": {
     "title": "Pendaftaran Pengamal Kesihatan",

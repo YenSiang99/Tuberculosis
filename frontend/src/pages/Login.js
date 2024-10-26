@@ -492,7 +492,7 @@ export default function Login() {
         } else if (decoded.roles.includes("healthcare")) {
           navigate("/healthcare/patient");
         } else if (decoded.roles.includes("user")) {
-          navigate("/games/score-dashboard");
+          navigate("/infographics");
         } else {
           setAuth(false);
           console.log("User role not recognized or unauthorized");

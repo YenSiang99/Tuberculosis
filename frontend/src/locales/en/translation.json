@@ -144,16 +144,23 @@
     "generic_error": "An error occurred. Please try again later."
   },
   "user_registration": {
-    "title": "User Registration",
-    "first_name": "First Name",
-    "last_name": "Last Name",
-    "email": "Email Address",
-    "password": "Password",
-    "confirm_password": "Confirm Password",
+    "title": "Register",
+    "phone_placeholder": "Enter your phone number",
     "register_button": "Register",
-    "email_already_registered": "Email already registered.",
-    "unexpected_error": "An unexpected error occurred. Please try again.",
-    "phone_placeholder": "Phone Number"
+    "info_message": "After registration, use your phone number (without country code 6) as both username and password to login.",
+    "success": {
+      "title": "Registration Successful!",
+      "message": "Your account has been created successfully.",
+      "credentials_intro": "Please use the following credentials to login:",
+      "username_label": "Username:",
+      "password_label": "Password:",
+      "security_note": "Please make sure to save these credentials securely.",
+      "proceed_button": "Proceed to Login"
+    },
+    "error": {
+      "phone_exists": "Phone number already registered.",
+      "general": "An unexpected error occurred. Please try again."
+    }
   },
   "healthcare_registration": {
     "title": "Healthcare Registration",
