@@ -35,6 +35,17 @@ const FillInBlanksPage = () => {
   const [gamePause, setGamePause] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
 
+  const [randomizedWords, setRandomizedWords] = useState([]);
+
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   // Handle language change and reset the game
   useEffect(() => {
     if (selectedLanguage !== prevLanguage) {
@@ -162,21 +173,21 @@ const FillInBlanksPage = () => {
 
     setQuestions(resetQuestions);
     setUsedWords([]);
+
+    // Re-randomize the words on reset
+    setRandomizedWords(shuffleArray([...randomizedWords]));
+
     if (gameTime !== null) {
-      setGameTimer(gameTime); // Reset the game timer
+      setGameTimer(gameTime);
     }
     setGameEnd(false);
     setGamePause(false);
     setGameStart(true);
     setScore(0);
 
-    // Automatically set focus to the first blank (if it exists)
     if (resetQuestions.length > 0) {
       setSelectedBlankId(resetQuestions[0]._id);
     }
-    setGameEnd(false);
-    setGamePause(false);
-    setGameStart(true);
   };
 
   useEffect(() => {
@@ -200,19 +211,23 @@ const FillInBlanksPage = () => {
         setGameTime(data.totalGameTime);
         setGameTimer(data.totalGameTime);
 
-        // Map questions to include the selected language
         const questionsWithAnswers = data.questions.map((q) => ({
           _id: q._id,
           textBefore:
             q.textBefore[selectedLanguage] || q.textBefore["en"] || "",
           textAfter: q.textAfter[selectedLanguage] || q.textAfter["en"] || "",
           answer: q.answer[selectedLanguage] || q.answer["en"] || "",
-          answerChoice: "", // Add empty answerChoice field to each question
+          answerChoice: "",
         }));
 
         setQuestions(questionsWithAnswers);
 
-        // Automatically select the first blank by setting the selectedBlankId
+        // Create and shuffle the word options
+        const uniqueWords = [
+          ...new Set(questionsWithAnswers.map((q) => q.answer)),
+        ];
+        setRandomizedWords(shuffleArray(uniqueWords));
+
         if (questionsWithAnswers.length > 0) {
           setSelectedBlankId(questionsWithAnswers[0]._id);
         }
@@ -262,8 +277,7 @@ const FillInBlanksPage = () => {
             spacing={1}
             sx={{ justifyContent: "center", width: "100%" }}
           >
-            {/* Generate unique words to select */}
-            {[...new Set(questions.map((q) => q.answer))].map((word, index) => (
+            {randomizedWords.map((word, index) => (
               <Grid item key={index} xs={6} md={3}>
                 <Button
                   variant="outlined"
