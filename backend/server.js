@@ -59,7 +59,7 @@ if (!fs.existsSync(videosDir)) {
 }
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 require("./scheduler");
 
@@ -90,6 +90,12 @@ app.use("/api/score/fillblank", fillBlankScoreRoutes);
 app.use("/media", express.static(path.join(__dirname, "media")));
 
 app.get("/", (req, res) => res.send("Backend is running!"));
-app.listen(port, () =>
-  console.log(`Server listening at ${process.env.BASE_URL}`)
-);
+
+// app.listen(port, () =>
+//   console.log(`Server listening at ${process.env.BASE_URL}`)
+// );
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Current Environment: ${process.env.NODE_ENV}`);
+  console.log("Backend server listening on port:", port);
+});
