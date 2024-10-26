@@ -4,69 +4,57 @@ import {
   ThemeProvider,
   Box,
   Typography,
-  TextField,
   Button,
   Avatar,
   Grid,
-  InputAdornment,
-  IconButton,
   Alert,
   Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import theme from "../../components/reusable/Theme";
 import BgImage from "../../assets/cover.jpeg";
 import axios from "../../components/axios";
 import PhoneInput from "react-phone-input-2";
-
 import { useTranslation } from "react-i18next";
 
 export default function UserRegister() {
-  const { t } = useTranslation(); // Initialize translation function
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [alertInfo, setAlertInfo] = useState({
     show: false,
     type: "",
     message: "",
   });
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState({
-    valid: true,
-    message: "",
-  });
-  const [emailError, setEmailError] = useState({ valid: true, message: "" });
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  // Function to format phone number for display (remove '6' prefix)
+  const getLocalPhoneNumber = (number) => {
+    return number.startsWith("6") ? number.slice(1) : number;
+  };
 
   const handleRegister = async (event) => {
     event.preventDefault();
 
-    // Create the user data object
     const userData = {
       phoneNumber,
     };
+
     try {
-      // Send a POST request
-      const response = await axios.post("/auth/registerUser", userData);
-      navigate("/register/success");
+      await axios.post("/auth/registerUser", userData);
+      setShowSuccessDialog(true);
     } catch (error) {
-      if (error.response && error.response.status === 409) {
-        // Email already registered
+      if (error.response?.status === 409) {
         setAlertInfo({
           show: true,
           type: "error",
-          message: "Email already registered.",
+          message: "Phone number already registered.",
         });
       } else {
-        // General error handling
         setAlertInfo({
           show: true,
           type: "error",
@@ -80,6 +68,11 @@ export default function UserRegister() {
     setAlertInfo({ show: false, type: "", message: "" });
   };
 
+  const handleSuccessDialogClose = () => {
+    setShowSuccessDialog(false);
+    navigate("/");
+  };
+
   const CustomDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiPaper-root": {
       boxShadow: "none",
@@ -87,41 +80,8 @@ export default function UserRegister() {
     },
   }));
 
-  // const validateEmail = (email) => {
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   if (!emailRegex.test(email)) {
-  //     return {
-  //       valid: false,
-  //       message: "Invalid email format.",
-  //     };
-  //   }
-  //   return { valid: true, message: "" };
-  // };
-
-  //  const validatePassword = (password) => {
-  //    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-  //    if (!passwordRegex.test(password)) {
-  //      return {
-  //        valid: false,
-  //        message:
-  //          "Password must be at least 8 characters long and contain at least one letter and one number.",
-  //      };
-  //    }
-  //    return { valid: true, message: "" };
-  //  };
-
-  //  const handlePasswordChange = () => {
-  //    const validationResult = validatePassword(password);
-  //    setPasswordError(validationResult);
-  //  };
-
-  // const handleEmailChange = () => {
-  //   const validationResult = validateEmail(email);
-  //   setEmailError(validationResult);
-  // };
-
   const isFormValid = () => {
-    return emailError.valid && passwordError.valid;
+    return phoneNumber.length >= 10;
   };
 
   return (
@@ -153,9 +113,15 @@ export default function UserRegister() {
           <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
-            {t("user_registration.title")} {/* Translate Registration Title */}
+          <Typography component="h1" variant="h5" mb={2}>
+            {t("user_registration.title")}
           </Typography>
+
+          <Alert severity="info" sx={{ width: "100%", mb: 2 }}>
+            After registration, use your phone number (without country code 6)
+            as both username and password to login.
+          </Alert>
+
           <Box
             component="form"
             onSubmit={handleRegister}
@@ -183,12 +149,13 @@ export default function UserRegister() {
               sx={{ mt: 3, mb: 2 }}
               disabled={!isFormValid()}
             >
-              {t("user_registration.register_button")} {/* Translate Button */}
+              {t("user_registration.register_button")}
             </Button>
           </Box>
         </Box>
       </Box>
 
+      {/* Error Alert Dialog */}
       <CustomDialog
         open={alertInfo.show}
         onClose={handleCloseAlert}
@@ -199,6 +166,43 @@ export default function UserRegister() {
           {alertInfo.message}
         </Alert>
       </CustomDialog>
+
+      {/* Success Dialog */}
+      <Dialog
+        open={showSuccessDialog}
+        onClose={handleSuccessDialogClose}
+        aria-labelledby="success-dialog-title"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="success-dialog-title">
+          Registration Successful!
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Your account has been created successfully.
+          </Alert>
+          <Typography variant="body1" gutterBottom>
+            Please use the following credentials to login:
+          </Typography>
+          <Box sx={{ bgcolor: "grey.100", p: 2, borderRadius: 1, mt: 1 }}>
+            <Typography variant="body1" sx={{ fontWeight: "medium", mb: 1 }}>
+              Username: {getLocalPhoneNumber(phoneNumber)}
+            </Typography>
+            <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+              Password: {getLocalPhoneNumber(phoneNumber)}
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            Please make sure to save these credentials securely.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSuccessDialogClose} variant="contained">
+            Proceed to Login
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }

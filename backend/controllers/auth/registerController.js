@@ -148,8 +148,6 @@ exports.registerUser = async (req, res) => {
       ? phoneNumber.slice(1)
       : phoneNumber;
 
-    console.log("local phone number", localPhoneNumber);
-
     // Hash the phone number without the prefix as the password
     const hashedPassword = await bcrypt.hash(localPhoneNumber, 10);
 
@@ -159,7 +157,7 @@ exports.registerUser = async (req, res) => {
       password: hashedPassword, // Save the hashed password without the prefix
       roles: ["user"], // Assign "user" role
       group: "user", // Assign the "user" group
-      // firstName, lastName, email can be left undefined
+      email: undefined, // Explicitly set email to undefined instead of letting it be null
     });
 
     // Save the user
@@ -167,7 +165,18 @@ exports.registerUser = async (req, res) => {
 
     res.status(201).send("User registered successfully");
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Error registering user");
+    console.error("Registration error:", error);
+    if (error.code === 11000) {
+      // Handle duplicate key errors more specifically
+      if (error.keyPattern.email) {
+        res.status(409).send("Email already registered");
+      } else if (error.keyPattern.phoneNumber) {
+        res.status(409).send("Phone number already registered");
+      } else {
+        res.status(409).send("Duplicate entry detected");
+      }
+    } else {
+      res.status(500).send("Error registering user");
+    }
   }
 };

@@ -99,6 +99,30 @@
       "content": "Go to Profile page and click ‘History’."
     }
   },
+  "infographics": {
+    "title": "Infographics"
+  },
+  "videos": {
+    "title": "Educational Videos",
+    "list": [
+      {
+        "index": 1,
+        "title": "Understanding the Basics of Tuberculosis"
+      },
+      {
+        "index": 2,
+        "title": "Signs and Symptoms, Treatment and Management of TB"
+      },
+      {
+        "index": 3,
+        "title": "Fighting Tuberculosis: Innovation and Research"
+      },
+      {
+        "index": 4,
+        "title": "Direct Observed Therapy (DOT) vs Video Observed Therapy (VOT)"
+      }
+    ]
+  },
   "login": {
     "title": "Login",
     "email_placeholder": "Email / Phone Number (eg 0123456789)",

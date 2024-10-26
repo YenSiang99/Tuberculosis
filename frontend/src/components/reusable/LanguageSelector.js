@@ -1,40 +1,52 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Menu, MenuItem } from "@mui/material";
-import LanguageIcon from "@mui/icons-material/Language";
+import { ButtonGroup, Button } from "@mui/material";
 
 const LanguageSelector = () => {
   const { i18n } = useTranslation();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
-    handleClose();
   };
 
   return (
-    <>
+    <ButtonGroup
+      variant="contained"
+      size="small"
+      sx={{
+        "& .MuiButton-root": {
+          minWidth: "40px", // Ensure buttons stay compact
+          backgroundColor: "white",
+          color: "#0046c0",
+          "&:hover": {
+            backgroundColor: "#e3f2fd",
+          },
+          "&.active": {
+            backgroundColor: "#0046c0",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#0046c0",
+            },
+          },
+          // Make buttons slightly smaller on mobile
+          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+          padding: { xs: "4px 8px", sm: "6px 12px" },
+        },
+      }}
+    >
       <Button
-        color="inherit"
-        startIcon={<LanguageIcon />}
-        onClick={handleClick}
+        className={i18n.language === "en" ? "active" : ""}
+        onClick={() => changeLanguage("en")}
       >
-        {i18n.language.toUpperCase()}
+        EN
       </Button>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={() => changeLanguage("en")}>English</MenuItem>
-        <MenuItem onClick={() => changeLanguage("ms")}>Malay</MenuItem>
-        {/* Add more language options as needed */}
-      </Menu>
-    </>
+      <Button
+        className={i18n.language === "ms" ? "active" : ""}
+        onClick={() => changeLanguage("ms")}
+      >
+        MS
+      </Button>
+    </ButtonGroup>
   );
 };
 

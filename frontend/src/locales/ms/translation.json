@@ -99,6 +99,30 @@
       "content": "Pergi ke halaman Profil dan klik 'Sejarah'."
     }
   },
+  "videos": {
+    "title": "Video Pendidikan",
+    "list": [
+      {
+        "index": 1,
+        "title": "Memahami Asas Tuberkulosis"
+      },
+      {
+        "index": 2,
+        "title": "Tanda dan Gejala, Rawatan dan Pengurusan TB"
+      },
+      {
+        "index": 3,
+        "title": "Memerangi Tuberkulosis: Inovasi dan Penyelidikan"
+      },
+      {
+        "index": 4,
+        "title": "Terapi Pemerhatian Langsung (DOT) vs Terapi Pemerhatian Video (VOT)"
+      }
+    ]
+  },
+  "infographics": {
+    "title": "Infografik"
+  },
   "login": {
     "title": "Log Masuk",
     "email_placeholder": "Emel / Nombor Telefon (contoh 0123456789)",
