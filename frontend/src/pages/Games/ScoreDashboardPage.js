@@ -104,7 +104,9 @@ export default function GamePerformanceDashboard() {
           score: `${score.score} ${t("user_score.outOf")} ${
             score.totalPossibleScore
           }`,
-          accuracyRate: `${score.accuracyRate}%`,
+          accuracyRate: score.accuracyRate
+            ? `${score.accuracyRate.toFixed(2)}%`
+            : "N/A",
           timeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
           totalGameTime: `${score.wordList?.totalGameTime || "N/A"} ${t(
             "user_score.seconds"
@@ -130,10 +132,9 @@ export default function GamePerformanceDashboard() {
           score: `${score.score} ${t("user_score.outOf")} ${
             score.totalPossibleScore
           }`,
-          accuracyRate:
-            typeof score.accuracyRate === "number"
-              ? `${score.accuracyRate.toFixed(2)}%`
-              : "N/A",
+          accuracyRate: score.accuracyRate
+            ? `${score.accuracyRate.toFixed(2)}%`
+            : "N/A",
           averageTimePerQuestion:
             typeof score.averageTimePerQuestion === "number"
               ? `${score.averageTimePerQuestion.toFixed(2)} ${t(
@@ -179,10 +180,9 @@ export default function GamePerformanceDashboard() {
           score: `${score.score} ${t("user_score.outOf")} ${
             score.totalPossibleScore
           }`,
-          accuracyRate:
-            typeof score.accuracyRate === "number"
-              ? `${score.accuracyRate.toFixed(2)}%`
-              : "N/A",
+          accuracyRate: score.accuracyRate
+            ? `${score.accuracyRate.toFixed(2)}%`
+            : "N/A",
           totalTimeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
           totalGameTime: `${score.totalGameTime} ${t("user_score.seconds")}`,
           completionStatus:
