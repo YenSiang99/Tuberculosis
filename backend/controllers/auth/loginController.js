@@ -54,7 +54,7 @@ exports.login = async (req, res) => {
     );
 
     // Role-based logic (healthcare/patient vs normal users)
-    if (user.roles.includes("patient") || user.roles.includes("healthcare")) {
+    if (user.roles.includes("patient")) {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset hours to start of the day
 
