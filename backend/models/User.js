@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema(
   {
     // Common fields
+
     profilePicture: { type: String, default: "" },
     email: {
       type: String,
@@ -63,7 +64,12 @@ const userSchema = new mongoose.Schema(
     videoUploadAlert: { type: Boolean, required: false },
     reminderTime: { type: Date, required: false },
     reminderFrequency: { type: Number, required: false },
+    refreshToken: {
+      type: String,
+      default: null,
+    },
   },
+
   {
     timestamps: true,
   }

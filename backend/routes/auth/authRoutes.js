@@ -21,4 +21,6 @@ router.post("/registerUser", registerController.registerUser);
 //Login that handles both phone no login and email login
 router.post("/login", loginController.login);
 
+router.post("/refresh-token", loginController.refreshToken);
+
 module.exports = router;
