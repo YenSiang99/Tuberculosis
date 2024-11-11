@@ -13,9 +13,181 @@ import {
   TableRow,
   Paper,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import axios from "../../components/axios"; // Adjust the import path based on your project structure
 import { useTranslation } from "react-i18next"; // Import useTranslation
+import { Star, Award, Trophy, Crown, Medal } from "lucide-react";
+
+const ACCURACY_BADGE_CONFIGS = [
+  {
+    threshold: 20,
+    icon: Medal,
+    label: "Bronze",
+    color: "text-amber-600",
+    iconProps: { fill: "#B45309", color: "#92400E" },
+    description: "Getting Started (0-20%)",
+  },
+  {
+    threshold: 40,
+    icon: Star,
+    label: "Silver",
+    color: "text-gray-400",
+    iconProps: { fill: "#9CA3AF", color: "#6B7280" },
+    description: "Making Progress (21-40%)",
+  },
+  {
+    threshold: 60,
+    icon: Award,
+    label: "Gold",
+    color: "text-yellow-500",
+    iconProps: { fill: "#F59E0B", color: "#D97706" },
+    description: "Rising Star (41-60%)",
+  },
+  {
+    threshold: 80,
+    icon: Trophy,
+    label: "Platinum",
+    color: "text-green-500",
+    iconProps: { fill: "#10B981", color: "#059669" },
+    description: "Expert Player (61-80%)",
+  },
+  {
+    threshold: 100,
+    icon: Crown,
+    label: "Diamond",
+    color: "text-blue-500",
+    iconProps: { fill: "#3B82F6", color: "#2563EB" },
+    description: "Master (81-100%)",
+  },
+];
+
+const TIME_BADGE_CONFIGS = [
+  {
+    threshold: 15,
+    icon: Crown,
+    label: "Diamond",
+    color: "text-blue-500",
+    iconProps: { fill: "#3B82F6", color: "#2563EB" },
+    description: "Speed Master (Under 15s)",
+  },
+  {
+    threshold: 30,
+    icon: Trophy,
+    label: "Platinum",
+    color: "text-green-500",
+    iconProps: { fill: "#10B981", color: "#059669" },
+    description: "Swift Solver (15-30s)",
+  },
+  {
+    threshold: 45,
+    icon: Award,
+    label: "Gold",
+    color: "text-yellow-500",
+    iconProps: { fill: "#F59E0B", color: "#D97706" },
+    description: "Fast Reader (31-45s)",
+  },
+  {
+    threshold: 60,
+    icon: Star,
+    label: "Silver",
+    color: "text-gray-400",
+    iconProps: { fill: "#9CA3AF", color: "#6B7280" },
+    description: "Steady Pace (46-60s)",
+  },
+  {
+    threshold: Infinity,
+    icon: Medal,
+    label: "Bronze",
+    color: "text-amber-600",
+    iconProps: { fill: "#B45309", color: "#92400E" },
+    description: "Taking Time (60s+)",
+  },
+];
+
+const getBadgeInfo = (value, isTime = false) => {
+  if (value === null || value === undefined) return null;
+
+  const configs = isTime ? TIME_BADGE_CONFIGS : ACCURACY_BADGE_CONFIGS;
+  return configs.find((config) => value <= config.threshold);
+};
+
+const BadgeDisplay = ({ value, isTime = false }) => {
+  const badge = getBadgeInfo(value, isTime);
+
+  if (!badge) return <span>-</span>;
+
+  const IconComponent = badge.icon;
+
+  return (
+    <div className="flex flex-col items-center space-y-2">
+      {/* Row 1: Badge Icon */}
+      <div className="w-full flex justify-center">
+        <IconComponent
+          className={`w-6 h-6 ${badge.color}`}
+          {...badge.iconProps}
+        />
+      </div>
+
+      {/* Row 2: Badge Label */}
+      <div className="w-full text-center">
+        <span className="font-medium text-sm">{badge.label}</span>
+      </div>
+
+      {/* Row 3: Percentage/Time Range */}
+      <div className="w-full text-center">
+        <span className="text-gray-500 text-xs">
+          {isTime
+            ? `${badge.threshold === Infinity ? "60+" : `<${badge.threshold}`}s`
+            : `${
+                badge.threshold === 100
+                  ? "81-100"
+                  : `${badge.threshold - 19}-${badge.threshold}`
+              }%`}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const BadgeLegend = ({ isTime = false }) => {
+  const configs = isTime ? TIME_BADGE_CONFIGS : ACCURACY_BADGE_CONFIGS;
+
+  return (
+    <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+      <Typography variant="h6" className="mb-4 text-center">
+        {isTime
+          ? "Time-Based Achievement Levels"
+          : "Accuracy-Based Achievement Levels"}
+      </Typography>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {configs.map((badge) => {
+          const IconComponent = badge.icon;
+          return (
+            <div
+              key={badge.label}
+              className="flex flex-col items-center p-2 bg-white rounded shadow-sm"
+            >
+              <IconComponent
+                className={`w-8 h-8 ${badge.color}`}
+                {...badge.iconProps}
+              />
+              <Typography variant="subtitle2" className="font-bold">
+                {badge.label}
+              </Typography>
+              <Typography
+                variant="caption"
+                className="text-center text-gray-600"
+              >
+                {badge.description}
+              </Typography>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 export default function GamePerformanceDashboard() {
   const { t, i18n } = useTranslation(); // Initialize useTranslation
@@ -94,6 +266,7 @@ export default function GamePerformanceDashboard() {
           t("user_score.wordListName"),
           t("user_score.score"),
           t("user_score.accuracyRate"),
+          t("user_score.badge"),
           t("user_score.timeTaken"),
           t("user_score.totalGameTime"),
           t("user_score.completionStatus"),
@@ -107,6 +280,12 @@ export default function GamePerformanceDashboard() {
           accuracyRate: score.accuracyRate
             ? `${score.accuracyRate.toFixed(2)}%`
             : "N/A",
+          badge: (
+            <BadgeDisplay
+              value={parseFloat(score.accuracyRate)}
+              isTime={false}
+            />
+          ),
           timeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
           totalGameTime: `${score.wordList?.totalGameTime || "N/A"} ${t(
             "user_score.seconds"
@@ -122,6 +301,7 @@ export default function GamePerformanceDashboard() {
           t("user_score.quizName"),
           t("user_score.score"),
           t("user_score.accuracyRate"),
+          t("user_score.badge"),
           t("user_score.averageTimePerQuestion"),
           t("user_score.timeLimitPerQuestion"),
           t("user_score.completionStatus"),
@@ -135,6 +315,13 @@ export default function GamePerformanceDashboard() {
           accuracyRate: score.accuracyRate
             ? `${score.accuracyRate.toFixed(2)}%`
             : "N/A",
+
+          badge: (
+            <BadgeDisplay
+              value={parseFloat(score.accuracyRate)}
+              isTime={false}
+            />
+          ),
           averageTimePerQuestion:
             typeof score.averageTimePerQuestion === "number"
               ? `${score.averageTimePerQuestion.toFixed(2)} ${t(
@@ -155,12 +342,19 @@ export default function GamePerformanceDashboard() {
           t("user_score.storyTitle"),
           t("user_score.numberOfRetries"),
           t("user_score.totalTimeTaken"),
+          t("user_score.badge"), // Added badge header
           t("user_score.date"),
         ];
         rows = scores.map((score) => ({
           storyTitle: score.story?.title?.[currentLanguage] || "N/A",
           numberOfRetries: score.numberOfRetries,
           totalTimeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
+          badge: (
+            <BadgeDisplay
+              value={parseFloat(score.totalTimeTaken)}
+              isTime={true}
+            />
+          ), // Added badge display
           date: new Date(score.createdAt).toLocaleString(),
         }));
         break;
@@ -170,6 +364,7 @@ export default function GamePerformanceDashboard() {
           t("user_score.gameName"),
           t("user_score.score"),
           t("user_score.accuracyRate"),
+          t("user_score.badge"),
           t("user_score.totalTimeTaken"),
           t("user_score.totalGameTime"),
           t("user_score.completionStatus"),
@@ -183,6 +378,12 @@ export default function GamePerformanceDashboard() {
           accuracyRate: score.accuracyRate
             ? `${score.accuracyRate.toFixed(2)}%`
             : "N/A",
+          badge: (
+            <BadgeDisplay
+              value={parseFloat(score.accuracyRate)}
+              isTime={false}
+            />
+          ),
           totalTimeTaken: `${score.totalTimeTaken} ${t("user_score.seconds")}`,
           totalGameTime: `${score.totalGameTime} ${t("user_score.seconds")}`,
           completionStatus:
@@ -209,8 +410,12 @@ export default function GamePerformanceDashboard() {
           <TableBody>
             {rows.map((row, index) => (
               <TableRow key={index}>
-                {Object.values(row).map((value, idx) => (
-                  <TableCell key={idx} align="center">
+                {Object.entries(row).map(([key, value], idx) => (
+                  <TableCell
+                    key={idx}
+                    align="center"
+                    className={key === "badge" ? "py-3" : ""} // Add more padding for badge cells
+                  >
                     {value}
                   </TableCell>
                 ))}

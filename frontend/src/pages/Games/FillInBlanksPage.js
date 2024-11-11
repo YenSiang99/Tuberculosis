@@ -71,7 +71,7 @@ const FillInBlanksPage = () => {
 
   const submitFillBlankScore = async () => {
     console.log("submit called...");
-    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+    const storedUserData = JSON.parse(localStorage.getItem("userData"));
 
     if (!storedUserData) return; // Only submit score if user is logged in
 

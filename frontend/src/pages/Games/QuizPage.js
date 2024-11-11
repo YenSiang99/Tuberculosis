@@ -46,7 +46,7 @@ const QuizPage = () => {
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
 
   const submitQuizScore = async () => {
-    const storedUserData = JSON.parse(sessionStorage.getItem("userData"));
+    const storedUserData = JSON.parse(localStorage.getItem("userData"));
 
     if (!storedUserData) return;
 
