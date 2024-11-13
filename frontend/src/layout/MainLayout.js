@@ -34,6 +34,12 @@ import InfoIcon from "@mui/icons-material/Info";
 import GamesIcon from "@mui/icons-material/Games";
 import MenuIcon from "@mui/icons-material/Menu";
 
+import ExtensionIcon from '@mui/icons-material/Extension'; 
+import QuizIcon from '@mui/icons-material/Quiz'; 
+import AutoStoriesIcon from '@mui/icons-material/AutoStories'; 
+import TextFieldsIcon from '@mui/icons-material/TextFields'; 
+import LeaderboardIcon from '@mui/icons-material/Leaderboard'; 
+
 import theme from "../components/reusable/Theme";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -260,16 +266,6 @@ export default function MainLayout() {
     if (userRole?.includes("admin")) {
       menuItems.push(
         <>
-          {/* <ListItemButton
-            onClick={() => navigateTo("/adminpanel")}
-            selected={location.pathname === "/adminpanel"}
-          >
-            <ListItemIcon>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary="Admin Panel" />
-          </ListItemButton> */}
-          {/* Add your Games menu and submenus here */}
           <ListItemButton onClick={handleAdminClick}>
             <ListItemIcon>
               <SettingsIcon />
@@ -284,21 +280,29 @@ export default function MainLayout() {
                 selected={location.pathname === "/admin/scoredashboard"}
                 sx={{ pl: 4 }}
               >
-                <ListItemText primary="Score Dashboard" />
+                <ListItemIcon>
+                  <LeaderboardIcon />
+                </ListItemIcon>
+                <ListItemText primary="Game Score" />
               </ListItemButton>
               <ListItemButton
                 onClick={() => navigateTo("/admin/wordsearchmenu")}
                 selected={location.pathname === "/admin/wordsearchmenu"}
                 sx={{ pl: 4 }}
               >
+                <ListItemIcon>
+                  <ExtensionIcon />
+                </ListItemIcon>
                 <ListItemText primary="Word Search" />
               </ListItemButton>
-              {/* Add more submenus here if needed */}
               <ListItemButton
                 onClick={() => navigateTo("/admin/quizzes")}
                 selected={location.pathname === "/admin/quizzes"}
                 sx={{ pl: 4 }}
               >
+                <ListItemIcon>
+                  <QuizIcon />
+                </ListItemIcon>
                 <ListItemText primary="Quizzes" />
               </ListItemButton>
               <ListItemButton
@@ -306,6 +310,9 @@ export default function MainLayout() {
                 selected={location.pathname === "/admin/storymenu"}
                 sx={{ pl: 4 }}
               >
+                <ListItemIcon>
+                  <AutoStoriesIcon />
+                </ListItemIcon>
                 <ListItemText primary="Interactive Story" />
               </ListItemButton>
               <ListItemButton
@@ -313,6 +320,9 @@ export default function MainLayout() {
                 selected={location.pathname === "/admin/blanks"}
                 sx={{ pl: 4 }}
               >
+                <ListItemIcon>
+                  <TextFieldsIcon />
+                </ListItemIcon>
                 <ListItemText primary="Fill in the blanks" />
               </ListItemButton>
             </List>
@@ -388,7 +398,10 @@ export default function MainLayout() {
               }}
               selected={location.pathname === "/games/score-dashboard"}
             >
-              <ListItemText primary="Score Dashboard" />
+              <ListItemIcon>
+                <LeaderboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Game Score" />
             </ListItemButton>
             <ListItemButton
               sx={{ pl: 4 }}
@@ -398,6 +411,9 @@ export default function MainLayout() {
               }}
               selected={location.pathname === "/games/word-search"}
             >
+              <ListItemIcon>
+                <ExtensionIcon />
+              </ListItemIcon>
               <ListItemText primary="Word Search" />
             </ListItemButton>
             <ListItemButton
@@ -408,6 +424,9 @@ export default function MainLayout() {
               }}
               selected={location.pathname === "/games/quiz"}
             >
+              <ListItemIcon>
+                <QuizIcon />
+              </ListItemIcon>
               <ListItemText primary="Quiz" />
             </ListItemButton>
             <ListItemButton
@@ -418,6 +437,9 @@ export default function MainLayout() {
               }}
               selected={location.pathname === "/games/interactive-story"}
             >
+              <ListItemIcon>
+                <AutoStoriesIcon />
+              </ListItemIcon>
               <ListItemText primary="Interactive Story" />
             </ListItemButton>
             <ListItemButton
@@ -428,18 +450,11 @@ export default function MainLayout() {
               }}
               selected={location.pathname === "/games/fill-in-blanks"}
             >
+              <ListItemIcon>
+                <TextFieldsIcon />
+              </ListItemIcon>
               <ListItemText primary="Fill in the Blanks" />
             </ListItemButton>
-            {/* <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => {
-                navigate("/games/true-false");
-                handleDrawerToggle();
-              }}
-              selected={location.pathname === "/games/true-false"}
-            >
-              <ListItemText primary="True or False" />
-            </ListItemButton> */}
           </List>
         </Collapse>
       </>
