@@ -153,15 +153,19 @@ const FillInBlanksPage = () => {
     return score;
   };
 
+  const handleGameEnd = () => {
+    setGameStart(false);
+    setGamePause(false);
+    setGameEnd(true);
+    const finalScore = calculateScore();
+    setScore(finalScore);
+    setShowResult(true);
+    submitFillBlankScore();
+  };
+
   const handleSubmit = () => {
     if (!gameEnd) {
-      setGameStart(false);
-      setGamePause(false);
-      setGameEnd(true);
-      const finalScore = calculateScore();
-      setScore(finalScore);
-      setShowResult(true);
-      submitFillBlankScore();
+      handleGameEnd()
     }
   };
 
@@ -196,8 +200,7 @@ const FillInBlanksPage = () => {
         const countdown = setTimeout(() => setGameTimer(gameTimer - 1), 1000);
         return () => clearTimeout(countdown);
       } else if (gameTimer === 0) {
-        setGameEnd(true);
-        submitFillBlankScore();
+        handleGameEnd();
       }
     }
   }, [gameTimer, gameStart, gamePause]);
