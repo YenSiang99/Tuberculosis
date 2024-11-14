@@ -604,9 +604,6 @@ const WordSearchPage = () => {
           setGameStart(false);
           setFinalTimeTaken(null);
 
-          // Open instruction dialog when language changes
-          // setOpenInstructionDialog(true);
-          setShowStartDialog(true);
         }
       } catch (error) {
         console.error("Failed to fetch word list", error);
