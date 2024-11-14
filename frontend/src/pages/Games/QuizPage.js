@@ -14,36 +14,224 @@ import {
   DialogContentText,
   DialogTitle,
   useMediaQuery,
+  CircularProgress,
+  Checkbox,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
 import { useTranslation } from "react-i18next";
 
+const InstructionDialog = ({ 
+  showInstructions, 
+  dontShowAgain, 
+  setDontShowAgain, 
+  handleCloseInstructionDialog,
+  gameState,
+  questionTime,
+  t 
+}) => (
+  <Dialog
+    open={showInstructions}
+    onClose={handleCloseInstructionDialog}
+    aria-labelledby="instruction-dialog-title"
+    maxWidth="sm"
+    fullWidth
+  >
+    <DialogTitle id="instruction-dialog-title">
+      {t("quiz_game.quizGameHowToPlay")}
+    </DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        1. <strong>{t("quiz_game.objective")}:</strong> <br />
+        {t("quiz_game.objectiveText")}
+        <br />
+        <br />
+        2. <strong>{t("quiz_game.multipleChoices")}:</strong> <br />
+        {t("quiz_game.multipleChoicesText")}
+        <br />
+        <br />
+        3. <strong>{t("quiz_game.timeLimit")}:</strong> <br />
+        {t("quiz_game.timeLimitText", { questionTime })}
+        <br />
+        <br />
+        4. <strong>{t("quiz_game.missedAnswers")}:</strong> <br />
+        {t("quiz_game.missedAnswersText")}
+        <br />
+        <br />
+        5. <strong>{t("quiz_game.preparationTime")}:</strong> <br />
+        {t("quiz_game.preparationTimeText")}
+        <br />
+        <br />
+        6. <strong>{t("quiz_game.finishStrong")}:</strong> <br />
+        {t("quiz_game.finishStrongText")}
+      </DialogContentText>
+      {gameState === 'initial' && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={dontShowAgain}
+              onChange={(e) => setDontShowAgain(e.target.checked)}
+            />
+          }
+          label={t("quiz_game.dontShowAgain")}
+        />
+      )}
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleCloseInstructionDialog} variant="contained" fullWidth>
+        {t("quiz_game.okay")}
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
+// Start Game Dialog Component
+const StartGameDialog = ({ showStartDialog, handleStartGame, t }) => (
+  <Dialog
+    open={showStartDialog}
+    aria-labelledby="start-game-dialog-title"
+    maxWidth="sm"
+    fullWidth
+  >
+    <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        {t("quiz_game.areYouReady")}
+      </Typography>
+      <Button 
+        variant="contained" 
+        size="large" 
+        onClick={handleStartGame}
+        sx={{ mt: 3, minWidth: 200 }}
+      >
+        {t("quiz_game.startGame")}
+      </Button>
+    </DialogContent>
+  </Dialog>
+);
+
+// Countdown Dialog Component
+const CountdownDialog = ({ showCountdown, countdown }) => (
+  <Dialog
+    open={showCountdown}
+    maxWidth="sm"
+    fullWidth
+    PaperProps={{
+      sx: {
+        backgroundColor: 'transparent',
+        boxShadow: 'none',
+      },
+    }}
+  >
+    <DialogContent sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 200,
+    }}>
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <CircularProgress 
+          size={100}
+          thickness={2}
+          sx={{ color: 'primary.main' }}
+        />
+        <Box sx={{
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          position: 'absolute',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <Typography
+            variant="h2"
+            component="div"
+            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+          >
+            {countdown}
+          </Typography>
+        </Box>
+      </Box>
+    </DialogContent>
+  </Dialog>
+);
+
 const QuizPage = () => {
   const test = false;
   const { i18n, t } = useTranslation();
   const selectedLanguage = i18n.language || "en";
+  const theme = useTheme();
 
   const [prevLanguage, setPrevLanguage] = useState(selectedLanguage);
-
   const [questions, setQuestions] = useState([]);
-
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [questionTime, setQuestionTime] = useState(null);
   const [questionTimer, setQuestionTimer] = useState(null);
   const [nextQuestionTimer, setNextQuestionTimer] = useState(0);
   const [answerFeedback, setFeedback] = useState(null);
+  const [totalTimeTaken, setTotalTimeTaken] = useState(0);
 
+  const [gameState, setGameState] = useState('initial');
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showStartDialog, setShowStartDialog] = useState(false);
+  const [showCountdown, setShowCountdown] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
   const [gameStart, setGameStart] = useState(false);
   const [gamePause, setGamePause] = useState(false);
 
-  const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  useEffect(() => {
+    const hideInstructions = localStorage.getItem('hideQuizInstructions');
+    if (hideInstructions === 'true') {
+      setShowInstructions(false);
+      setShowStartDialog(true);
+    }
+  }, []);
 
-  const [totalTimeTaken, setTotalTimeTaken] = useState(0);
+  // Handle instruction dialog close
+  const handleCloseInstructionDialog = () => {
+    if (dontShowAgain) {
+      localStorage.setItem('hideQuizInstructions', 'true');
+    }
+    setShowInstructions(false);
+  
+    if (gameState === 'initial') {
+      setShowStartDialog(true);
+    } else {
+      setGamePause(false);
+    }
+  };
+
+  // Handle game start
+  const handleStartGame = () => {
+    setShowStartDialog(false);
+    setShowCountdown(true);
+    setGameState('countdown');
+    setCountdown(3);
+  };
+
+  // Countdown effect
+  useEffect(() => {
+    if (gameState === 'countdown' && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (gameState === 'countdown' && countdown === 0) {
+      setShowCountdown(false);
+      setGameState('playing');
+      setGameStart(true);
+      setGamePause(false);
+    }
+  }, [countdown, gameState]);
+
+  // View instructions button handler
+  const handleOpenInstructionDialog = () => {
+    setShowInstructions(true);
+    setGamePause(true);
+  };
 
   const submitQuizScore = async () => {
     const storedUserData = JSON.parse(localStorage.getItem("userData"));
@@ -113,19 +301,6 @@ const QuizPage = () => {
     }
   };
 
-  const handleCloseInstructionDialog = () => {
-    setOpenInstructionDialog(false);
-    setGameStart(true);
-    if (gamePause) {
-      setGamePause(false);
-    }
-  };
-
-  const handleOpenInstructionDialog = () => {
-    setOpenInstructionDialog(true);
-    setGamePause(true);
-  };
-
   useEffect(() => {
     if (!test && gameStart && !gamePause) {
       if (questionTimer > 0 && answerFeedback === null) {
@@ -192,7 +367,8 @@ const QuizPage = () => {
     setGameEnd(false);
     setGameStart(false);
     setGamePause(false);
-    setOpenInstructionDialog(true);
+    // setOpenInstructionDialog(true);
+    setShowInstructions(true)
     setTotalTimeTaken(0);
   };
 
@@ -210,7 +386,31 @@ const QuizPage = () => {
         {t("quiz_game.title")}
       </Typography>
       {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
-      {!gameEnd && questions.length > 0 ? (
+
+      <InstructionDialog 
+        showInstructions={showInstructions}
+        dontShowAgain={dontShowAgain}
+        setDontShowAgain={setDontShowAgain}
+        handleCloseInstructionDialog={handleCloseInstructionDialog}
+        gameState={gameState}
+        questionTime={questionTime}
+        t={t}
+      />
+      
+      <StartGameDialog 
+        showStartDialog={showStartDialog}
+        handleStartGame={handleStartGame}
+        t={t}
+      />
+      
+      <CountdownDialog 
+        showCountdown={showCountdown}
+        countdown={countdown}
+      />
+
+
+{gameState === 'playing' && (
+      !gameEnd && questions.length > 0 ? (
         <Grid
           container
           justifyContent="center"
@@ -419,47 +619,9 @@ const QuizPage = () => {
             <Typography variant="h6">{t("quiz_game.loadingQuiz")}</Typography>
           )}
         </Box>
+      )
       )}
-      <Dialog
-        open={openInstructionDialog}
-        onClose={handleCloseInstructionDialog}
-        aria-labelledby="responsive-dialog-title"
-      >
-        <DialogTitle id="responsive-dialog-title">
-          {t("quiz_game.quizGameHowToPlay")}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            1. <strong>{t("quiz_game.objective")}:</strong> <br />
-            {t("quiz_game.objectiveText")}
-            <br />
-            <br />
-            2. <strong>{t("quiz_game.multipleChoices")}:</strong> <br />
-            {t("quiz_game.multipleChoicesText")}
-            <br />
-            <br />
-            3. <strong>{t("quiz_game.timeLimit")}:</strong> <br />
-            {t("quiz_game.timeLimitText", { questionTime })}
-            <br />
-            <br />
-            4. <strong>{t("quiz_game.missedAnswers")}:</strong> <br />
-            {t("quiz_game.missedAnswersText")}
-            <br />
-            <br />
-            5. <strong>{t("quiz_game.preparationTime")}:</strong> <br />
-            {t("quiz_game.preparationTimeText")}
-            <br />
-            <br />
-            6. <strong>{t("quiz_game.finishStrong")}:</strong> <br />
-            {t("quiz_game.finishStrongText")}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseInstructionDialog} autoFocus>
-            {t("quiz_game.okay")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+    
     </Container>
   );
 };
