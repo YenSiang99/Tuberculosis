@@ -11,14 +11,151 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Box,
+  CircularProgress,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
 import { useTranslation } from "react-i18next";
 
+// Instruction Dialog Component
+const InstructionDialog = ({ 
+  showInstructions, 
+  dontShowAgain, 
+  setDontShowAgain, 
+  handleCloseInstructionDialog,
+  gameState,
+  t 
+}) => (
+  <Dialog
+    open={showInstructions}
+    onClose={handleCloseInstructionDialog}
+    aria-labelledby="instruction-dialog-title"
+    maxWidth="sm"
+    fullWidth
+  >
+    <DialogTitle id="instruction-dialog-title">
+      {t("interactive_story.quizGameHowToPlay")}
+    </DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        1. <strong>{t("interactive_story.introductionToTheStory")}:</strong> <br />
+        {t("interactive_story.introductionText")}
+        <br />
+        <br />
+        2. <strong>{t("interactive_story.makeYourChoice")}:</strong> <br />
+        {t("interactive_story.makeYourChoiceText")}
+        <br />
+        <br />
+        3. <strong>{t("interactive_story.gameOver")}:</strong> <br />
+        {t("interactive_story.gameOverText")}
+        <br />
+        <br />
+        4. <strong>{t("interactive_story.goal")}:</strong> <br />
+        {t("interactive_story.goalText")}
+      </DialogContentText>
+      {gameState === 'initial' && (
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={dontShowAgain}
+              onChange={(e) => setDontShowAgain(e.target.checked)}
+            />
+          }
+          label={t("interactive_story.dontShowAgain")}
+        />
+      )}
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleCloseInstructionDialog} variant="contained" fullWidth>
+        {t("interactive_story.okay")}
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
+// Start Game Dialog Component
+const StartGameDialog = ({ showStartDialog, handleStartGame, t }) => (
+  <Dialog
+    open={showStartDialog}
+    aria-labelledby="start-game-dialog-title"
+    maxWidth="sm"
+    fullWidth
+  >
+    <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        {t("interactive_story.areYouReady")}
+      </Typography>
+      <Button 
+        variant="contained" 
+        size="large" 
+        onClick={handleStartGame}
+        sx={{ mt: 3, minWidth: 200 }}
+      >
+        {t("interactive_story.startGame")}
+      </Button>
+    </DialogContent>
+  </Dialog>
+);
+
+// Countdown Dialog Component
+const CountdownDialog = ({ showCountdown, countdown }) => (
+  <Dialog
+    open={showCountdown}
+    maxWidth="sm"
+    fullWidth
+    PaperProps={{
+      sx: {
+        backgroundColor: 'transparent',
+        boxShadow: 'none',
+      },
+    }}
+  >
+    <DialogContent sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 200,
+    }}>
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <CircularProgress 
+          size={100}
+          thickness={2}
+          sx={{ color: 'primary.main' }}
+        />
+        <Box sx={{
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          position: 'absolute',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <Typography
+            variant="h2"
+            component="div"
+            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+          >
+            {countdown}
+          </Typography>
+        </Box>
+      </Box>
+    </DialogContent>
+  </Dialog>
+);
+
+
 const InteractiveStoryPage = () => {
+
   const { i18n, t } = useTranslation();
   const selectedLanguage = i18n.language || "en";
+  const theme = useTheme();
+
   const [prevLanguage, setPrevLanguage] = useState(selectedLanguage);
   const [storyData, setStoryData] = useState({
     title: {
@@ -135,25 +272,84 @@ const InteractiveStoryPage = () => {
       },
     ],
   });
-  const [currentStepId, setCurrentStepId] = useState(
-    storyData?.steps[0]?.stepId || null
-  );
-  const [loading, setLoading] = useState(true); // To handle loading state
-  const [error, setError] = useState(null); // For error handling
-
+  const [currentStepId, setCurrentStepId] = useState(storyData?.steps[0]?.stepId || null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [retries, setRetries] = useState(0);
   const [startTime, setStartTime] = useState(null);
-  const [finalTimeTaken, setFinalTimeTaken] = useState(null); // New state for final time
-  const [gameStarted, setGameStarted] = useState(false); // Track if the game has started
+  const [finalTimeTaken, setFinalTimeTaken] = useState(null);
+
+  const [gameState, setGameState] = useState('initial');
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showStartDialog, setShowStartDialog] = useState(false);
+  const [showCountdown, setShowCountdown] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
 
   const currentStep =
     storyData?.steps.find((step) => step.stepId === currentStepId) ||
     storyData?.ends.find((end) => end.endId === currentStepId);
-
   const isEnd = currentStep && "endType" in currentStep;
-
-  const theme = useTheme();
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
+
+  useEffect(() => {
+    const hideInstructions = localStorage.getItem('hideStoryInstructions');
+    if (hideInstructions === 'true') {
+      setShowInstructions(false);
+      setShowStartDialog(true);
+    }
+  }, []);
+
+  // Handle instruction dialog close
+  const handleCloseInstructionDialog = () => {
+    if (dontShowAgain) {
+      localStorage.setItem('hideStoryInstructions', 'true');
+    }
+    setShowInstructions(false);
+  
+    if (gameState === 'initial') {
+      setShowStartDialog(true);
+    }
+  };
+
+  // Handle game start
+  const handleStartGame = () => {
+    setShowStartDialog(false);
+    setShowCountdown(true);
+    setGameState('countdown');
+    setCountdown(3);
+  };
+
+  // Countdown effect
+  useEffect(() => {
+    if (gameState === 'countdown' && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (gameState === 'countdown' && countdown === 0) {
+      setShowCountdown(false);
+      setGameState('playing');
+      setGameStarted(true);
+      setStartTime(Date.now());
+    }
+  }, [countdown, gameState]);
+
+  const handleOpenInstructionDialog = () => {
+    setShowInstructions(true);
+  };
+
+  // Reset game function updated
+  const resetGame = () => {
+    setCurrentStepId(storyData?.steps[0]?.stepId || null);
+    setRetries(0);
+    setStartTime(null);
+    setFinalTimeTaken(null);
+    setGameStarted(false);
+    setGameState('initial');
+    setShowInstructions(true);
+  };
+
+
 
   const generateImageUrl = (content) => {
     const englishContent = content?.en || content?.[selectedLanguage] || "";
@@ -162,18 +358,6 @@ const InteractiveStoryPage = () => {
       .replace(/\s+/g, "-");
     console.log("formattedContent", formattedContent);
     return `https://image.pollinations.ai/prompt/${formattedContent}-kids-animation-16-by-9-image`;
-  };
-
-  const handleCloseInstructionDialog = () => {
-    setOpenInstructionDialog(false);
-    if (!gameStarted) {
-      setStartTime(Date.now()); // Set start time only if the game hasn't started yet
-      setGameStarted(true); // Mark the game as started
-    }
-  };
-
-  const handleOpenInstructionDialog = () => {
-    setOpenInstructionDialog(true);
   };
 
   const handleRestartStory = () => {
@@ -186,15 +370,6 @@ const InteractiveStoryPage = () => {
       setPrevLanguage(selectedLanguage);
     }
   }, [selectedLanguage, prevLanguage]);
-
-  const resetGame = () => {
-    setCurrentStepId(storyData?.steps[0]?.stepId || null);
-    setRetries(0);
-    setStartTime(Date.now());
-    setFinalTimeTaken(null);
-    setGameStarted(false);
-    setOpenInstructionDialog(true);
-  };
 
   const handleRetryStory = () => {
     setRetries(retries + 1);
@@ -262,18 +437,42 @@ const InteractiveStoryPage = () => {
       >
         {t("interactive_story.title")}
       </Typography>
-      <Grid container spacing={1}>
+
+      <InstructionDialog 
+        showInstructions={showInstructions}
+        dontShowAgain={dontShowAgain}
+        setDontShowAgain={setDontShowAgain}
+        handleCloseInstructionDialog={handleCloseInstructionDialog}
+        gameState={gameState}
+        t={t}
+      />
+      
+      <StartGameDialog 
+        showStartDialog={showStartDialog}
+        handleStartGame={handleStartGame}
+        t={t}
+      />
+      
+      <CountdownDialog 
+        showCountdown={showCountdown}
+        countdown={countdown}
+      />
+
+
+{(gameState === 'playing' || gameStarted) && (
+        // Your existing game content JSX
+        <Grid container spacing={1}>
         {/* Title */}
         <Grid
-          item
-          container
-          xs={12}
-          sx={{ justifyContent: "start", alignItems: "center" }}
-        >
-          <Button variant="contained" onClick={handleOpenInstructionDialog}>
-            {t("interactive_story.viewInstruction")}
-          </Button>
-        </Grid>
+            item
+            container
+            xs={12}
+            sx={{ justifyContent: "start", alignItems: "center" }}
+          >
+            <Button variant="contained" onClick={handleOpenInstructionDialog}>
+              {t("interactive_story.viewInstruction")}
+            </Button>
+          </Grid>
         <Grid item xs={12}>
           <Typography variant="h4">
             {storyData.title?.[selectedLanguage] ||
@@ -421,39 +620,10 @@ const InteractiveStoryPage = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Dialog
-        open={openInstructionDialog}
-        onClose={handleCloseInstructionDialog}
-        aria-labelledby="responsive-dialog-title"
-      >
-        <DialogTitle id="responsive-dialog-title">
-          {t("interactive_story.quizGameHowToPlay")}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            1. <strong>{t("interactive_story.introductionToTheStory")}:</strong>{" "}
-            <br />
-            {t("interactive_story.introductionText")}
-            <br />
-            <br />
-            2. <strong>{t("interactive_story.makeYourChoice")}:</strong> <br />
-            {t("interactive_story.makeYourChoiceText")}
-            <br />
-            <br />
-            3. <strong>{t("interactive_story.gameOver")}:</strong> <br />
-            {t("interactive_story.gameOverText")}
-            <br />
-            <br />
-            4. <strong>{t("interactive_story.goal")}:</strong> <br />
-            {t("interactive_story.goalText")}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseInstructionDialog} autoFocus>
-            {t("interactive_story.okay")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      )}
+
+     
+    
     </Container>
   );
 };

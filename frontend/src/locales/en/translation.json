@@ -286,7 +286,11 @@
     "preparationTimeText": "There will be a 5-second interval between questions to get ready for the next one.",
     "finishStrong": "Finish Strong",
     "finishStrongText": "Keep going until you’ve answered all the questions. Good luck!",
-    "okay": "Okay"
+    "okay": "Okay",
+    "areYouReady": "Are you ready?",
+    "startGame": "Start Game",
+    "dontShowAgain": "Don't show again",
+    "gotIt": "Got it"
   },
   "interactive_story": {
     "title": "Interactive Story",
@@ -310,7 +314,11 @@
     "gameOverText": "If you make the wrong choice, the game will end. You can restart the story and try again by clicking the \"Restart Story\" button.",
     "goal": "Goal",
     "goalText": "The goal is to make the correct decisions that lead to a successful outcome in the story.",
-    "okay": "Okay"
+    "okay": "Okay",
+    "areYouReady": "Are you ready?",
+    "startGame": "Start Game",
+    "dontShowAgain": "Don't show again",
+    "gotIt": "Got it"
   },
   "fill_in_the_blanks": {
     "title": "Fill in the blanks!",
@@ -343,7 +351,11 @@
     "resettingTheGame": "Resetting the Game",
     "resettingTheGameText": "You can reset the game at any time to try again with a fresh start.",
     "okay": "Okay",
-    "aLimitedAmountOf": "a limited amount of"
+    "aLimitedAmountOf": "a limited amount of",
+    "areYouReady": "Are you ready?",
+    "startGame": "Start Game",
+    "dontShowAgain": "Don't show again",
+    "gotIt": "Got it"
   },
   "user_score": {
     "myGameStats": "My Game Stats",

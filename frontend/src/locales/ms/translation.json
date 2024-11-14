@@ -286,7 +286,11 @@
     "preparationTimeText": "Akan ada selang 5 saat antara soalan untuk bersedia untuk soalan seterusnya.",
     "finishStrong": "Selesaikan Dengan Baik",
     "finishStrongText": "Teruskan sehingga anda telah menjawab semua soalan. Semoga berjaya!",
-    "okay": "Baiklah"
+    "okay": "Baiklah",
+    "areYouReady": "Anda sudah bersedia?",
+    "startGame": "Mula Permainan",
+    "dontShowAgain": "Jangan tunjuk lagi",
+    "gotIt": "Faham"
   },
   "interactive_story": {
     "title": "Cerita Interaktif",
@@ -310,7 +314,11 @@
     "gameOverText": "Jika anda membuat pilihan yang salah, permainan akan berakhir. Anda boleh mulakan semula cerita dan cuba lagi dengan mengklik butang \"Mulakan Cerita Semula\".",
     "goal": "Matlamat",
     "goalText": "Matlamatnya adalah untuk membuat keputusan yang betul yang membawa kepada hasil yang berjaya dalam cerita.",
-    "okay": "Baiklah"
+    "okay": "Baiklah",
+    "areYouReady": "Anda sudah bersedia?",
+    "startGame": "Mula Permainan",
+    "dontShowAgain": "Jangan tunjuk lagi",
+    "gotIt": "Faham"
   },
   "fill_in_the_blanks": {
     "title": "Isi tempat kosong!",
@@ -343,7 +351,11 @@
     "resettingTheGame": "Menetapkan Semula Permainan",
     "resettingTheGameText": "Anda boleh menetapkan semula permainan pada bila-bila masa untuk mencuba lagi dengan permulaan yang baru.",
     "okay": "Baiklah",
-    "aLimitedAmountOf": "jumlah masa yang terhad"
+    "aLimitedAmountOf": "jumlah masa yang terhad",
+    "areYouReady": "Anda sudah bersedia?",
+    "startGame": "Mula Permainan",
+    "dontShowAgain": "Jangan tunjuk lagi",
+    "gotIt": "Faham"
   },
   "user_score": {
     "myGameStats": "Statistik Permainan Saya",
