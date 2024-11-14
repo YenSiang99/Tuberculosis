@@ -249,7 +249,11 @@
     "findingWordsText": "Once you've correctly selected a word, the letters will turn green, and the word will be crossed out in the list.",
     "completeTheChallenge": "Complete the Challenge",
     "completeTheChallengeText": "The game will end after you find all of the words or the timer ends. Good luck!",
-    "okay": "Okay"
+    "okay": "Okay",
+    "areYouReady": "Are you ready?",
+    "startGame": "Start Game",
+    "dontShowAgain": "Don't show again",
+    "gotIt": "Got it"
   },
   "quiz_game": {
     "title": "Quiz Time!",
