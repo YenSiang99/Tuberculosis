@@ -249,7 +249,11 @@
     "findingWordsText": "Setelah anda memilih perkataan dengan betul, huruf akan bertukar hijau, dan perkataan akan dicoret dalam senarai.",
     "completeTheChallenge": "Lengkapkan Cabaran",
     "completeTheChallengeText": "Permainan akan berakhir selepas anda menemui semua perkataan atau masa tamat. Semoga berjaya!",
-    "okay": "Baiklah"
+    "okay": "Baiklah",
+    "areYouReady": "Anda sudah bersedia?",
+    "startGame": "Mula Permainan",
+    "dontShowAgain": "Jangan tunjuk lagi",
+    "gotIt": "Faham"
   },
   "quiz_game": {
     "title": "Masa Kuiz!",
