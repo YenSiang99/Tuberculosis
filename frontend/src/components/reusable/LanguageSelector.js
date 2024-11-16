@@ -44,7 +44,7 @@ const LanguageSelector = () => {
         className={i18n.language === "ms" ? "active" : ""}
         onClick={() => changeLanguage("ms")}
       >
-        MS
+        MY
       </Button>
     </ButtonGroup>
   );

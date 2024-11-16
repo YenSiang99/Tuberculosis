@@ -21,14 +21,14 @@ import { useTheme } from "@mui/material/styles";
 import axios from "../../components/axios";
 import { useTranslation } from "react-i18next";
 
-const InstructionDialog = ({ 
-  showInstructions, 
-  dontShowAgain, 
-  setDontShowAgain, 
+const InstructionDialog = ({
+  showInstructions,
+  dontShowAgain,
+  setDontShowAgain,
   handleCloseInstructionDialog,
   gameState,
   questionTime,
-  t 
+  t,
 }) => (
   <Dialog
     open={showInstructions}
@@ -65,7 +65,7 @@ const InstructionDialog = ({
         6. <strong>{t("quiz_game.finishStrong")}:</strong> <br />
         {t("quiz_game.finishStrongText")}
       </DialogContentText>
-      {gameState === 'initial' && (
+      {gameState === "initial" && (
         <FormControlLabel
           control={
             <Checkbox
@@ -78,7 +78,11 @@ const InstructionDialog = ({
       )}
     </DialogContent>
     <DialogActions>
-      <Button onClick={handleCloseInstructionDialog} variant="contained" fullWidth>
+      <Button
+        onClick={handleCloseInstructionDialog}
+        variant="contained"
+        fullWidth
+      >
         {t("quiz_game.okay")}
       </Button>
     </DialogActions>
@@ -93,13 +97,13 @@ const StartGameDialog = ({ showStartDialog, handleStartGame, t }) => (
     maxWidth="sm"
     fullWidth
   >
-    <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+    <DialogContent sx={{ textAlign: "center", py: 4 }}>
       <Typography variant="h4" gutterBottom>
         {t("quiz_game.areYouReady")}
       </Typography>
-      <Button 
-        variant="contained" 
-        size="large" 
+      <Button
+        variant="contained"
+        size="large"
         onClick={handleStartGame}
         sx={{ mt: 3, minWidth: 200 }}
       >
@@ -117,38 +121,42 @@ const CountdownDialog = ({ showCountdown, countdown }) => (
     fullWidth
     PaperProps={{
       sx: {
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
+        backgroundColor: "transparent",
+        boxShadow: "none",
       },
     }}
   >
-    <DialogContent sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 200,
-    }}>
-      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-        <CircularProgress 
+    <DialogContent
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 200,
+      }}
+    >
+      <Box sx={{ position: "relative", display: "inline-flex" }}>
+        <CircularProgress
           size={100}
           thickness={2}
-          sx={{ color: 'primary.main' }}
+          sx={{ color: "primary.main" }}
         />
-        <Box sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: "absolute",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Typography
             variant="h2"
             component="div"
-            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+            sx={{ color: "primary.main", fontWeight: "bold" }}
           >
             {countdown}
           </Typography>
@@ -174,7 +182,7 @@ const QuizPage = () => {
   const [answerFeedback, setFeedback] = useState(null);
   const [totalTimeTaken, setTotalTimeTaken] = useState(0);
 
-  const [gameState, setGameState] = useState('initial');
+  const [gameState, setGameState] = useState("initial");
   const [showInstructions, setShowInstructions] = useState(true);
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
@@ -193,30 +201,28 @@ const QuizPage = () => {
     setGameEnd(false);
     setGameStart(false);
     setGamePause(false);
-    setGameState('initial');
-    
+    setGameState("initial");
+
     // Check if user has previously chosen to not show instructions
-    const hideInstructions = localStorage.getItem('hideQuizInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideQuizInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     } else {
       setShowInstructions(true);
       setShowStartDialog(false);
     }
-    
+
     setTotalTimeTaken(0);
   };
 
   useEffect(() => {
-    resetGame()
+    resetGame();
   }, [selectedLanguage]);
 
-  
-
   useEffect(() => {
-    const hideInstructions = localStorage.getItem('hideQuizInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideQuizInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     }
@@ -225,11 +231,11 @@ const QuizPage = () => {
   // Handle instruction dialog close
   const handleCloseInstructionDialog = () => {
     if (dontShowAgain) {
-      localStorage.setItem('hideQuizInstructions', 'true');
+      localStorage.setItem("hideQuizInstructions", "true");
     }
     setShowInstructions(false);
-  
-    if (gameState === 'initial') {
+
+    if (gameState === "initial") {
       setShowStartDialog(true);
     } else {
       setGamePause(false);
@@ -240,18 +246,18 @@ const QuizPage = () => {
   const handleStartGame = () => {
     setShowStartDialog(false);
     setShowCountdown(true);
-    setGameState('countdown');
+    setGameState("countdown");
     setCountdown(3);
   };
 
   // Countdown effect
   useEffect(() => {
-    if (gameState === 'countdown' && countdown > 0) {
+    if (gameState === "countdown" && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (gameState === 'countdown' && countdown === 0) {
+    } else if (gameState === "countdown" && countdown === 0) {
       setShowCountdown(false);
-      setGameState('playing');
+      setGameState("playing");
       setGameStart(true);
       setGamePause(false);
     }
@@ -301,7 +307,7 @@ const QuizPage = () => {
         goToNextQuestion();
       }
       setQuestionTimer(0);
-      setNextQuestionTimer(5);
+      setNextQuestionTimer(3);
     } else {
       setGameEnd(true);
     }
@@ -310,7 +316,7 @@ const QuizPage = () => {
   const handleNoAnswer = () => {
     setFeedback("wrong");
     setTotalTimeTaken((prevTime) => prevTime + questionTime);
-    setNextQuestionTimer(5);
+    setNextQuestionTimer(3);
   };
 
   const goToNextQuestion = () => {
@@ -404,7 +410,8 @@ const QuizPage = () => {
 
   console.log("Current Question:", questions[currentQuestionIndex]);
 
-  const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"];
+  // const colors = ["#7f0000", "#002984", "#827717", "#1b5e20"];
+  const colors = ["#CFE9F4", "#CFE9F4", "#CFE9F4", "#CFE9F4"];
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>
@@ -417,7 +424,7 @@ const QuizPage = () => {
       </Typography>
       {/* <DataViewer data={questions} variableName="questions"></DataViewer> */}
 
-      <InstructionDialog 
+      <InstructionDialog
         showInstructions={showInstructions}
         dontShowAgain={dontShowAgain}
         setDontShowAgain={setDontShowAgain}
@@ -426,232 +433,235 @@ const QuizPage = () => {
         questionTime={questionTime}
         t={t}
       />
-      
-      <StartGameDialog 
+
+      <StartGameDialog
         showStartDialog={showStartDialog}
         handleStartGame={handleStartGame}
         t={t}
       />
-      
-      <CountdownDialog 
-        showCountdown={showCountdown}
-        countdown={countdown}
-      />
 
+      <CountdownDialog showCountdown={showCountdown} countdown={countdown} />
 
-{gameState === 'playing' && (
-      !gameEnd && questions.length > 0 ? (
-        <Grid
-          container
-          justifyContent="center"
-          alignItems="center"
-          textAlign="center"
-          spacing={1}
-        >
-          {/* View instruction */}
+      {gameState === "playing" &&
+        (!gameEnd && questions.length > 0 ? (
           <Grid
-            item
             container
-            xs={12}
-            sx={{ justifyContent: "start", alignItems: "center" }}
+            justifyContent="center"
+            alignItems="center"
+            textAlign="center"
+            spacing={1}
           >
-            <Button
-              variant="contained"
-              onClick={() => {
-                handleOpenInstructionDialog();
-              }}
-            >
-              {t("quiz_game.viewInstruction")}
-            </Button>
-          </Grid>
-          {/* Title */}
-
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            <Typography variant="h4">
-              {questions[currentQuestionIndex]?.questionText?.[
-                selectedLanguage
-              ] ||
-                questions[currentQuestionIndex]?.questionText?.en ||
-                t("quiz_game.questionTextNotAvailable")}
-            </Typography>
-          </Grid>
-          {/* Time Countdown for question */}
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {questionTimer !== null ? (
-              <Typography variant="h7">
-                {t("quiz_game.timeLeft")}: {questionTimer}{" "}
-                {t("quiz_game.seconds")}
-              </Typography>
-            ) : (
-              <Typography variant="h7">{t("quiz_game.loading")}</Typography>
-            )}
-          </Grid>
-          {/* Answer Selection */}
-          <Grid item container spacing={1}>
-            {questions[currentQuestionIndex].options.map((option, index) => (
-              <Grid item xs={12} sm={12} md={6} lg={6} key={option._id}>
-                <Button
-                  variant="contained"
-                  onClick={() =>
-                    handleOptionClick(
-                      option,
-                      questions[currentQuestionIndex]._id
-                    )
-                  }
-                  disabled={answerFeedback !== null}
-                  sx={{
-                    backgroundColor: colors[index],
-                    color: "#fff",
-                    width: "100%",
-                    height: "100px",
-                    fontSize: "1rem",
-                    whiteSpace: "normal",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {option.optionText?.[selectedLanguage] ||
-                    option.optionText?.en ||
-                    t("quiz_game.optionTextNotAvailable")}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-          {/* Time Countdown interval to next question*/}
-          {answerFeedback && (
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <Typography
-                variant="h6"
-                sx={{ color: answerFeedback === "correct" ? "green" : "red" }}
-              >
-                {answerFeedback === "correct"
-                  ? t("quiz_game.correct")
-                  : t("quiz_game.wrong")}
-              </Typography>
-              {nextQuestionTimer > 0 && (
-                <Typography variant="caption">
-                  {t("quiz_game.nextQuestionIn")}: {nextQuestionTimer}{" "}
-                  {t("quiz_game.seconds")}
-                </Typography>
-              )}
-            </Grid>
-          )}
-
-          {/* Next and Previous button */}
-          {test && (
+            {/* View instruction */}
             <Grid
               item
               container
-              justifyContent="space-between"
-              alignItems="center"
-              direction="row"
+              xs={12}
+              sx={{ justifyContent: "space-between", alignItems: "center" }}
             >
-              <Grid
-                item
-                sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}
+              <Button
+                variant="contained"
+                onClick={() => {
+                  handleOpenInstructionDialog();
+                }}
               >
-                {currentQuestionIndex > 0 && (
-                  <Button variant="contained" onClick={handlePreviousQuestion}>
-                    {t("quiz_game.previous")}
-                  </Button>
-                )}
-              </Grid>
-              <Grid
-                item
-                sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}
-              >
-                {currentQuestionIndex < questions.length - 1 && (
+                {t("quiz_game.viewInstruction")}
+              </Button>
+              <Typography variant="h6">
+                {t("quiz_game.question")} {currentQuestionIndex + 1}/
+                {questions.length}
+              </Typography>
+            </Grid>
+            {/* Title */}
+
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              <Typography variant="h4">
+                {questions[currentQuestionIndex]?.questionText?.[
+                  selectedLanguage
+                ] ||
+                  questions[currentQuestionIndex]?.questionText?.en ||
+                  t("quiz_game.questionTextNotAvailable")}
+              </Typography>
+            </Grid>
+            {/* Time Countdown for question */}
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {questionTimer !== null ? (
+                <Typography variant="h7">
+                  {t("quiz_game.timeLeft")}: {questionTimer}{" "}
+                  {t("quiz_game.seconds")}
+                </Typography>
+              ) : (
+                <Typography variant="h7">{t("quiz_game.loading")}</Typography>
+              )}
+            </Grid>
+            {/* Answer Selection */}
+            <Grid item container spacing={1}>
+              {questions[currentQuestionIndex].options.map((option, index) => (
+                <Grid item xs={12} sm={12} md={6} lg={6} key={option._id}>
                   <Button
                     variant="contained"
-                    onClick={goToNextQuestion}
-                    sx={{ flexGrow: 0, display: "flex" }}
+                    onClick={() =>
+                      handleOptionClick(
+                        option,
+                        questions[currentQuestionIndex]._id
+                      )
+                    }
+                    disabled={answerFeedback !== null}
+                    sx={{
+                      backgroundColor: colors[index],
+                      color: "#000",
+                      width: "100%",
+                      height: "100px",
+                      fontSize: "1.5rem",
+                      whiteSpace: "normal",
+                      lineHeight: 1.5,
+                    }}
                   >
-                    {t("quiz_game.next")}
+                    {option.optionText?.[selectedLanguage] ||
+                      option.optionText?.en ||
+                      t("quiz_game.optionTextNotAvailable")}
                   </Button>
+                </Grid>
+              ))}
+            </Grid>
+            {/* Time Countdown interval to next question*/}
+            {answerFeedback && (
+              <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Typography
+                  variant="h6"
+                  sx={{ color: answerFeedback === "correct" ? "green" : "red" }}
+                >
+                  {answerFeedback === "correct"
+                    ? t("quiz_game.correct")
+                    : t("quiz_game.wrong")}
+                </Typography>
+                {nextQuestionTimer > 0 && (
+                  <Typography variant="caption">
+                    {t("quiz_game.nextQuestionIn")}: {nextQuestionTimer}{" "}
+                    {t("quiz_game.seconds")}
+                  </Typography>
                 )}
               </Grid>
-            </Grid>
-          )}
-        </Grid>
-      ) : (
-        // Summary page
-        <Box sx={{ my: 2 }}>
-          <Typography variant="h3" gutterBottom>
-            {t("quiz_game.yourScore")}: {score} / {questions.length}
-          </Typography>
-          <Typography variant="h4" gutterBottom>
-            {t("quiz_game.summaryOfQuestions")}:
-          </Typography>
-          {questions.length > 0 ? (
-            <>
-              {questions.map((question) => (
-                <Box key={question._id} sx={{ mb: 4 }}>
-                  <Typography
-                    sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
-                  >
-                    {question.questionText?.[selectedLanguage] ||
-                      question.questionText?.en ||
-                      t("quiz_game.questionTextNotAvailable")}
-                  </Typography>
-                  <RadioGroup>
-                    {question.options.map((option) => {
-                      const isUserSelection =
-                        question.selectedOption === option._id;
-                      const isCorrect = option.isCorrect;
-                      return (
-                        <FormControlLabel
-                          key={option._id}
-                          value={
-                            option.optionText?.[selectedLanguage] ||
-                            option.optionText?.en ||
-                            t("quiz_game.optionTextNotAvailable")
-                          }
-                          control={<Radio checked={isUserSelection} />}
-                          label={
-                            <span
-                              style={{
-                                color: isCorrect
+            )}
+
+            {/* Next and Previous button */}
+            {test && (
+              <Grid
+                item
+                container
+                justifyContent="space-between"
+                alignItems="center"
+                direction="row"
+              >
+                <Grid
+                  item
+                  sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}
+                >
+                  {currentQuestionIndex > 0 && (
+                    <Button
+                      variant="contained"
+                      onClick={handlePreviousQuestion}
+                    >
+                      {t("quiz_game.previous")}
+                    </Button>
+                  )}
+                </Grid>
+                <Grid
+                  item
+                  sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}
+                >
+                  {currentQuestionIndex < questions.length - 1 && (
+                    <Button
+                      variant="contained"
+                      onClick={goToNextQuestion}
+                      sx={{ flexGrow: 0, display: "flex" }}
+                    >
+                      {t("quiz_game.next")}
+                    </Button>
+                  )}
+                </Grid>
+              </Grid>
+            )}
+          </Grid>
+        ) : (
+          // Summary page
+          <Box sx={{ my: 2 }}>
+            <Typography variant="h3" gutterBottom>
+              {t("quiz_game.yourScore")}: {score} / {questions.length}
+            </Typography>
+            <Typography variant="h4" gutterBottom>
+              {t("quiz_game.summaryOfQuestions")}:
+            </Typography>
+            {questions.length > 0 ? (
+              <>
+                {questions.map((question) => (
+                  <Box key={question._id} sx={{ mb: 4 }}>
+                    <Typography
+                      sx={{ fontSize: "1.25rem", mb: 1, textAlign: "left" }}
+                    >
+                      {question.questionText?.[selectedLanguage] ||
+                        question.questionText?.en ||
+                        t("quiz_game.questionTextNotAvailable")}
+                    </Typography>
+                    <RadioGroup>
+                      {question.options.map((option) => {
+                        const isUserSelection =
+                          question.selectedOption === option._id;
+                        const isCorrect = option.isCorrect;
+                        return (
+                          <FormControlLabel
+                            key={option._id}
+                            value={
+                              option.optionText?.[selectedLanguage] ||
+                              option.optionText?.en ||
+                              t("quiz_game.optionTextNotAvailable")
+                            }
+                            control={<Radio checked={isUserSelection} />}
+                            label={
+                              <span
+                                style={{
+                                  color: isCorrect
+                                    ? "green"
+                                    : isUserSelection
+                                    ? "red"
+                                    : "black",
+                                  fontWeight: isUserSelection
+                                    ? "bold"
+                                    : "normal",
+                                }}
+                              >
+                                {option.optionText?.[selectedLanguage] ||
+                                  option.optionText?.en ||
+                                  t("quiz_game.optionTextNotAvailable")}
+                                {isUserSelection &&
+                                  !isCorrect &&
+                                  ` (${t("quiz_game.yourChoice")})`}
+                                {isCorrect &&
+                                  ` (${t("quiz_game.correctAnswer")})`}
+                              </span>
+                            }
+                            sx={{
+                              "& .MuiFormControlLabel-label": {
+                                color: isUserSelection
+                                  ? isCorrect
+                                    ? "green"
+                                    : "red"
+                                  : isCorrect
                                   ? "green"
-                                  : isUserSelection
-                                  ? "red"
                                   : "black",
-                                fontWeight: isUserSelection ? "bold" : "normal",
-                              }}
-                            >
-                              {option.optionText?.[selectedLanguage] ||
-                                option.optionText?.en ||
-                                t("quiz_game.optionTextNotAvailable")}
-                              {isUserSelection &&
-                                !isCorrect &&
-                                ` (${t("quiz_game.yourChoice")})`}
-                              {isCorrect &&
-                                ` (${t("quiz_game.correctAnswer")})`}
-                            </span>
-                          }
-                          sx={{
-                            "& .MuiFormControlLabel-label": {
-                              color: isUserSelection
-                                ? isCorrect
-                                  ? "green"
-                                  : "red"
-                                : isCorrect
-                                ? "green"
-                                : "black",
-                            },
-                          }}
-                        />
-                      );
-                    })}
-                  </RadioGroup>
-                </Box>
-              ))}
-            </>
-          ) : (
-            <Typography variant="h6">{t("quiz_game.loadingQuiz")}</Typography>
-          )}
-        </Box>
-      )
-      )}
-    
+                              },
+                            }}
+                          />
+                        );
+                      })}
+                    </RadioGroup>
+                  </Box>
+                ))}
+              </>
+            ) : (
+              <Typography variant="h6">{t("quiz_game.loadingQuiz")}</Typography>
+            )}
+          </Box>
+        ))}
     </Container>
   );
 };

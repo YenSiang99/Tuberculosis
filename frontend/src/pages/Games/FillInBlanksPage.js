@@ -19,14 +19,14 @@ import axios from "../../components/axios"; // Adjust with your axios instance
 import { useTranslation } from "react-i18next";
 
 // Instruction Dialog Component
-const InstructionDialog = ({ 
-  showInstructions, 
-  dontShowAgain, 
-  setDontShowAgain, 
+const InstructionDialog = ({
+  showInstructions,
+  dontShowAgain,
+  setDontShowAgain,
   handleCloseInstructionDialog,
   gameState,
   gameTime,
-  t 
+  t,
 }) => (
   <Dialog
     open={showInstructions}
@@ -42,28 +42,37 @@ const InstructionDialog = ({
       <DialogContentText>
         1. <strong>{t("fill_in_the_blanks.objective")}:</strong> <br />
         {t("fill_in_the_blanks.objectiveText")}
-        <br /><br />
+        <br />
+        <br />
         2. <strong>{t("fill_in_the_blanks.selectingWords")}:</strong> <br />
         {t("fill_in_the_blanks.selectingWordsText")}
-        <br /><br />
+        <br />
+        <br />
         3. <strong>{t("fill_in_the_blanks.removingWords")}:</strong> <br />
         {t("fill_in_the_blanks.removingWordsText")}
-        <br /><br />
+        <br />
+        <br />
         4. <strong>{t("fill_in_the_blanks.timeLimit")}:</strong> <br />
         {t("fill_in_the_blanks.timeLimitText", {
-          gameTime: gameTime !== null ? gameTime : t("fill_in_the_blanks.aLimitedAmountOf")
+          gameTime:
+            gameTime !== null
+              ? gameTime
+              : t("fill_in_the_blanks.aLimitedAmountOf"),
         })}
-        <br /><br />
+        <br />
+        <br />
         5. <strong>{t("fill_in_the_blanks.submitYourAnswers")}:</strong> <br />
         {t("fill_in_the_blanks.submitYourAnswersText")}
-        <br /><br />
+        <br />
+        <br />
         6. <strong>{t("fill_in_the_blanks.scoring")}:</strong> <br />
         {t("fill_in_the_blanks.scoringText")}
-        <br /><br />
+        <br />
+        <br />
         7. <strong>{t("fill_in_the_blanks.resettingTheGame")}:</strong> <br />
         {t("fill_in_the_blanks.resettingTheGameText")}
       </DialogContentText>
-      {gameState === 'initial' && (
+      {gameState === "initial" && (
         <FormControlLabel
           control={
             <Checkbox
@@ -76,7 +85,11 @@ const InstructionDialog = ({
       )}
     </DialogContent>
     <DialogActions>
-      <Button onClick={handleCloseInstructionDialog} variant="contained" fullWidth>
+      <Button
+        onClick={handleCloseInstructionDialog}
+        variant="contained"
+        fullWidth
+      >
         {t("fill_in_the_blanks.okay")}
       </Button>
     </DialogActions>
@@ -91,13 +104,13 @@ const StartGameDialog = ({ showStartDialog, handleStartGame, t }) => (
     maxWidth="sm"
     fullWidth
   >
-    <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+    <DialogContent sx={{ textAlign: "center", py: 4 }}>
       <Typography variant="h4" gutterBottom>
         {t("fill_in_the_blanks.areYouReady")}
       </Typography>
-      <Button 
-        variant="contained" 
-        size="large" 
+      <Button
+        variant="contained"
+        size="large"
         onClick={handleStartGame}
         sx={{ mt: 3, minWidth: 200 }}
       >
@@ -115,38 +128,42 @@ const CountdownDialog = ({ showCountdown, countdown }) => (
     fullWidth
     PaperProps={{
       sx: {
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
+        backgroundColor: "transparent",
+        boxShadow: "none",
       },
     }}
   >
-    <DialogContent sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 200,
-    }}>
-      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-        <CircularProgress 
+    <DialogContent
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 200,
+      }}
+    >
+      <Box sx={{ position: "relative", display: "inline-flex" }}>
+        <CircularProgress
           size={100}
           thickness={2}
-          sx={{ color: 'primary.main' }}
+          sx={{ color: "primary.main" }}
         />
-        <Box sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: "absolute",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Typography
             variant="h2"
             component="div"
-            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+            sx={{ color: "primary.main", fontWeight: "bold" }}
           >
             {countdown}
           </Typography>
@@ -170,7 +187,7 @@ const FillInBlanksPage = () => {
   const [score, setScore] = useState(0);
   const [randomizedWords, setRandomizedWords] = useState([]);
 
-  const [gameState, setGameState] = useState('initial');
+  const [gameState, setGameState] = useState("initial");
   const [showInstructions, setShowInstructions] = useState(true);
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
@@ -188,16 +205,16 @@ const FillInBlanksPage = () => {
     setGameTimer(null);
     setShowResult(false);
     setScore(0);
-    setGameState('initial');
+    setGameState("initial");
     setGameStart(false);
     setGamePause(false);
     setGameEnd(false);
     setShowCountdown(false);
     setCountdown(3);
-    
+
     // Check localStorage preference for instructions
-    const hideInstructions = localStorage.getItem('hideFillBlanksInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideFillBlanksInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     } else {
@@ -210,14 +227,13 @@ const FillInBlanksPage = () => {
 
   // Handle language change and reset the game
   useEffect(() => {
-      resetGame();
+    resetGame();
   }, [selectedLanguage]);
-
 
   // Check local storage preference on mount
   useEffect(() => {
-    const hideInstructions = localStorage.getItem('hideFillBlanksInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideFillBlanksInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     }
@@ -226,11 +242,11 @@ const FillInBlanksPage = () => {
   // Handle instruction dialog close
   const handleCloseInstructionDialog = () => {
     if (dontShowAgain) {
-      localStorage.setItem('hideFillBlanksInstructions', 'true');
+      localStorage.setItem("hideFillBlanksInstructions", "true");
     }
     setShowInstructions(false);
-  
-    if (gameState === 'initial') {
+
+    if (gameState === "initial") {
       setShowStartDialog(true);
     } else {
       setGamePause(false);
@@ -241,18 +257,18 @@ const FillInBlanksPage = () => {
   const handleStartGame = () => {
     setShowStartDialog(false);
     setShowCountdown(true);
-    setGameState('countdown');
+    setGameState("countdown");
     setCountdown(3);
   };
 
   // Countdown effect
   useEffect(() => {
-    if (gameState === 'countdown' && countdown > 0) {
+    if (gameState === "countdown" && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (gameState === 'countdown' && countdown === 0) {
+    } else if (gameState === "countdown" && countdown === 0) {
       setShowCountdown(false);
-      setGameState('playing');
+      setGameState("playing");
       setGameStart(true);
       setGamePause(false);
     }
@@ -279,8 +295,6 @@ const FillInBlanksPage = () => {
       setPrevLanguage(selectedLanguage);
     }
   }, [selectedLanguage, prevLanguage]);
-
-
 
   const submitFillBlankScore = async () => {
     console.log("submit called...");
@@ -365,7 +379,7 @@ const FillInBlanksPage = () => {
 
   const handleSubmit = () => {
     if (!gameEnd) {
-      handleGameEnd()
+      handleGameEnd();
     }
   };
 
@@ -451,7 +465,7 @@ const FillInBlanksPage = () => {
         {t("fill_in_the_blanks.title")}
       </Typography>
 
-      <InstructionDialog 
+      <InstructionDialog
         showInstructions={showInstructions}
         dontShowAgain={dontShowAgain}
         setDontShowAgain={setDontShowAgain}
@@ -460,21 +474,18 @@ const FillInBlanksPage = () => {
         gameTime={gameTime}
         t={t}
       />
-      
-      <StartGameDialog 
+
+      <StartGameDialog
         showStartDialog={showStartDialog}
         handleStartGame={handleStartGame}
         t={t}
       />
-      
-      <CountdownDialog 
-        showCountdown={showCountdown}
-        countdown={countdown}
-      />
 
-{(gameState === 'playing' || gameEnd) && (
+      <CountdownDialog showCountdown={showCountdown} countdown={countdown} />
+
+      {(gameState === "playing" || gameEnd) &&
         // Your existing game content JSX
-        !gameEnd ? (
+        (!gameEnd ? (
           <Grid container spacing={2}>
             <Grid
               item
@@ -530,7 +541,7 @@ const FillInBlanksPage = () => {
                 </Typography>
               )}
             </Grid>
-  
+
             {/* Questions blanks */}
             <Grid item container spacing={2}>
               {questions.map((question, index) => (
@@ -627,11 +638,7 @@ const FillInBlanksPage = () => {
               {t("fill_in_the_blanks.resetGame")}
             </Button>
           </Box>
-        )
-      )}
-
-
-    
+        ))}
     </Container>
   );
 };

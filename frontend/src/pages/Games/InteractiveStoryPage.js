@@ -21,13 +21,13 @@ import axios from "../../components/axios";
 import { useTranslation } from "react-i18next";
 
 // Instruction Dialog Component
-const InstructionDialog = ({ 
-  showInstructions, 
-  dontShowAgain, 
-  setDontShowAgain, 
+const InstructionDialog = ({
+  showInstructions,
+  dontShowAgain,
+  setDontShowAgain,
   handleCloseInstructionDialog,
   gameState,
-  t 
+  t,
 }) => (
   <Dialog
     open={showInstructions}
@@ -41,7 +41,8 @@ const InstructionDialog = ({
     </DialogTitle>
     <DialogContent>
       <DialogContentText>
-        1. <strong>{t("interactive_story.introductionToTheStory")}:</strong> <br />
+        1. <strong>{t("interactive_story.introductionToTheStory")}:</strong>{" "}
+        <br />
         {t("interactive_story.introductionText")}
         <br />
         <br />
@@ -56,7 +57,7 @@ const InstructionDialog = ({
         4. <strong>{t("interactive_story.goal")}:</strong> <br />
         {t("interactive_story.goalText")}
       </DialogContentText>
-      {gameState === 'initial' && (
+      {gameState === "initial" && (
         <FormControlLabel
           control={
             <Checkbox
@@ -69,7 +70,11 @@ const InstructionDialog = ({
       )}
     </DialogContent>
     <DialogActions>
-      <Button onClick={handleCloseInstructionDialog} variant="contained" fullWidth>
+      <Button
+        onClick={handleCloseInstructionDialog}
+        variant="contained"
+        fullWidth
+      >
         {t("interactive_story.okay")}
       </Button>
     </DialogActions>
@@ -84,13 +89,13 @@ const StartGameDialog = ({ showStartDialog, handleStartGame, t }) => (
     maxWidth="sm"
     fullWidth
   >
-    <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+    <DialogContent sx={{ textAlign: "center", py: 4 }}>
       <Typography variant="h4" gutterBottom>
         {t("interactive_story.areYouReady")}
       </Typography>
-      <Button 
-        variant="contained" 
-        size="large" 
+      <Button
+        variant="contained"
+        size="large"
         onClick={handleStartGame}
         sx={{ mt: 3, minWidth: 200 }}
       >
@@ -108,38 +113,42 @@ const CountdownDialog = ({ showCountdown, countdown }) => (
     fullWidth
     PaperProps={{
       sx: {
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
+        backgroundColor: "transparent",
+        boxShadow: "none",
       },
     }}
   >
-    <DialogContent sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 200,
-    }}>
-      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-        <CircularProgress 
+    <DialogContent
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 200,
+      }}
+    >
+      <Box sx={{ position: "relative", display: "inline-flex" }}>
+        <CircularProgress
           size={100}
           thickness={2}
-          sx={{ color: 'primary.main' }}
+          sx={{ color: "primary.main" }}
         />
-        <Box sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: "absolute",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Typography
             variant="h2"
             component="div"
-            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+            sx={{ color: "primary.main", fontWeight: "bold" }}
           >
             {countdown}
           </Typography>
@@ -149,9 +158,7 @@ const CountdownDialog = ({ showCountdown, countdown }) => (
   </Dialog>
 );
 
-
 const InteractiveStoryPage = () => {
-
   const { i18n, t } = useTranslation();
   const selectedLanguage = i18n.language || "en";
   const theme = useTheme();
@@ -272,14 +279,16 @@ const InteractiveStoryPage = () => {
       },
     ],
   });
-  const [currentStepId, setCurrentStepId] = useState(storyData?.steps[0]?.stepId || null);
+  const [currentStepId, setCurrentStepId] = useState(
+    storyData?.steps[0]?.stepId || null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retries, setRetries] = useState(0);
   const [startTime, setStartTime] = useState(null);
   const [finalTimeTaken, setFinalTimeTaken] = useState(null);
 
-  const [gameState, setGameState] = useState('initial');
+  const [gameState, setGameState] = useState("initial");
   const [showInstructions, setShowInstructions] = useState(true);
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
@@ -299,13 +308,13 @@ const InteractiveStoryPage = () => {
     setStartTime(null);
     setFinalTimeTaken(null);
     setGameStarted(false);
-    setGameState('initial');
+    setGameState("initial");
     setShowCountdown(false);
     setCountdown(3);
-    
+
     // Check localStorage preference for instructions
-    const hideInstructions = localStorage.getItem('hideStoryInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideStoryInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     } else {
@@ -315,14 +324,14 @@ const InteractiveStoryPage = () => {
   };
 
   useEffect(() => {
-    if (selectedLanguage ) {
+    if (selectedLanguage) {
       resetGame();
     }
   }, [selectedLanguage]);
 
   useEffect(() => {
-    const hideInstructions = localStorage.getItem('hideStoryInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideStoryInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     }
@@ -331,11 +340,11 @@ const InteractiveStoryPage = () => {
   // Handle instruction dialog close
   const handleCloseInstructionDialog = () => {
     if (dontShowAgain) {
-      localStorage.setItem('hideStoryInstructions', 'true');
+      localStorage.setItem("hideStoryInstructions", "true");
     }
     setShowInstructions(false);
-  
-    if (gameState === 'initial') {
+
+    if (gameState === "initial") {
       setShowStartDialog(true);
     }
   };
@@ -344,18 +353,18 @@ const InteractiveStoryPage = () => {
   const handleStartGame = () => {
     setShowStartDialog(false);
     setShowCountdown(true);
-    setGameState('countdown');
+    setGameState("countdown");
     setCountdown(3);
   };
 
   // Countdown effect
   useEffect(() => {
-    if (gameState === 'countdown' && countdown > 0) {
+    if (gameState === "countdown" && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (gameState === 'countdown' && countdown === 0) {
+    } else if (gameState === "countdown" && countdown === 0) {
       setShowCountdown(false);
-      setGameState('playing');
+      setGameState("playing");
       setGameStarted(true);
       setStartTime(Date.now());
     }
@@ -452,7 +461,7 @@ const InteractiveStoryPage = () => {
         {t("interactive_story.title")}
       </Typography>
 
-      <InstructionDialog 
+      <InstructionDialog
         showInstructions={showInstructions}
         dontShowAgain={dontShowAgain}
         setDontShowAgain={setDontShowAgain}
@@ -460,24 +469,20 @@ const InteractiveStoryPage = () => {
         gameState={gameState}
         t={t}
       />
-      
-      <StartGameDialog 
+
+      <StartGameDialog
         showStartDialog={showStartDialog}
         handleStartGame={handleStartGame}
         t={t}
       />
-      
-      <CountdownDialog 
-        showCountdown={showCountdown}
-        countdown={countdown}
-      />
 
+      <CountdownDialog showCountdown={showCountdown} countdown={countdown} />
 
-{(gameState === 'playing' || gameStarted) && (
+      {(gameState === "playing" || gameStarted) && (
         // Your existing game content JSX
         <Grid container spacing={1}>
-        {/* Title */}
-        <Grid
+          {/* Title */}
+          <Grid
             item
             container
             xs={12}
@@ -487,157 +492,154 @@ const InteractiveStoryPage = () => {
               {t("interactive_story.viewInstruction")}
             </Button>
           </Grid>
-        <Grid item xs={12}>
-          <Typography variant="h4">
-            {storyData.title?.[selectedLanguage] ||
-              storyData.title?.en ||
-              t("interactive_story.storyTitleFallback")}
-          </Typography>
-        </Grid>
-
-        <Grid
-          item
-          container
-          spacing={2}
-          direction="row"
-          sx={{ alignItems: "stretch" }}
-        >
-          {/* Photo */}
-          <Grid item xs={12} md={6}>
-            <Grid item xs={6}>
-              <Typography variant="h6">
-                {t("interactive_story.retries")}: {retries}
-              </Typography>
-            </Grid>
-            <Card>
-              <CardMedia
-                component="img"
-                height="300"
-                image={generateImageUrl(currentStep.content)}
-                alt="Dynamic story image"
-                sx={{
-                  width: "100%",
-                  height: "auto",
-                }}
-              />
-            </Card>
+          <Grid item xs={12}>
+            <Typography variant="h4">
+              {storyData.title?.[selectedLanguage] ||
+                storyData.title?.en ||
+                t("interactive_story.storyTitleFallback")}
+            </Typography>
           </Grid>
-          {/* Content and Decisions */}
+
           <Grid
             item
             container
-            direction="column"
-            sx={{
-              justifyContent: "center",
-              alignItems: "center",
-              textAlign: "center",
-            }}
-            spacing={1}
-            xs={12}
-            md={6}
+            spacing={2}
+            direction="row"
+            sx={{ alignItems: "stretch" }}
           >
-            <Grid item>
-              <Typography variant="h6">
-                {currentStep?.content?.[selectedLanguage] ||
-                  t("interactive_story.contentNotAvailable")}
-              </Typography>
-            </Grid>
-            {!isEnd &&
-              currentStep.options.map((option, index) => (
-                <Grid item key={index}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setCurrentStepId(option.nextStep)}
-                    sx={{ width: "100%" }}
-                  >
-                    {option.optionText?.[selectedLanguage] ||
-                      option.optionText?.en}
-                  </Button>
-                </Grid>
-              ))}
-            {isEnd && (
-              <Grid container spacing={1} sx={{ justifyContent: "center" }}>
-                {currentStep.endType === "negative" ? (
-                  <Grid
-                    item
-                    container
-                    xs={12}
-                    md={8}
-                    spacing={1}
-                    sx={{ justifyContent: "center", alignItems: "center" }}
-                  >
-                    {/* Negative ending content */}
-                    <Grid item>
-                      <Typography variant="h6" sx={{ color: "red" }}>
-                        {t("interactive_story.ohNoWrongMove")}
-                      </Typography>
-                    </Grid>
-                    {/* Retry the story */}
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleRetryStory}
-                      >
-                        {t("interactive_story.retryStory")}
-                      </Button>
-                    </Grid>
-                  </Grid>
-                ) : (
-                  <Grid
-                    item
-                    container
-                    xs={12}
-                    md={8}
-                    spacing={1}
-                    sx={{ justifyContent: "center", alignItems: "center" }}
-                  >
-                    {/* Positive ending content */}
-                    <Grid item xs={12}>
-                      <Typography variant="h6" color="green">
-                        {t("interactive_story.congratulations")}
-                      </Typography>
-                    </Grid>
-                    {/* Display retries and total time */}
-                    <Grid item xs={6}>
-                      <Typography variant="h6">
-                        {t("interactive_story.numberOfRetries")}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">: {retries}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">
-                        {t("interactive_story.totalTimeTaken")}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="h6">
-                        : {finalTimeTaken} {t("interactive_story.seconds")}
-                      </Typography>
-                    </Grid>
-                    {/* Restart the story */}
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleRestartStory}
-                      >
-                        {t("interactive_story.restartStory")}
-                      </Button>
-                    </Grid>
-                  </Grid>
-                )}
+            {/* Photo */}
+            <Grid item xs={12} md={6}>
+              <Grid item xs={6}>
+                <Typography variant="h6">
+                  {t("interactive_story.retries")}: {retries}
+                </Typography>
               </Grid>
-            )}
+              <Card>
+                <CardMedia
+                  component="img"
+                  height="300"
+                  image={generateImageUrl(currentStep.content)}
+                  alt="Dynamic story image"
+                  sx={{
+                    width: "100%",
+                    height: "auto",
+                  }}
+                />
+              </Card>
+            </Grid>
+            {/* Content and Decisions */}
+            <Grid
+              item
+              container
+              direction="column"
+              sx={{
+                justifyContent: "center",
+                alignItems: "center",
+                textAlign: "center",
+              }}
+              spacing={1}
+              xs={12}
+              md={6}
+            >
+              <Grid item>
+                <Typography variant="h6">
+                  {currentStep?.content?.[selectedLanguage] ||
+                    t("interactive_story.contentNotAvailable")}
+                </Typography>
+              </Grid>
+              {!isEnd &&
+                currentStep.options.map((option, index) => (
+                  <Grid item key={index}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setCurrentStepId(option.nextStep)}
+                      sx={{ width: "100%" }}
+                    >
+                      {option.optionText?.[selectedLanguage] ||
+                        option.optionText?.en}
+                    </Button>
+                  </Grid>
+                ))}
+              {isEnd && (
+                <Grid container spacing={1} sx={{ justifyContent: "center" }}>
+                  {currentStep.endType === "negative" ? (
+                    <Grid
+                      item
+                      container
+                      xs={12}
+                      md={8}
+                      spacing={1}
+                      sx={{ justifyContent: "center", alignItems: "center" }}
+                    >
+                      {/* Negative ending content */}
+                      <Grid item>
+                        <Typography variant="h6" sx={{ color: "red" }}>
+                          {t("interactive_story.ohNoWrongMove")}
+                        </Typography>
+                      </Grid>
+                      {/* Retry the story */}
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleRetryStory}
+                        >
+                          {t("interactive_story.retryStory")}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  ) : (
+                    <Grid
+                      item
+                      container
+                      xs={12}
+                      md={8}
+                      spacing={1}
+                      sx={{ justifyContent: "center", alignItems: "center" }}
+                    >
+                      {/* Positive ending content */}
+                      <Grid item xs={12}>
+                        <Typography variant="h6" color="green">
+                          {t("interactive_story.congratulations")}
+                        </Typography>
+                      </Grid>
+                      {/* Display retries and total time */}
+                      <Grid item xs={6}>
+                        <Typography variant="h6">
+                          {t("interactive_story.numberOfRetries")}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">: {retries}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">
+                          {t("interactive_story.totalTimeTaken")}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="h6">
+                          : {finalTimeTaken} {t("interactive_story.seconds")}
+                        </Typography>
+                      </Grid>
+                      {/* Restart the story */}
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleRestartStory}
+                        >
+                          {t("interactive_story.restartStory")}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  )}
+                </Grid>
+              )}
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
       )}
-
-     
-    
     </Container>
   );
 };

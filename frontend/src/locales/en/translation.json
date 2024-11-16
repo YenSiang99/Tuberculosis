@@ -290,7 +290,8 @@
     "areYouReady": "Are you ready?",
     "startGame": "Start Game",
     "dontShowAgain": "Don't show again",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "question": "Question"
   },
   "interactive_story": {
     "title": "Interactive Story",

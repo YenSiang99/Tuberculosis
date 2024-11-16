@@ -1,30 +1,63 @@
-import React from 'react';
-import { Box, Typography, Card, CardActionArea, CardContent, Grid } from '@mui/material';
-import PuzzleIcon from '@mui/icons-material/Extension'; // Example icon for Word Search
-import QuizIcon from '@mui/icons-material/Quiz';
-import StoryIcon from '@mui/icons-material/MenuBook';
-import FillIcon from '@mui/icons-material/Edit';
-import TrueFalseIcon from '@mui/icons-material/CheckCircleOutline';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  CardActionArea,
+  CardContent,
+  Grid,
+} from "@mui/material";
+import PuzzleIcon from "@mui/icons-material/Extension"; // Example icon for Word Search
+import QuizIcon from "@mui/icons-material/Quiz";
+import StoryIcon from "@mui/icons-material/MenuBook";
+import FillIcon from "@mui/icons-material/Edit";
+import TrueFalseIcon from "@mui/icons-material/CheckCircleOutline";
+import { useNavigate } from "react-router-dom";
 
 function GamesPage({ setActiveSection }) {
   const navigate = useNavigate();
 
   const games = [
-    { name: 'Word Search Game', description: 'Find TB-related terms hidden in a grid of letters.', icon: <PuzzleIcon />,section: 'WordSearch'},
-    { name: 'Quiz', description: 'Answer questions to test your understanding of TB.', icon: <QuizIcon /> ,section: 'QuizPage'},
-    { name: 'Interactive Story', description: 'Make choices in a story scenario about TB and see different outcomes.', icon: <StoryIcon />,section: 'InteractiveStory'},
-    { name: 'Fill in the Blanks', description: 'Fill in missing words in sentences related to TB facts.', icon: <FillIcon />,section: 'FillBlanks'  },
-    { name: 'True or False', description: 'Decide if statements about TB are true or false.', icon: <TrueFalseIcon />,section: 'TrueFalse'}
+    {
+      name: "Word Search Game",
+      description: "Find TB-related terms hidden in a grid of letters.",
+      icon: <PuzzleIcon />,
+      section: "WordSearch",
+    },
+    {
+      name: "Quiz",
+      description: "Answer questions to test your understanding of TB.",
+      icon: <QuizIcon />,
+      section: "QuizPage",
+    },
+    {
+      name: "Interactive Story",
+      description:
+        "Make choices in a story scenario about TB and see different outcomes.",
+      icon: <StoryIcon />,
+      section: "InteractiveStory",
+    },
+    {
+      name: "Fill in the Blanks",
+      description: "Fill in missing words in sentences related to TB facts.",
+      icon: <FillIcon />,
+      section: "FillBlanks",
+    },
+    {
+      name: "True or False",
+      description: "Decide if statements about TB are true or false.",
+      icon: <TrueFalseIcon />,
+      section: "TrueFalse",
+    },
   ];
 
   const cardStyle = {
     height: 150, // Fixed height for uniformity
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f0e3', // Pastel background color
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f0e3", // Pastel background color
   };
 
   return (

@@ -17,13 +17,13 @@ import {
 import axios from "../../components/axios";
 import { useTranslation } from "react-i18next";
 
-const InstructionDialog = ({ 
-  showInstructions, 
-  dontShowAgain, 
-  setDontShowAgain, 
+const InstructionDialog = ({
+  showInstructions,
+  dontShowAgain,
+  setDontShowAgain,
   handleCloseInstructionDialog,
-  gameState, 
-  t  
+  gameState,
+  t,
 }) => (
   <Dialog
     open={showInstructions}
@@ -37,30 +37,30 @@ const InstructionDialog = ({
     </DialogTitle>
     <DialogContent>
       <DialogContentText>
-      1. <strong>{t("word_search.objective")}:</strong> <br />
-          {t("word_search.objectiveText")}
-          <br />
-          <br />
-          2. <strong>{t("word_search.wordDirections")}:</strong> <br />
-          {t("word_search.wordDirectionsText")}
-          <br />
-          <br />
-          3. <strong>{t("word_search.selectLetters")}:</strong> <br />
-          {t("word_search.selectLettersText")}
-          <br />
-          <br />
-          4. <strong>{t("word_search.deselectLetters")}:</strong> <br />
-          {t("word_search.deselectLettersText")}
-          <br />
-          <br />
-          5. <strong>{t("word_search.findingWords")}:</strong> <br />
-          {t("word_search.findingWordsText")}
-          <br />
-          <br />
-          6. <strong>{t("word_search.completeTheChallenge")}:</strong> <br />
-          {t("word_search.completeTheChallengeText")}
+        1. <strong>{t("word_search.objective")}:</strong> <br />
+        {t("word_search.objectiveText")}
+        <br />
+        <br />
+        2. <strong>{t("word_search.wordDirections")}:</strong> <br />
+        {t("word_search.wordDirectionsText")}
+        <br />
+        <br />
+        3. <strong>{t("word_search.selectLetters")}:</strong> <br />
+        {t("word_search.selectLettersText")}
+        <br />
+        <br />
+        4. <strong>{t("word_search.deselectLetters")}:</strong> <br />
+        {t("word_search.deselectLettersText")}
+        <br />
+        <br />
+        5. <strong>{t("word_search.findingWords")}:</strong> <br />
+        {t("word_search.findingWordsText")}
+        <br />
+        <br />
+        6. <strong>{t("word_search.completeTheChallenge")}:</strong> <br />
+        {t("word_search.completeTheChallengeText")}
       </DialogContentText>
-      {gameState === 'initial' && (
+      {gameState === "initial" && (
         <FormControlLabel
           control={
             <Checkbox
@@ -73,7 +73,11 @@ const InstructionDialog = ({
       )}
     </DialogContent>
     <DialogActions>
-      <Button onClick={handleCloseInstructionDialog} variant="contained" fullWidth>
+      <Button
+        onClick={handleCloseInstructionDialog}
+        variant="contained"
+        fullWidth
+      >
         {t("word_search.gotIt")}
       </Button>
     </DialogActions>
@@ -87,38 +91,42 @@ const CountdownDialog = ({ showCountdown, countdown }) => (
     fullWidth
     PaperProps={{
       sx: {
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
+        backgroundColor: "transparent",
+        boxShadow: "none",
       },
     }}
   >
-    <DialogContent sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 200,
-    }}>
-      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-        <CircularProgress 
+    <DialogContent
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 200,
+      }}
+    >
+      <Box sx={{ position: "relative", display: "inline-flex" }}>
+        <CircularProgress
           size={100}
           thickness={2}
-          sx={{ color: 'primary.main' }}
+          sx={{ color: "primary.main" }}
         />
-        <Box sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: "absolute",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Typography
             variant="h2"
             component="div"
-            sx={{ color: 'primary.main', fontWeight: 'bold' }}
+            sx={{ color: "primary.main", fontWeight: "bold" }}
           >
             {countdown}
           </Typography>
@@ -145,9 +153,9 @@ const WordSearchPage = () => {
   const [showInstructions, setShowInstructions] = useState(true);
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
-  
+
   const [dontShowAgain, setDontShowAgain] = useState(false);
-  const [gameState, setGameState] = useState('initial');
+  const [gameState, setGameState] = useState("initial");
   const [countdown, setCountdown] = useState(3);
 
   const [gameStart, setGameStart] = useState(false);
@@ -162,13 +170,13 @@ const WordSearchPage = () => {
     setGamePause(false);
     setGameStart(false);
     setFinalTimeTaken(null);
-    setGameState('initial');
+    setGameState("initial");
     setShowCountdown(false);
     setCountdown(3);
-    
+
     // Check localStorage preference for instructions
-    const hideInstructions = localStorage.getItem('hideWordSearchInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideWordSearchInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     } else {
@@ -214,8 +222,8 @@ const WordSearchPage = () => {
 
   // Check local storage preference on mount
   useEffect(() => {
-    const hideInstructions = localStorage.getItem('hideWordSearchInstructions');
-    if (hideInstructions === 'true') {
+    const hideInstructions = localStorage.getItem("hideWordSearchInstructions");
+    if (hideInstructions === "true") {
       setShowInstructions(false);
       setShowStartDialog(true);
     }
@@ -224,11 +232,11 @@ const WordSearchPage = () => {
   // Handle instruction dialog close
   const handleCloseInstructionDialog = () => {
     if (dontShowAgain) {
-      localStorage.setItem('hideWordSearchInstructions', 'true');
+      localStorage.setItem("hideWordSearchInstructions", "true");
     }
     setShowInstructions(false);
-    
-    if (gameState === 'initial') {
+
+    if (gameState === "initial") {
       setShowStartDialog(true);
     } else {
       setGamePause(false);
@@ -239,22 +247,22 @@ const WordSearchPage = () => {
   const handleStartGame = () => {
     setShowStartDialog(false);
     setShowCountdown(true);
-    setGameState('countdown');
+    setGameState("countdown");
     setCountdown(3);
   };
 
   // Countdown effect
   useEffect(() => {
-    if (gameState === 'countdown' && countdown > 0) {
+    if (gameState === "countdown" && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (gameState === 'countdown' && countdown === 0) {
+    } else if (gameState === "countdown" && countdown === 0) {
       setShowCountdown(false);
-      setGameState('playing');
+      setGameState("playing");
       setGameStart(true);
       setGamePause(false);
     }
-  }, [countdown, gameState])
+  }, [countdown, gameState]);
 
   // Start Game Dialog
   const StartGameDialog = () => (
@@ -264,13 +272,13 @@ const WordSearchPage = () => {
       maxWidth="sm"
       fullWidth
     >
-      <DialogContent sx={{ textAlign: 'center', py: 4 }}>
+      <DialogContent sx={{ textAlign: "center", py: 4 }}>
         <Typography variant="h4" gutterBottom>
           {t("word_search.areYouReady")}
         </Typography>
-        <Button 
-          variant="contained" 
-          size="large" 
+        <Button
+          variant="contained"
+          size="large"
           onClick={handleStartGame}
           sx={{ mt: 3, minWidth: 200 }}
         >
@@ -563,8 +571,8 @@ const WordSearchPage = () => {
       setSelectedCells(newSelectedCells);
 
       // Check for horizontal, vertical, and diagonal words
-      handleHorizontalCheck(newSelectedCells, x, y) ;
-      handleVerticalCheck(newSelectedCells, x, y) ;
+      handleHorizontalCheck(newSelectedCells, x, y);
+      handleVerticalCheck(newSelectedCells, x, y);
       handleDiagonalTLBRCheck(newSelectedCells, x, y);
     }
   };
@@ -581,7 +589,7 @@ const WordSearchPage = () => {
 
   const handleOpenInstructionDialog = () => {
     setShowInstructions(true);
-    setGamePause(true); 
+    setGamePause(true);
   };
 
   const calculateAccuracyRate = () => {
@@ -633,7 +641,7 @@ const WordSearchPage = () => {
         <Typography variant="h4">{t("word_search.title")}</Typography>
       </Box>
 
-      <InstructionDialog 
+      <InstructionDialog
         showInstructions={showInstructions}
         dontShowAgain={dontShowAgain}
         setDontShowAgain={setDontShowAgain}
@@ -642,133 +650,132 @@ const WordSearchPage = () => {
         t={t}
       />
       <StartGameDialog />
-      <CountdownDialog 
-        showCountdown={showCountdown}
-        countdown={countdown}
-      />
-      {gameState === 'playing' && (
-      <Grid container direction="row">
-      {gameEnd ? (
-        // Show the results if the timer is zero
-        <>
-          {/* Summary title */}
-          <Grid
-            item
-            xs={12}
-            sx={{
-              textAlign: "center",
-            }}
-          >
-            <Typography variant="h4">
-              {t("word_search.gameSummary")}
-            </Typography>
-          </Grid>
-          <Grid
-            item
-            container
-            sx={{
-              textAlign: "center",
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
-            <Grid
-              container
-              item
-              xs={12}
-              sm={8}
-              md={6}
-              sx={{
-                justifyContent: "center",
-                width: "100%",
-                textAlign: "left",
-              }}
-              spacing={2}
-            >
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  {t("word_search.totalTimeTaken")}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  :{" "}
-                  {finalTimeTaken !== null
-                    ? finalTimeTaken
-                    : totalTime - gameTimer}{" "}
-                  {t("word_search.seconds")}
-                </Typography>
-              </Grid>
-
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  {t("word_search.accuracyRate")}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  : {calculateAccuracyRate().toFixed(2)}%
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  {t("word_search.longestWordFound")}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  : {getLongestWordFound()}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">{t("word_search.score")}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  : {foundWords.length} / {wordsToFind.length}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  {t("word_search.completionStatus")}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="h6">
-                  :{" "}
-                  {foundWords.length === wordsToFind.length
-                    ? t("word_search.allWordsFound")
-                    : t("word_search.someWordsMissing")}
-                </Typography>
-              </Grid>
-            </Grid>
-            {/* Reset game button */}
-            <Grid item xs={12} sx={{ mt: 2 }}>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setSelectedCells([]);
-                  setFoundWords([]);
-                  const gridWithWords = placeWordsInGrid(
-                    generateEmptyGrid(gridSize),
-                    wordsToFind
-                  );
-                  setGrid(gridWithWords);
-                  setGameTimer(totalTime);
-                  setGameEnd(false);
-                  setGamePause(false);
-                  setGameStart(true);
-                  setFinalTimeTaken(null);
+      <CountdownDialog showCountdown={showCountdown} countdown={countdown} />
+      {gameState === "playing" && (
+        <Grid container direction="row">
+          {gameEnd ? (
+            // Show the results if the timer is zero
+            <>
+              {/* Summary title */}
+              <Grid
+                item
+                xs={12}
+                sx={{
+                  textAlign: "center",
                 }}
               >
-                {t("word_search.playAgain")}
-              </Button>
-            </Grid>
-          </Grid>
-        </>
-      ) : (
-        <>
-          {/* <Grid
+                <Typography variant="h4">
+                  {t("word_search.gameSummary")}
+                </Typography>
+              </Grid>
+              <Grid
+                item
+                container
+                sx={{
+                  textAlign: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <Grid
+                  container
+                  item
+                  xs={12}
+                  sm={8}
+                  md={6}
+                  sx={{
+                    justifyContent: "center",
+                    width: "100%",
+                    textAlign: "left",
+                  }}
+                  spacing={2}
+                >
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      {t("word_search.totalTimeTaken")}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      :{" "}
+                      {finalTimeTaken !== null
+                        ? finalTimeTaken
+                        : totalTime - gameTimer}{" "}
+                      {t("word_search.seconds")}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      {t("word_search.accuracyRate")}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      : {calculateAccuracyRate().toFixed(2)}%
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      {t("word_search.longestWordFound")}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      : {getLongestWordFound()}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      {t("word_search.score")}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      : {foundWords.length} / {wordsToFind.length}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      {t("word_search.completionStatus")}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="h6">
+                      :{" "}
+                      {foundWords.length === wordsToFind.length
+                        ? t("word_search.allWordsFound")
+                        : t("word_search.someWordsMissing")}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                {/* Reset game button */}
+                <Grid item xs={12} sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setSelectedCells([]);
+                      setFoundWords([]);
+                      const gridWithWords = placeWordsInGrid(
+                        generateEmptyGrid(gridSize),
+                        wordsToFind
+                      );
+                      setGrid(gridWithWords);
+                      setGameTimer(totalTime);
+                      setGameEnd(false);
+                      setGamePause(false);
+                      setGameStart(true);
+                      setFinalTimeTaken(null);
+                    }}
+                  >
+                    {t("word_search.playAgain")}
+                  </Button>
+                </Grid>
+              </Grid>
+            </>
+          ) : (
+            <>
+              {/* <Grid
             item
             xs={12}
             sx={{ justifyContent: "center", alignItems: "center" }}
@@ -783,169 +790,164 @@ const WordSearchPage = () => {
             </Button>
           </Grid> */}
 
-          <Grid
-              item
-              xs={12}
-              sx={{ 
-                display: 'flex',
-                justifyContent: 'center', // Center the button
-                alignItems: 'center',
-                my: 2 // Add some margin top and bottom
-              }}
-            >
-              <Button
-                variant="contained"
-                onClick={handleOpenInstructionDialog}
-              >
-                {t("word_search.viewInstruction")}
-              </Button>
-            </Grid>
-
-
-
-
-          <Grid item xs={12} sx={{ textAlign: "center" }}>
-            <Typography variant="h6">
-              {t("word_search.timeLeft")}: {gameTimer}{" "}
-              {t("word_search.seconds")}
-            </Typography>
-          </Grid>
-          {/* Words to find list big screen */}
-          <Grid
-            item
-            sm={12}
-            md={3}
-            sx={{ display: { xs: "none", md: "inline" } }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}
-            >
-              {t("word_search.wordsToFind")}
-            </Typography>
-            <ul style={{ paddingLeft: "1rem", fontSize: "inherit" }}>
-              {wordsToFind.map((word, index) => (
-                <li
-                  key={index}
-                  style={{
-                    textDecoration: foundWords.some(
-                      (foundWord) => foundWord.word === word
-                    )
-                      ? "line-through"
-                      : "none",
-                    color: foundWords.some(
-                      (foundWord) => foundWord.word === word
-                    )
-                      ? "green"
-                      : "inherit",
-                  }}
-                >
-                  {word}
-                </li>
-              ))}
-            </ul>
-            <Button
-              variant="contained"
-              onClick={() => {
-                setSelectedCells([]);
-                setFoundWords([]);
-                const gridWithWords = placeWordsInGrid(
-                  generateEmptyGrid(gridSize),
-                  wordsToFind
-                );
-                setGrid(gridWithWords);
-                setGameTimer(totalTime);
-                setGameEnd(false);
-                setGamePause(false);
-                setGameStart(true);
-              }}
-            >
-              {t("word_search.resetGame")}
-            </Button>
-          </Grid>
-          {/* Words to find list, small screen */}
-          <Grid
-            item
-            container
-            direction="row"
-            columnSpacing={{ xs: 1 }}
-            xs={12}
-            sx={{
-              display: {
-                md: "none",
-                justifyContent: "space-evenly",
-              },
-            }}
-          >
-            {wordsToFind.map((word, index) => (
               <Grid
-                item
-                key={index}
-                sx={{
-                  textDecoration: foundWords.some(
-                    (foundWord) => foundWord.word === word
-                  )
-                    ? "line-through"
-                    : "none",
-                  color: foundWords.some(
-                    (foundWord) => foundWord.word === word
-                  )
-                    ? "green"
-                    : "inherit",
-                }}
-              >
-                {word}
-              </Grid>
-            ))}
-          </Grid>
-          {/* Game grid */}
-          <Grid item sm={12} md={9} sx={{ width: "100%" }}>
-            {grid.map((row, rowIndex) => (
-              <Grid
-                container
                 item
                 xs={12}
-                justifyContent="center"
-                wrap="nowrap"
-                sx={{ minWidth: "275px", width: "100%" }}
-                key={rowIndex}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center", // Center the button
+                  alignItems: "center",
+                  my: 2, // Add some margin top and bottom
+                }}
               >
-                {row.map((letter, colIndex) => (
+                <Button
+                  variant="contained"
+                  onClick={handleOpenInstructionDialog}
+                >
+                  {t("word_search.viewInstruction")}
+                </Button>
+              </Grid>
+
+              <Grid item xs={12} sx={{ textAlign: "center" }}>
+                <Typography variant="h6">
+                  {t("word_search.timeLeft")}: {gameTimer}{" "}
+                  {t("word_search.seconds")}
+                </Typography>
+              </Grid>
+              {/* Words to find list big screen */}
+              <Grid
+                item
+                sm={12}
+                md={3}
+                sx={{ display: { xs: "none", md: "inline" } }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}
+                >
+                  {t("word_search.wordsToFind")}
+                </Typography>
+                <ul style={{ paddingLeft: "1rem", fontSize: "inherit" }}>
+                  {wordsToFind.map((word, index) => (
+                    <li
+                      key={index}
+                      style={{
+                        textDecoration: foundWords.some(
+                          (foundWord) => foundWord.word === word
+                        )
+                          ? "line-through"
+                          : "none",
+                        color: foundWords.some(
+                          (foundWord) => foundWord.word === word
+                        )
+                          ? "green"
+                          : "inherit",
+                      }}
+                    >
+                      {word}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setSelectedCells([]);
+                    setFoundWords([]);
+                    const gridWithWords = placeWordsInGrid(
+                      generateEmptyGrid(gridSize),
+                      wordsToFind
+                    );
+                    setGrid(gridWithWords);
+                    setGameTimer(totalTime);
+                    setGameEnd(false);
+                    setGamePause(false);
+                    setGameStart(true);
+                  }}
+                >
+                  {t("word_search.resetGame")}
+                </Button>
+              </Grid>
+              {/* Words to find list, small screen */}
+              <Grid
+                item
+                container
+                direction="row"
+                columnSpacing={{ xs: 1 }}
+                xs={12}
+                sx={{
+                  display: {
+                    md: "none",
+                    justifyContent: "space-evenly",
+                  },
+                }}
+              >
+                {wordsToFind.map((word, index) => (
                   <Grid
-                    key={colIndex}
                     item
+                    key={index}
                     sx={{
-                      width: "100%",
-                      border: "1px solid #ccc",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      backgroundColor: isCellPartOfFoundWord(
-                        rowIndex,
-                        colIndex
+                      textDecoration: foundWords.some(
+                        (foundWord) => foundWord.word === word
                       )
-                        ? "#a3d2ca" // Green when word is found
-                        : isCellSelected(rowIndex, colIndex)
-                        ? "red"
-                        : "white",
+                        ? "line-through"
+                        : "none",
+                      color: foundWords.some(
+                        (foundWord) => foundWord.word === word
+                      )
+                        ? "green"
+                        : "inherit",
                     }}
-                    onClick={() =>
-                      handleCellClick(letter, rowIndex, colIndex)
-                    }
                   >
-                    <Typography variant="h6">{letter}</Typography>
+                    {word}
                   </Grid>
                 ))}
               </Grid>
-            ))}
-          </Grid>
-        </>
+              {/* Game grid */}
+              <Grid item sm={12} md={9} sx={{ width: "100%" }}>
+                {grid.map((row, rowIndex) => (
+                  <Grid
+                    container
+                    item
+                    xs={12}
+                    justifyContent="center"
+                    wrap="nowrap"
+                    sx={{ minWidth: "275px", width: "100%" }}
+                    key={rowIndex}
+                  >
+                    {row.map((letter, colIndex) => (
+                      <Grid
+                        key={colIndex}
+                        item
+                        sx={{
+                          width: "100%",
+                          border: "1px solid #ccc",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          backgroundColor: isCellPartOfFoundWord(
+                            rowIndex,
+                            colIndex
+                          )
+                            ? "#a3d2ca" // Green when word is found
+                            : isCellSelected(rowIndex, colIndex)
+                            ? "red"
+                            : "white",
+                        }}
+                        onClick={() =>
+                          handleCellClick(letter, rowIndex, colIndex)
+                        }
+                      >
+                        <Typography variant="h6">{letter}</Typography>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
+        </Grid>
       )}
-    </Grid>
-      )}
-
-      
     </Container>
   );
 };
