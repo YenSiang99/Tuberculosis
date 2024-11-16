@@ -155,12 +155,69 @@ const WordSearchPage = () => {
   const [gameEnd, setGameEnd] = useState(false);
   const [finalTimeTaken, setFinalTimeTaken] = useState(null);
 
+  const resetGameState = () => {
+    setSelectedCells([]);
+    setFoundWords([]);
+    setGameEnd(false);
+    setGamePause(false);
+    setGameStart(false);
+    setFinalTimeTaken(null);
+    setGameState('initial');
+    setShowCountdown(false);
+    setCountdown(3);
+    
+    // Check localStorage preference for instructions
+    const hideInstructions = localStorage.getItem('hideWordSearchInstructions');
+    if (hideInstructions === 'true') {
+      setShowInstructions(false);
+      setShowStartDialog(true);
+    } else {
+      setShowInstructions(true);
+      setShowStartDialog(false);
+    }
+  };
+
+  // Handle language changes
+  useEffect(() => {
+    resetGameState();
+  }, [currentLanguage]);
+
+  // Fetch word list and handle language changes
+  useEffect(() => {
+    const fetchActiveWordList = async () => {
+      try {
+        const response = await axios.get(`/wordLists/active`);
+        const data = response.data;
+
+        setTotalTime(data.totalGameTime);
+        setGameTimer(data.totalGameTime);
+
+        if (data && data.words) {
+          const words = data.words.map(
+            (wordObj) => wordObj[currentLanguage] || ""
+          );
+          const upperCaseWords = words.map((word) => word.toUpperCase());
+
+          setWordsToFind(upperCaseWords);
+
+          const emptyGrid = generateEmptyGrid(gridSize);
+          const gridWithWords = placeWordsInGrid(emptyGrid, upperCaseWords);
+          setGrid(gridWithWords);
+        }
+      } catch (error) {
+        console.error("Failed to fetch word list", error);
+      }
+    };
+
+    fetchActiveWordList();
+  }, [gridSize, currentLanguage]);
+
   // Check local storage preference on mount
   useEffect(() => {
     const hideInstructions = localStorage.getItem('hideWordSearchInstructions');
     if (hideInstructions === 'true') {
       setShowInstructions(false);
-      setShowStartDialog(true); // Show start dialog immediately if instructions are disabled
+      setShowStartDialog(true);
     }
   }, []);
 
@@ -170,12 +227,10 @@ const WordSearchPage = () => {
       localStorage.setItem('hideWordSearchInstructions', 'true');
     }
     setShowInstructions(false);
-  
-    // Only show the start dialog and trigger countdown if we're in the initial state
+    
     if (gameState === 'initial') {
       setShowStartDialog(true);
     } else {
-      // If we're mid-game, just unpause the game
       setGamePause(false);
     }
   };
@@ -571,47 +626,6 @@ const WordSearchPage = () => {
     finalTimeTaken,
     gameEnd, // Include gameEnd in the dependencies
   ]);
-
-  // Fetch word list and handle language changes
-  useEffect(() => {
-    const fetchActiveWordList = async () => {
-      try {
-        // Remove the language parameter from the API call
-        const response = await axios.get(`/wordLists/active`);
-        const data = response.data;
-
-        setTotalTime(data.totalGameTime);
-        setGameTimer(data.totalGameTime);
-
-        if (data && data.words) {
-          // Extract words in the current language
-          const words = data.words.map(
-            (wordObj) => wordObj[currentLanguage] || ""
-          );
-          const upperCaseWords = words.map((word) => word.toUpperCase());
-
-          setWordsToFind(upperCaseWords);
-
-          const emptyGrid = generateEmptyGrid(gridSize);
-          const gridWithWords = placeWordsInGrid(emptyGrid, upperCaseWords);
-          setGrid(gridWithWords);
-
-          // Reset game state when language changes
-          setSelectedCells([]);
-          setFoundWords([]);
-          setGameEnd(false);
-          setGamePause(false);
-          setGameStart(false);
-          setFinalTimeTaken(null);
-
-        }
-      } catch (error) {
-        console.error("Failed to fetch word list", error);
-      }
-    };
-
-    fetchActiveWordList();
-  }, [gridSize, currentLanguage]);
 
   return (
     <Container sx={{ padding: 0, margin: 0 }}>

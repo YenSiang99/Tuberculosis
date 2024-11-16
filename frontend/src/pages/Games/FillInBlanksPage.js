@@ -180,6 +180,39 @@ const FillInBlanksPage = () => {
   const [gamePause, setGamePause] = useState(false);
   const [gameEnd, setGameEnd] = useState(false);
 
+  const resetGame = () => {
+    setQuestions([]);
+    setSelectedBlankId(null);
+    setUsedWords([]);
+    setGameTime(null);
+    setGameTimer(null);
+    setShowResult(false);
+    setScore(0);
+    setGameState('initial');
+    setGameStart(false);
+    setGamePause(false);
+    setGameEnd(false);
+    setShowCountdown(false);
+    setCountdown(3);
+    
+    // Check localStorage preference for instructions
+    const hideInstructions = localStorage.getItem('hideFillBlanksInstructions');
+    if (hideInstructions === 'true') {
+      setShowInstructions(false);
+      setShowStartDialog(true);
+    } else {
+      setShowInstructions(true);
+      setShowStartDialog(false);
+    }
+
+    fetchQuestions();
+  };
+
+  // Handle language change and reset the game
+  useEffect(() => {
+      resetGame();
+  }, [selectedLanguage]);
+
 
   // Check local storage preference on mount
   useEffect(() => {
@@ -228,23 +261,6 @@ const FillInBlanksPage = () => {
   const handleOpenInstructionDialog = () => {
     setShowInstructions(true);
     setGamePause(true);
-  };
-
-  // Reset game function updated
-  const resetGame = () => {
-    setQuestions([]);
-    setSelectedBlankId(null);
-    setUsedWords([]);
-    setGameTime(null);
-    setGameTimer(null);
-    setShowResult(false);
-    setScore(0);
-    setGameState('initial');
-    setGameStart(false);
-    setGamePause(false);
-    setGameEnd(false);
-    setShowInstructions(true);
-    fetchQuestions();
   };
 
   const shuffleArray = (array) => {
@@ -354,28 +370,29 @@ const FillInBlanksPage = () => {
   };
 
   const handleReset = () => {
-    const resetQuestions = questions.map((question) => ({
-      ...question,
-      answerChoice: "",
-    }));
+    resetGame();
+    // const resetQuestions = questions.map((question) => ({
+    //   ...question,
+    //   answerChoice: "",
+    // }));
 
-    setQuestions(resetQuestions);
-    setUsedWords([]);
+    // setQuestions(resetQuestions);
+    // setUsedWords([]);
 
-    // Re-randomize the words on reset
-    setRandomizedWords(shuffleArray([...randomizedWords]));
+    // // Re-randomize the words on reset
+    // setRandomizedWords(shuffleArray([...randomizedWords]));
 
-    if (gameTime !== null) {
-      setGameTimer(gameTime);
-    }
-    setGameEnd(false);
-    setGamePause(false);
-    setGameStart(true);
-    setScore(0);
+    // if (gameTime !== null) {
+    //   setGameTimer(gameTime);
+    // }
+    // setGameEnd(false);
+    // setGamePause(false);
+    // setGameStart(true);
+    // setScore(0);
 
-    if (resetQuestions.length > 0) {
-      setSelectedBlankId(resetQuestions[0]._id);
-    }
+    // if (resetQuestions.length > 0) {
+    //   setSelectedBlankId(resetQuestions[0]._id);
+    // }
   };
 
   useEffect(() => {

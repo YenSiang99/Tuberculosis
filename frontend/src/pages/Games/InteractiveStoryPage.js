@@ -293,6 +293,33 @@ const InteractiveStoryPage = () => {
   const isEnd = currentStep && "endType" in currentStep;
   const [openInstructionDialog, setOpenInstructionDialog] = useState(true);
 
+  const resetGame = () => {
+    setCurrentStepId(storyData?.steps[0]?.stepId || null);
+    setRetries(0);
+    setStartTime(null);
+    setFinalTimeTaken(null);
+    setGameStarted(false);
+    setGameState('initial');
+    setShowCountdown(false);
+    setCountdown(3);
+    
+    // Check localStorage preference for instructions
+    const hideInstructions = localStorage.getItem('hideStoryInstructions');
+    if (hideInstructions === 'true') {
+      setShowInstructions(false);
+      setShowStartDialog(true);
+    } else {
+      setShowInstructions(true);
+      setShowStartDialog(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedLanguage ) {
+      resetGame();
+    }
+  }, [selectedLanguage]);
+
   useEffect(() => {
     const hideInstructions = localStorage.getItem('hideStoryInstructions');
     if (hideInstructions === 'true') {
@@ -337,19 +364,6 @@ const InteractiveStoryPage = () => {
   const handleOpenInstructionDialog = () => {
     setShowInstructions(true);
   };
-
-  // Reset game function updated
-  const resetGame = () => {
-    setCurrentStepId(storyData?.steps[0]?.stepId || null);
-    setRetries(0);
-    setStartTime(null);
-    setFinalTimeTaken(null);
-    setGameStarted(false);
-    setGameState('initial');
-    setShowInstructions(true);
-  };
-
-
 
   const generateImageUrl = (content) => {
     const englishContent = content?.en || content?.[selectedLanguage] || "";

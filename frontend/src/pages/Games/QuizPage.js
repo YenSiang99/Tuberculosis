@@ -184,6 +184,36 @@ const QuizPage = () => {
   const [gameStart, setGameStart] = useState(false);
   const [gamePause, setGamePause] = useState(false);
 
+  const resetGame = () => {
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setQuestionTimer(questionTime);
+    setNextQuestionTimer(0);
+    setFeedback(null);
+    setGameEnd(false);
+    setGameStart(false);
+    setGamePause(false);
+    setGameState('initial');
+    
+    // Check if user has previously chosen to not show instructions
+    const hideInstructions = localStorage.getItem('hideQuizInstructions');
+    if (hideInstructions === 'true') {
+      setShowInstructions(false);
+      setShowStartDialog(true);
+    } else {
+      setShowInstructions(true);
+      setShowStartDialog(false);
+    }
+    
+    setTotalTimeTaken(0);
+  };
+
+  useEffect(() => {
+    resetGame()
+  }, [selectedLanguage]);
+
+  
+
   useEffect(() => {
     const hideInstructions = localStorage.getItem('hideQuizInstructions');
     if (hideInstructions === 'true') {
@@ -358,19 +388,19 @@ const QuizPage = () => {
     }
   }, [selectedLanguage, prevLanguage]);
 
-  const resetGame = () => {
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setQuestionTimer(questionTime);
-    setNextQuestionTimer(0);
-    setFeedback(null);
-    setGameEnd(false);
-    setGameStart(false);
-    setGamePause(false);
-    // setOpenInstructionDialog(true);
-    setShowInstructions(true)
-    setTotalTimeTaken(0);
-  };
+  // const resetGame = () => {
+  //   setCurrentQuestionIndex(0);
+  //   setScore(0);
+  //   setQuestionTimer(questionTime);
+  //   setNextQuestionTimer(0);
+  //   setFeedback(null);
+  //   setGameEnd(false);
+  //   setGameStart(false);
+  //   setGamePause(false);
+  //   // setOpenInstructionDialog(true);
+  //   setShowInstructions(true)
+  //   setTotalTimeTaken(0);
+  // };
 
   console.log("Current Question:", questions[currentQuestionIndex]);
 
