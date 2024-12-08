@@ -12,7 +12,7 @@ exports.login = async (req, res) => {
     // console.log("this is login body", req.body);
 
     // First, check if the provided text is a phone number or email
-    const isPhoneNumber = /^\d{9,10}$/.test(email); // Adjust based on expected phone number length (9 or 10 digits for local numbers)
+    const isPhoneNumber = /^\d{10,11}$/.test(email); // Adjust based on expected phone number length (9 or 10 digits for local numbers)
     let user;
 
     if (isPhoneNumber) {
