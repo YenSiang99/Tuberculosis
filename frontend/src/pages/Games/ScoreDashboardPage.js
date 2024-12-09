@@ -13,11 +13,68 @@ import {
   TableRow,
   Paper,
   CircularProgress,
-  Tooltip,
+  Grid,
 } from "@mui/material";
 import axios from "../../components/axios"; // Adjust the import path based on your project structure
 import { useTranslation } from "react-i18next"; // Import useTranslation
 import { Star, Award, Trophy, Crown, Medal } from "lucide-react";
+
+const BadgeSummary = ({ scores, isTime = false }) => {
+  // Skip if no scores
+  if (!scores || scores.length === 0) return null;
+
+  // Calculate badge counts based on scores
+  const badgeCounts = scores.reduce((acc, score) => {
+    const value = isTime ? score.totalTimeTaken : score.accuracyRate;
+    if (value === null || value === undefined) return acc;
+
+    const badge = getBadgeInfo(value, isTime);
+    if (badge) {
+      acc[badge.label] = (acc[badge.label] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  // Only show badges that have a count > 0
+  const badgesToShow = Object.entries(badgeCounts)
+    .filter(([_, count]) => count > 0)
+    .map(([label, count]) => {
+      const config = (
+        isTime ? TIME_BADGE_CONFIGS : ACCURACY_BADGE_CONFIGS
+      ).find((cfg) => cfg.label === label);
+      return { ...config, count };
+    });
+
+  if (badgesToShow.length === 0) return null;
+
+  return (
+    <Grid
+      container
+      direction="row"
+      sx={{
+        justifyContent: "flex-start",
+        alignItems: "center",
+        marginTop: 1,
+      }}
+      spacing={2}
+    >
+      {badgesToShow.map(
+        ({ icon: IconComponent, label, color, iconProps, count }) => (
+          <Grid item key={label}>
+            <Grid container spacing={1} alignItems="center" wrap="nowrap">
+              <Grid item>
+                <IconComponent className={`w-6 h-6 ${color}`} {...iconProps} />
+              </Grid>
+              <Grid item>
+                <Typography align="center">x {count}</Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+        )
+      )}
+    </Grid>
+  );
+};
 
 const ACCURACY_BADGE_CONFIGS = [
   {
@@ -257,6 +314,8 @@ export default function GamePerformanceDashboard() {
     // Define table headers and rows based on the selected game
     const currentGame = gameApis[tabIndex].name;
 
+    const showTimeBadges = currentGame === "Interactive Story";
+
     let headers = [];
     let rows = [];
 
@@ -396,34 +455,37 @@ export default function GamePerformanceDashboard() {
     }
 
     return (
-      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {headers.map((header) => (
-                <TableCell key={header} align="center">
-                  {header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={index}>
-                {Object.entries(row).map(([key, value], idx) => (
-                  <TableCell
-                    key={idx}
-                    align="center"
-                    className={key === "badge" ? "py-3" : ""} // Add more padding for badge cells
-                  >
-                    {value}
+      <>
+        <BadgeSummary scores={scores} isTime={showTimeBadges} />
+        <TableContainer component={Paper} sx={{ marginTop: 1 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {headers.map((header) => (
+                  <TableCell key={header} align="center">
+                    {header}
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, index) => (
+                <TableRow key={index}>
+                  {Object.entries(row).map(([key, value], idx) => (
+                    <TableCell
+                      key={idx}
+                      align="center"
+                      className={key === "badge" ? "py-3" : ""} // Add more padding for badge cells
+                    >
+                      {value}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </>
     );
   };
 
