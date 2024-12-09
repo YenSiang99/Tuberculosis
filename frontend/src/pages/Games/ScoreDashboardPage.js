@@ -23,6 +23,11 @@ const BadgeSummary = ({ scores, isTime = false }) => {
   // Skip if no scores
   if (!scores || scores.length === 0) return null;
 
+  // Define the correct badge order
+  const badgeOrder = isTime
+    ? ["Bronze", "Silver", "Gold", "Platinum", "Diamond"]
+    : ["Bronze", "Silver", "Gold", "Platinum", "Diamond"];
+
   // Calculate badge counts based on scores
   const badgeCounts = scores.reduce((acc, score) => {
     const value = isTime ? score.totalTimeTaken : score.accuracyRate;
@@ -35,7 +40,7 @@ const BadgeSummary = ({ scores, isTime = false }) => {
     return acc;
   }, {});
 
-  // Only show badges that have a count > 0
+  // Map and sort the badges
   const badgesToShow = Object.entries(badgeCounts)
     .filter(([_, count]) => count > 0)
     .map(([label, count]) => {
@@ -43,6 +48,10 @@ const BadgeSummary = ({ scores, isTime = false }) => {
         isTime ? TIME_BADGE_CONFIGS : ACCURACY_BADGE_CONFIGS
       ).find((cfg) => cfg.label === label);
       return { ...config, count };
+    })
+    .sort((a, b) => {
+      // Sort based on the predefined order
+      return badgeOrder.indexOf(a.label) - badgeOrder.indexOf(b.label);
     });
 
   if (badgesToShow.length === 0) return null;
