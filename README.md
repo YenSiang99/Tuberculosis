@@ -1,4 +1,4 @@
-# Project Name
+# Project TB Celik
 
 This project is a continuation of the below github project.  
 https://github.com/wanyinggg/Tuberculosis  
